@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Generator and Uploader</title>
+</head>
+<body>
+    <h1>操作面板</h1>
+    <form id="generate-form">
+        <label for="servo_1">Servo 1:</label>
+        <input type="number" id="servo_1" name="servo_1"><br>
+        <label for="servo_2">Servo 2:</label>
+        <input type="number" id="servo_2" name="servo_2"><br>
+        <label for="servo_3">Servo 3:</label>
+        <input type="number" id="servo_3" name="servo_3"><br>
+        <label for="servo_4">Servo 4:</label>
+        <input type="number" id="servo_4" name="servo_4"><br>
+        <label for="servo_5">Servo 5:</label>
+        <input type="number" id="servo_5" name="servo_5"><br>
+        <label for="servo_6">Servo 6:</label>
+        <input type="number" id="servo_6" name="servo_6"><br>
+        <button type="submit">送出</button>
+    </form>
+
+    <h1>狀態面板</h1>
+    <form id="receive-form">
+        <label for="received-servo_1">Servo 1:</label>
+        <input type="text" id="received-servo_1" readonly><br>
+        <label for="received-servo_2">Servo 2:</label>
+        <input type="text" id="received-servo_2" readonly><br>
+        <label for="received-servo_3">Servo 3:</label>
+        <input type="text" id="received-servo_3" readonly><br>
+        <label for="received-servo_4">Servo 4:</label>
+        <input type="text" id="received-servo_4" readonly><br>
+        <label for="received-servo_5">Servo 5:</label>
+        <input type="text" id="received-servo_5" readonly><br>
+        <label for="received-servo_6">Servo 6:</label>
+        <input type="text" id="received-servo_6" readonly><br>
+
+        <label for="received-temperature">temperature</label>
+        <input type="text" id="received-temperature" readonly><br>
+        <label for="received-humidity">humidity</label>
+        <input type="text" id="received-humidity" readonly><br>
+        <label for="received-ip_address">ip_address</label>
+        <input type="text" id="received-ip_address" readonly><br>
+        <label for="received-detect">detect</label>
+        <input type="text" id="received-detect" readonly><br>
+        <label for="received-set_servo">communication</label>
+        <input type="text" id="received-set_servo" readonly><br>
+
+        <label for="received-time">更新時間</label>
+        <input type="text" id="received-time" readonly><br>
+
+        
+    </form>
+
+
+    <script>
+
+        document.getElementById('generate-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const servo_1 = document.getElementById('servo_1').value;
+            const servo_2 = document.getElementById('servo_2').value;
+            const servo_3 = document.getElementById('servo_3').value;
+            const servo_4 = document.getElementById('servo_4').value;
+            const servo_5 = document.getElementById('servo_5').value;
+            const servo_6 = document.getElementById('servo_6').value;
+
+            const data = {
+                servo_1: servo_1,
+                servo_2: servo_2,
+                servo_3: servo_3,
+                servo_4: servo_4,
+                servo_5: servo_5,
+                servo_6: servo_6
+            };
+
+            fetch('/api/receive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('received-servo_1').value = data.servo_dict.servo_1;
+                document.getElementById('received-servo_2').value = data.servo_dict.servo_2;
+                document.getElementById('received-servo_3').value = data.servo_dict.servo_3;
+                document.getElementById('received-servo_4').value = data.servo_dict.servo_4;
+                document.getElementById('received-servo_5').value = data.servo_dict.servo_5;
+                document.getElementById('received-servo_6').value = data.servo_dict.servo_6;
+                document.getElementById('received-temperature').value = data.temperature;
+                document.getElementById('received-humidity').value = data.humidity;
+                document.getElementById('received-ip_address').value = data.ip_address;
+                document.getElementById('received-detect').value = data.detect;
+                document.getElementById('received-set_servo').value = data.set_servo;
+                
+                document.getElementById('received-time').value = data.receivedtime;
+                
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

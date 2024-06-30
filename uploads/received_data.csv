@@ -1,0 +1,2 @@
+servo_1,servo_2,servo_3,servo_4,servo_5,servo_6,temperature,humidity,ip_address,detect,set_servo,receivedtime
+2.0,2.0,2.0,3.0,3.0,3.0,26.76509,61.91219,192.168.15.109,yes,successfully,2024-06-30 22:56:19
