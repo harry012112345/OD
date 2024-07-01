@@ -52,7 +52,7 @@ class ReceiveData(Resource):
         servo_4_value = data['servo_4']
         servo_5_value = data['servo_5']
         servo_6_value = data['servo_6']
-        test = requests.post(f'http://192.168.15.109/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
+        test = requests.post(f'http://192.168.15.100/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
         print(data)
      #   print(f"""servo_1={servo_1}&servo_2={servo_2}&servo_3={servo_3}&servo_4={servo_4}&servo_5={servo_5}&servo_6={servo_6}""")
             # 提取各个键的值
@@ -67,7 +67,7 @@ class ReceiveData(Resource):
         #    print(response.get_data(as_text=True))  # 打印实际的 JSON 数据内容
         #    test = requests.get(f'http://192.168.15.100/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
           #   http://192.168.15.100/set_servo?servo_1=5&servo_2=5&servo_3=5&servo_4=5&servo_5=5&servo_6=5
-        
+        print(123)
         if test.status_code == 200:
              # 解析 JSON 数据
                data = test.json()
@@ -117,10 +117,16 @@ def login():
         password = request.form['password']
         if username in users and users[username] == password:
             session['username'] = username
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('welcome'))
         else:
             flash('Invalid username or password!')
     return render_template('login.html')
+
+@app.route('/welcome')
+def welcome():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('welcome.html')
 
 @app.route('/dashboard')
 def dashboard():
@@ -147,6 +153,7 @@ def receive_ip():
 
 api.add_resource(ClientServer, '/api/generate')
 api.add_resource(ReceiveData, '/api/receive')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
