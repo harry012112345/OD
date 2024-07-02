@@ -52,10 +52,31 @@
 
         <label for="received-time">更新時間</label>
         <input type="text" id="received-time" readonly><br>
-
+        
         
     </form>
 
+
+    <h1>unet_AN203操作面板</h1>
+    <form id="unet-form">
+        <button type="bing-btn">Binding</button>
+        <button type="test-btn">AN203_ON_OFF_test</button>
+        <button type="on-btn">AN203_ON</button>
+        <button type="off-btn">AN203_OFF</button>
+    </form>
+
+    <h1>unet_AN203_狀態面板</h1>
+    <form id="receive-form">
+        <label for="received-set_MC026_binding">AN203學碼:</label>
+        <input type="text" id="received-set_MC026_binding" readonly><br>
+        <label for="unet-status">AN203狀態:</label>
+        <input type="text" id="unet-status" readonly><br>
+        <label for="received-servo_5">(ON or OFF)</label>
+        <label for="received-servo_3">更新時間:</label>
+        <input type="text" id="received-servo_3" readonly><br>
+        <label for="received-servo_4">ip位置:</label>
+        <input type="text" id="received-servo_4" readonly><br>
+    </form>
 
     <script>
 
@@ -85,24 +106,28 @@
                 body: JSON.stringify(data)
             })
             .then(response => response.json())
-            .then(data => {
-                document.getElementById('received-servo_1').value = data.servo_dict.servo_1;
-                document.getElementById('received-servo_2').value = data.servo_dict.servo_2;
-                document.getElementById('received-servo_3').value = data.servo_dict.servo_3;
-                document.getElementById('received-servo_4').value = data.servo_dict.servo_4;
-                document.getElementById('received-servo_5').value = data.servo_dict.servo_5;
-                document.getElementById('received-servo_6').value = data.servo_dict.servo_6;
-                document.getElementById('received-temperature').value = data.temperature;
-                document.getElementById('received-humidity').value = data.humidity;
-                document.getElementById('received-ip_address').value = data.ip_address;
-                document.getElementById('received-detect').value = data.detect;
-                document.getElementById('received-set_servo').value = data.set_servo;
+            .then(received_data => {
+                document.getElementById('received-servo_1').value = received_data[0].servo_dict.servo_1;
+                document.getElementById('received-servo_2').value = received_data[0].servo_dict.servo_2;
+                document.getElementById('received-servo_3').value = received_data[0].servo_dict.servo_3;
+                document.getElementById('received-servo_4').value = received_data[0].servo_dict.servo_4;
+                document.getElementById('received-servo_5').value = received_data[0].servo_dict.servo_5;
+                document.getElementById('received-servo_6').value = received_data[0].servo_dict.servo_6;
+                document.getElementById('received-temperature').value = received_data[0].temperature;
+                document.getElementById('received-humidity').value = received_data[0].humidity;
+                document.getElementById('received-ip_address').value = received_data[0].ip_address;
+                document.getElementById('received-detect').value = received_data[0].detect;
+                document.getElementById('received-set_servo').value = received_data[0].set_servo;
                 
-                document.getElementById('received-time').value = data.receivedtime;
+                document.getElementById('received-time').value = received_data[0].receivedtime;
+            
+                document.getElementById('received-set_MC026_binding').value = received_data[1].set_MC026_binding;
+
                 
             })
             .catch(error => console.error('Error:', error));
         });
+
     </script>
 </body>
 </html>
