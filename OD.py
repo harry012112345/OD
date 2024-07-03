@@ -68,7 +68,7 @@ class ReceiveData(Resource):
         servo_5_value = data['servo_5']
         servo_6_value = data['servo_6']
 
-        test = requests.post(f'http://192.168.15.102/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
+        test = requests.post(f'http://192.168.15.100/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
   #      print(data)
      #   print(f"""servo_1={servo_1}&servo_2={servo_2}&servo_3={servo_3}&servo_4={servo_4}&servo_5={servo_5}&servo_6={servo_6}""")
             # 提取各个键的值
@@ -92,14 +92,6 @@ class ReceiveData(Resource):
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             data['receivedtime'] = formatted_time
             print(data)
-            test = requests.post(f'http://192.168.15.100/set_MC026_binding')
-            if test.status_code == 200:
-                print(received_data)
-                data = test.json()
-                received_data.append(data)
-                return jsonify(received_data)
-            else:
-                print("Failed to retrieve data:", test.status_code)
                 # 存储为CSV文件
 #               file_path = 'uploads/received_data.csv'
 #               os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -179,6 +171,62 @@ def receive_ip():
         return jsonify({'error': 'Invalid JSON format'}), 400
     
     
+@app.route('/api/button', methods=['POST'])
+def button_pressed():
+    data = request.get_json()
+    button_id = data.get('button_id')
+    print(button_id)
+    ip_address='192.168.15.107'
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    received_data = {
+        'set_MC026_binding' : 'successfully',
+    }
+    # 根據button_id處理不同的按鈕請求
+#    if button_id == 'bing-btn':
+#        test = requests.post(f'http://192.168.15.107/set_MC026_binding')
+#        if test.status_code == 200:
+#            data = test.json()
+#            print(data)
+#            return jsonify(data)
+#        else:
+#            print("Failed to retrieve data:", test.status_code)
+#    elif button_id == 'test-btn':
+#        test = requests.post(f'http://192.168.15.107/AN203_ON_OFF_test')
+#        if test.status_code == 200:
+#            data = test.json()
+#            print(data)
+#            return jsonify(data)
+#        else:
+#            print("Failed to retrieve data:", test.status_code)
+    if button_id == 'on-btn':
+        test = requests.post(f'http://192.168.15.107/AN203_ON')
+        if test.status_code == 200:
+            data = test.json()
+            print(data)
+            received_data['AN203_ON_OFF_test']='AN203_ON'
+
+        else:
+            print("Failed to retrieve data:", test.status_code)
+    elif button_id == 'off-btn':
+        test = requests.post(f'http://192.168.15.107/AN203_OFF')
+        if test.status_code == 200:
+            data = test.json()
+            print(data)
+            received_data['AN203_ON_OFF_test']='AN203_OFF'
+        else:
+            print("Failed to retrieve data:", test.status_code)
+    
+    received_data['unet_time'] = formatted_time 
+    received_data['unet_ip'] = ip_address
+    return jsonify(received_data)
+
+#    else:
+#        message = "Unknown button pressed!"
+
+
+
+    return jsonify({"message": message}), 200
 
 
 api.add_resource(ClientServer, '/api/generate')
