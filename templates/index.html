@@ -56,19 +56,68 @@
         
     </form>
     
+    <h1>arm_機器手臂操作面板</h1>
+    <form onsubmit="arm_server(event)">
+        <label for="arm_servo_1">Servo 1:</label>
+        <input type="number" id="arm_servo_1" name="arm_servo_1"><br>
+        <label for="arm_servo_2">Servo 2:</label>
+        <input type="number" id="arm_servo_2" name="arm_servo_2"><br>
+        <label for="arm_servo_3">Servo 3:</label>
+        <input type="number" id="arm_servo_3" name="arm_servo_3"><br>
+        <label for="arm_servo_4">Servo 4:</label>
+        <input type="number" id="arm_servo_4" name="arm_servo_4"><br>
+        <label for="servo_5">Servo 5:</label>
+        <input type="number" id="arm_servo_5" name="arm_servo_5"><br>
+        <label for="arm_servo_6">Servo 6:</label>
+        <input type="number" id="arm_servo_6" name="arm_servo_6"><br>
+        <button type="submit">送出</button>
+    </form>
+    
+    <h1>arm_機器手臂狀態面板</h1>
+    <label for="received-arm_servo_1">Servo 1:</label>
+    <input type="text" id="received-arm_servo_1" readonly><br>
+    <label for="received-arm_servo_2">Servo 2:</label>
+    <input type="text" id="received-arm_servo_2" readonly><br>
+    <label for="received-arm_servo_3">Servo 3:</label>
+    <input type="text" id="received-arm_servo_3" readonly><br>
+    <label for="received-arm_servo_4">Servo 4:</label>
+    <input type="text" id="received-arm_servo_4" readonly><br>
+    <label for="received-arm_servo_5">Servo 5:</label>
+    <input type="text" id="received-arm_servo_5" readonly><br>
+    <label for="received-arm_servo_6">Servo 6:</label>
+    <input type="text" id="received-arm_servo_6" readonly><br>
+
+    <label for="received-arm_temperature">temperature</label>
+    <input type="text" id="received-arm_temperature" readonly><br>
+    <label for="received-arm_humidity">humidity</label>
+    <input type="text" id="received-arm_humidity" readonly><br>
+    <label for="received-arm_ip_address">ip_address</label>
+    <input type="text" id="received-arm_ip_address" readonly><br>
+    <label for="received-arm_detect">detect</label>
+    <input type="text" id="received-arm_detect" readonly><br>
+    <label for="received-arm_set_servo">communication</label>
+    <input type="text" id="received-arm_set_servo" readonly><br>
+
+    <label for="received-arm_time">更新時間</label>
+    <input type="text" id="received-arm_time" readonly><br>
+
+
     <h1>step_馬達操作面板</h1>
-    <label for="servo_1">移動至距離原點:</label>
-    <input type="number" id="servo_1" name="servo_1"><br>
-
+    <form onsubmit="sendData(event)">
+    <label for="real_position">移動至距離原點:</label>
+    <input type="text" id="real_position" name="real_position">
+    <button type="submit">送出</button>
+    </form>
+    
     <h1>step_馬達狀態面板</h1>
-    <label for="servo_1">距離原點:</label>
-    <input type="number" id="servo_1" name="servo_1"><br>
-    <label for="servo_1">更新時間:</label>
-    <input type="number" id="servo_1" name="servo_1"><br>
-    <label for="servo_1">ip位置    :</label>
-    <input type="number" id="servo_1" name="servo_1"><br>
+    <label for="received-real_position">距離原點:</label>
+    <input type="number" id="received-real_position"><br>
+    <label for="received-step_time">更新時間:</label>
+    <input type="text" id="received-step_time"><br>
+    <label for="received-step_ip">ip位置    :</label>
+    <input type="text" id="received-step_ip"><br>
 
-
+   
 
     <h1>unet_AN203操作面板</h1>
         <button onclick="sendButtonPress('bing-btn')">Binding</button>
@@ -133,7 +182,7 @@
         });
 
         function sendButtonPress(buttonId) {
-            fetch('/api/button', {
+            fetch('/api/step', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -149,6 +198,61 @@
                 document.getElementById('received-unet_ip').value = received_data.unet_ip;
                 // 你可以在這裡更新UI或進行其他操作
             });
+        }
+
+
+        function sendData(event) {
+            event.preventDefault();
+            const data = { real_position: parseFloat(document.getElementById('real_position').value) };
+
+            fetch('/api/step', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+            console.log(data);
+            document.getElementById('received-real_position').value = data.real_position;
+            document.getElementById('received-step_time').value = data.step_time;
+            document.getElementById('received-step_ip').value = data.step_ip;
+        });
+        }
+
+        function arm_server(event) {
+            event.preventDefault();
+            const data = { servo_1: document.getElementById('arm_servo_1').value,
+                           servo_2: document.getElementById('arm_servo_2').value,
+                           servo_3: document.getElementById('arm_servo_3').value,
+                           servo_4: document.getElementById('arm_servo_4').value,
+                           servo_5: document.getElementById('arm_servo_5').value,
+                           servo_6: document.getElementById('arm_servo_6').value
+            };
+
+            fetch('/api/arm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(received_data => {
+            document.getElementById('received-arm_servo_1').value = received_data.servo_dict.servo_1;
+            document.getElementById('received-arm_servo_2').value = received_data.servo_dict.servo_2;
+            document.getElementById('received-arm_servo_3').value = received_data.servo_dict.servo_3;
+            document.getElementById('received-arm_servo_4').value = received_data.servo_dict.servo_4;
+            document.getElementById('received-arm_servo_5').value = received_data.servo_dict.servo_5;
+            document.getElementById('received-arm_servo_6').value = received_data.servo_dict.servo_6;
+            document.getElementById('received-arm_temperature').value = received_data.temperature;
+            document.getElementById('received-arm_humidity').value = received_data.humidity;
+            document.getElementById('received-arm_ip_address').value = received_data.ip_address;
+            document.getElementById('received-arm_detect').value = received_data.detect;
+            document.getElementById('received-arm_set_servo').value = received_data.set_servo;                
+            document.getElementById('received-arm_time').value = received_data.receivedtime;
+        });
         }
 
     </script>

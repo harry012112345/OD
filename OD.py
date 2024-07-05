@@ -68,7 +68,7 @@ class ReceiveData(Resource):
         servo_5_value = data['servo_5']
         servo_6_value = data['servo_6']
 
-        test = requests.post(f'http://192.168.15.100/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
+        test = requests.post(f'http://192.168.15.102/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
   #      print(data)
      #   print(f"""servo_1={servo_1}&servo_2={servo_2}&servo_3={servo_3}&servo_4={servo_4}&servo_5={servo_5}&servo_6={servo_6}""")
             # 提取各个键的值
@@ -224,9 +224,47 @@ def button_pressed():
 #    else:
 #        message = "Unknown button pressed!"
 
+@app.route('/api/step', methods=['POST'])
+def step():
+    ip_address='192.168.15.107'
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    data = request.get_json()
+    real_position=data.get('real_position')
+    test = requests.post(f'http://192.168.15.107/set_distance?position={real_position}')
+    if test.status_code == 200:
+            data = test.json()
+    else:
+        print("Failed to retrieve data:", test.status_code)
+    data['step_time'] = formatted_time
+    data['step_ip'] = ip_address
+    print(data)
+    return jsonify(data)
 
-
-    return jsonify({"message": message}), 200
+@app.route('/api/arm', methods=['POST'])
+def arm():
+    ip_address='192.168.15.100'
+    data = request.json
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    servo_1_value = data['servo_1']
+    servo_2_value = data['servo_2']
+    servo_3_value = data['servo_3']
+    servo_4_value = data['servo_4']
+    servo_5_value = data['servo_5']
+    servo_6_value = data['servo_6']
+    test = requests.post(f'http://192.168.15.100/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
+    if test.status_code == 200:
+             # 解析 JSON 数据
+            data = test.json()
+            #   receivedtime=time.time()
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            data['receivedtime'] = formatted_time
+            print(data)
+    else:
+        print("Failed to retrieve data:", test.status_code)
+    return jsonify(data)
 
 
 api.add_resource(ClientServer, '/api/generate')
