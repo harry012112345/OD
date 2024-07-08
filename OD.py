@@ -13,6 +13,18 @@ api = Api(app)
 # 用于存储上传的数据
 received_data = []
 
+global_log_data = []
+
+global_dut_data={}
+global_arm_data={}
+global_step_data={}
+global_unet_data={}
+
+global_dut_ip=[]
+global_arm_ip=[]
+global_step_ip=[]
+global_unet_ip=[]
+
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
 
@@ -44,22 +56,6 @@ class ClientServer(Resource):
 
 class ReceiveData(Resource):
     def post(self):
-#        data = request.json
-#        ip_address = data.get('ip_address')
-#        self.process_data(data, ip_address)
-#
-#    def process_data(self, data, ip):
-#        # 根据 IP 地址执行不同的处理逻辑
-#        if ip == '192.168.15.102':
-#            self.handle_ip_1(data)
-#        elif ip == '192.168.15.100':
-#            self.handle_ip_2(data)
-#
-#    def handle_ip_2(self, data):
-#        print(data)
-#
-#
-#    def handle_ip_1(self, data):
         data = request.json
         servo_1_value = data['servo_1']
         servo_2_value = data['servo_2']
@@ -67,8 +63,9 @@ class ReceiveData(Resource):
         servo_4_value = data['servo_4']
         servo_5_value = data['servo_5']
         servo_6_value = data['servo_6']
-
-        test = requests.post(f'http://192.168.15.102/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
+        global global_dut_ip
+        ip_address=global_dut_ip
+        test = requests.post(f'http://{ip_address}/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
   #      print(data)
      #   print(f"""servo_1={servo_1}&servo_2={servo_2}&servo_3={servo_3}&servo_4={servo_4}&servo_5={servo_5}&servo_6={servo_6}""")
             # 提取各个键的值
@@ -91,7 +88,8 @@ class ReceiveData(Resource):
             now = datetime.datetime.now()
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             data['receivedtime'] = formatted_time
-            print(data)
+            global global_dut_data
+            global_dut_data=data
                 # 存储为CSV文件
 #               file_path = 'uploads/received_data.csv'
 #               os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -115,6 +113,15 @@ class ReceiveData(Resource):
 #                })
  #           response = jsonify(data)
  #              print("Received data:", data)
+            log_dut_data={
+            'time': data['receivedtime'],
+            'device': 'dut機器手臂',
+            'command': f'{servo_1_value},{servo_2_value},{servo_3_value},{servo_4_value},{servo_5_value},{servo_6_value}',
+            'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+            'operator': 'Frank'
+            }
+            global global_log_data
+            global_log_data.append(log_dut_data)
             return jsonify(data)  # 返回接收到的数据
     #       {'receivedtime': formatted_time} 
         else:
@@ -142,6 +149,7 @@ def login():
 now = datetime.datetime.now()
 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
 local_ip='192.168.15.108'
+
 @app.route('/welcome')
 def welcome():
     if 'username' not in session:
@@ -162,8 +170,22 @@ def dashboard():
 def receive_ip():
     if request.is_json:
         data = request.get_json()
-        ip_address = data.get('ip_address')
-        print(data)
+        if data["name"] == 'arm_server':
+            ip_address = data.get('ip_address')
+            global global_arm_ip
+            global_arm_ip=ip_address
+        elif data["name"] == 'dut_server':
+            ip_address = data.get('ip_address')
+            global global_dut_ip
+            global_dut_ip=ip_address
+        elif data["name"] == 'step_server':
+            ip_address = data.get('ip_address')
+            global global_step_ip
+            global_step_ip=ip_address
+        elif data["name"] == 'unet_server':
+            ip_address = data.get('ip_address')
+            global global_unet_ip
+            global_unet_ip=ip_address
 #        print(f"Received IP address: {ip_address}")
         response_data = {'message': "IP address received successfully", 'ip_received': ip_address}
         return jsonify(response_data)
@@ -175,8 +197,8 @@ def receive_ip():
 def button_pressed():
     data = request.get_json()
     button_id = data.get('button_id')
-    print(button_id)
-    ip_address='192.168.15.107'
+    global global_unet_ip
+    ip_address=global_unet_ip
     now = datetime.datetime.now()
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     received_data = {
@@ -200,7 +222,8 @@ def button_pressed():
 #        else:
 #            print("Failed to retrieve data:", test.status_code)
     if button_id == 'on-btn':
-        test = requests.post(f'http://192.168.15.107/AN203_ON')
+        test = requests.get(f'http://{ip_address}/AN203_ON')
+        print(test)
         if test.status_code == 200:
             data = test.json()
             print(data)
@@ -209,7 +232,8 @@ def button_pressed():
         else:
             print("Failed to retrieve data:", test.status_code)
     elif button_id == 'off-btn':
-        test = requests.post(f'http://192.168.15.107/AN203_OFF')
+        test = requests.get(f'http://{ip_address}/AN203_OFF')
+        print(test)
         if test.status_code == 200:
             data = test.json()
             print(data)
@@ -219,6 +243,15 @@ def button_pressed():
     
     received_data['unet_time'] = formatted_time 
     received_data['unet_ip'] = ip_address
+    log_unet_data={
+        'time': f'{received_data['unet_time']}',
+        'device': 'unet_AN203',
+        'command': f'{received_data['AN203_ON_OFF_test']}',
+        'status': f'{received_data['AN203_ON_OFF_test']},{received_data['unet_ip']}',
+        'operator': 'Frank'
+        }
+    global global_log_data
+    global_log_data.append(log_unet_data)
     return jsonify(received_data)
 
 #    else:
@@ -226,12 +259,13 @@ def button_pressed():
 
 @app.route('/api/step', methods=['POST'])
 def step():
-    ip_address='192.168.15.107'
     now = datetime.datetime.now()
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     data = request.get_json()
-    real_position=data.get('real_position')
-    test = requests.post(f'http://192.168.15.107/set_distance?position={real_position}')
+    global global_step_ip
+    ip_address=global_step_ip
+    in_real_position=data.get('real_position')
+    test = requests.post(f'http://{ip_address}/set_distance?position={in_real_position}')
     if test.status_code == 200:
             data = test.json()
     else:
@@ -239,21 +273,31 @@ def step():
     data['step_time'] = formatted_time
     data['step_ip'] = ip_address
     print(data)
+    log_step_data = {
+        'time': data['step_time'],
+        'device': 'step馬達',
+        'command': f'往前{in_real_position}(cm)',
+        'status': f'{data['real_position']},{data['step_ip']}',
+        'operator': 'Frank'
+    }
+    global global_log_data
+    global_log_data.append(log_step_data)
     return jsonify(data)
 
 @app.route('/api/arm', methods=['POST'])
 def arm():
-    ip_address='192.168.15.100'
     data = request.json
     now = datetime.datetime.now()
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    global global_arm_ip
+    ip_address=global_arm_ip
     servo_1_value = data['servo_1']
     servo_2_value = data['servo_2']
     servo_3_value = data['servo_3']
     servo_4_value = data['servo_4']
-    servo_5_value = data['servo_5']
+    servo_5_value = data['servo_5'] 
     servo_6_value = data['servo_6']
-    test = requests.post(f'http://192.168.15.100/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
+    test = requests.post(f'http://{ip_address}/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
     if test.status_code == 200:
              # 解析 JSON 数据
             data = test.json()
@@ -264,7 +308,35 @@ def arm():
             print(data)
     else:
         print("Failed to retrieve data:", test.status_code)
+    log_arm_data={
+        'time': f'{data['receivedtime']}',
+        'device': 'arm機器手臂',
+        'command': f'{servo_1_value},{servo_2_value},{servo_3_value},{servo_4_value},{servo_5_value},{servo_6_value}',
+        'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+        'operator': 'Frank'
+        }
+    global global_log_data
+    global_log_data.append(log_arm_data)
     return jsonify(data)
+
+
+
+@app.route('/download_log', methods=['GET'])
+def download_log():
+    global global_log_data
+    print(global_log_data)
+    logs = global_log_data
+ 
+    return jsonify(logs)
+
+@app.route('/clear_log')
+def clear_log():
+    # 實現清除功能
+    global global_dut_data
+    print(global_dut_data)
+                
+            
+    return "Clear log functionality to be implemented"
 
 
 api.add_resource(ClientServer, '/api/generate')

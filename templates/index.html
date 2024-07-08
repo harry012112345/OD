@@ -136,6 +136,59 @@
         <label for="received-unet_ip">ip位置:</label>
         <input type="text" id="received-unet_ip" readonly><br>
 
+        <title>操作日誌</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .button-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+        }
+    </style>
+<body>
+    <table id="log-table">
+        <thead>
+            <tr>
+                <th>時間</th>
+                <th>設備</th>
+                <th>指令</th>
+                <th>狀態</th>
+                <th>操作人員</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.time }}</td>
+                <td>{{ log.device }}</td>
+                <td>{{ log.command }}</td>
+                <td>{{ log.status }}</td>
+                <td>{{ log.operator }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="button-container">
+        <button onclick="location.href='/download_log'">下載</button>
+        <button onclick="location.href='/clear_log'">清除</button>
+    </div>
+</body>
+
     <script>
 
         document.getElementById('generate-form').addEventListener('submit', function(event) {
@@ -177,12 +230,15 @@
                 document.getElementById('received-detect').value = received_data.detect;
                 document.getElementById('received-set_servo').value = received_data.set_servo;                
                 document.getElementById('received-time').value = received_data.receivedtime;
+
+
+                
             })
             .catch(error => console.error('Error:', error));
         });
 
         function sendButtonPress(buttonId) {
-            fetch('/api/step', {
+            fetch('/api/button', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -254,6 +310,43 @@
             document.getElementById('received-arm_time').value = received_data.receivedtime;
         });
         }
+
+        function downloadLog() {
+    fetch('/download_log', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+    .then(response => response.json())
+    .then(logs => {
+        const tbody = document.querySelector('#log-table tbody');
+        logs.forEach(log => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${log.time}</td>
+                <td>${log.device}</td>
+                <td>${log.command}</td>
+                <td>${log.status}</td>
+                <td>${log.operator}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    })
+    .catch(error => console.error('Error downloading log:', error));
+}
+
+function clearLog() {
+    // 实现清除日志的逻辑，可以根据需要进行相应的后端处理
+    fetch('/clear_log', {
+        method: 'POST'
+    })
+    .then(response => {
+        // 清除成功的处理逻辑，例如重新加载页面或更新界面状态
+    })
+    .catch(error => console.error('Error clearing log:', error));
+}
 
     </script>
 </body>
