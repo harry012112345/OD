@@ -8,7 +8,7 @@
 <body>
     <h1>帳號:{{username}} 登入時間:{{formatted_time}} ip:{{local_ip}}</h1>
     <h1>操作面板</h1>
-    <form id="generate-form">
+    <form onsubmit="dut_server(event)">
         <label for="servo_1">Servo 1:</label>
         <input type="number" id="servo_1" name="servo_1"><br>
         <label for="servo_2">Servo 2:</label>
@@ -25,7 +25,6 @@
     </form>
 
     <h1>狀態面板</h1>
-    <form id="receive-form">
         <label for="received-servo_1">Servo 1:</label>
         <input type="text" id="received-servo_1" readonly><br>
         <label for="received-servo_2">Servo 2:</label>
@@ -135,7 +134,9 @@
         <input type="text" id="received-unet_time" readonly><br>
         <label for="received-unet_ip">ip位置:</label>
         <input type="text" id="received-unet_ip" readonly><br>
-
+    
+    <div id="dynamic-tables"></div>
+    
         <title>操作日誌</title>
     <style>
         table {
@@ -159,109 +160,90 @@
             margin: 5px;
             font-size: 16px;
         }
-    </style>
-<body>
-    <table id="log-table">
-        <thead>
-            <tr>
-                <th>時間</th>
-                <th>設備</th>
-                <th>指令</th>
-                <th>狀態</th>
-                <th>操作人員</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-            <tr>
-                <td>{{ log.time }}</td>
-                <td>{{ log.device }}</td>
-                <td>{{ log.command }}</td>
-                <td>{{ log.status }}</td>
-                <td>{{ log.operator }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <div class="button-container">
-        <button onclick="location.href='/download_log'">下載</button>
-        <button onclick="location.href='/clear_log'">清除</button>
-    </div>
-</body>
-
-    <script>
-
-        document.getElementById('generate-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const servo_1 = document.getElementById('servo_1').value;
-            const servo_2 = document.getElementById('servo_2').value;
-            const servo_3 = document.getElementById('servo_3').value;
-            const servo_4 = document.getElementById('servo_4').value;
-            const servo_5 = document.getElementById('servo_5').value;
-            const servo_6 = document.getElementById('servo_6').value;
-
-            const data = {
-                servo_1: servo_1,
-                servo_2: servo_2,
-                servo_3: servo_3,
-                servo_4: servo_4,
-                servo_5: servo_5,
-                servo_6: servo_6
-            };
-
-            fetch('/api/receive', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(received_data => {
-                document.getElementById('received-servo_1').value = received_data.servo_dict.servo_1;
-                document.getElementById('received-servo_2').value = received_data.servo_dict.servo_2;
-                document.getElementById('received-servo_3').value = received_data.servo_dict.servo_3;
-                document.getElementById('received-servo_4').value = received_data.servo_dict.servo_4;
-                document.getElementById('received-servo_5').value = received_data.servo_dict.servo_5;
-                document.getElementById('received-servo_6').value = received_data.servo_dict.servo_6;
-                document.getElementById('received-temperature').value = received_data.temperature;
-                document.getElementById('received-humidity').value = received_data.humidity;
-                document.getElementById('received-ip_address').value = received_data.ip_address;
-                document.getElementById('received-detect').value = received_data.detect;
-                document.getElementById('received-set_servo').value = received_data.set_servo;                
-                document.getElementById('received-time').value = received_data.receivedtime;
 
 
-                
-            })
-            .catch(error => console.error('Error:', error));
-        });
 
-        function sendButtonPress(buttonId) {
-            fetch('/api/button', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ button_id: buttonId })
-            })
-            .then(response => response.json())
-            .then(received_data => {
-                console.log(received_data);
-                document.getElementById('received-set_MC026_binding').value = received_data.set_MC026_binding;
-                document.getElementById('received-AN203_ON_OFF_test').value = received_data.AN203_ON_OFF_test;
-                document.getElementById('received-unet_time').value = received_data.unet_time;
-                document.getElementById('received-unet_ip').value = received_data.unet_ip;
-                // 你可以在這裡更新UI或進行其他操作
-            });
+        .led {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: green;
+            display: inline-block;
+        }
+        .led.red {
+            background-color: red;
         }
 
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+<body>
+    <div class="led" id="ledIndicator"></div>
 
-        function sendData(event) {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+
+    <div class="button-container">
+        <button onclick="downloadLog()">下載記錄</button>
+      <button onclick="clearLog()">清除</button>
+    </div>
+</body>
+    <div id="log">
+    <p>時間  裝置  指令  狀態  操作者</p>
+    </div>
+    <script>
+        
+        var socket = io();
+
+socket.on('led_trigger', function(data) {
+    if (data.status === 'triggered') {
+        changeLEDColor();
+    }
+});
+
+function changeLEDColor() {
+    const led = document.getElementById('ledIndicator');
+    led.classList.add('red');
+    setTimeout(() => {
+        led.classList.remove('red');
+    }, 3000); // 3000 milliseconds = 3 seconds
+}
+
+
+      var logEntries = [];
+
+      function logGenerate(logs) {
+        var logDiv = document.getElementById("log");
+        var newLogEntry = document.createElement("p");
+        var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
+        newLogEntry.textContent = logText;
+        logDiv.appendChild(newLogEntry);
+        logEntries.push(logs);
+      }
+
+      function downloadLog() {
+        var worksheet = XLSX.utils.json_to_sheet(logEntries);
+        var workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Log");
+
+        XLSX.writeFile(workbook, "log.xlsx");
+      }
+
+      function clearLog() {
+        var logDiv = document.getElementById("log");
+        logDiv.innerHTML = "<p>時間  裝置  指令  狀態  操作者</p>";
+        logEntries = [];
+      }
+      
+      function dut_server(event) {
             event.preventDefault();
-            const data = { real_position: parseFloat(document.getElementById('real_position').value) };
+            const data = { servo_1: document.getElementById('servo_1').value,
+                           servo_2: document.getElementById('servo_2').value,
+                           servo_3: document.getElementById('servo_3').value,
+                           servo_4: document.getElementById('servo_4').value,
+                           servo_5: document.getElementById('servo_5').value,
+                           servo_6: document.getElementById('servo_6').value
+            };
 
-            fetch('/api/step', {
+            fetch('/api/dut', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -270,13 +252,23 @@
             })
             .then(response => response.json())
             .then(data => {
-            console.log(data);
-            document.getElementById('received-real_position').value = data.real_position;
-            document.getElementById('received-step_time').value = data.step_time;
-            document.getElementById('received-step_ip').value = data.step_ip;
+            document.getElementById('received-servo_1').value = data.servo_dict.servo_1;
+            document.getElementById('received-servo_2').value = data.servo_dict.servo_2;
+            document.getElementById('received-servo_3').value = data.servo_dict.servo_3;
+            document.getElementById('received-servo_4').value = data.servo_dict.servo_4;
+            document.getElementById('received-servo_5').value = data.servo_dict.servo_5;
+            document.getElementById('received-servo_6').value = data.servo_dict.servo_6;
+            document.getElementById('received-temperature').value = data.temperature;
+            document.getElementById('received-humidity').value = data.humidity;
+            document.getElementById('received-ip_address').value = data.ip_address;
+            document.getElementById('received-detect').value = data.detect;
+            document.getElementById('received-set_servo').value = data.set_servo;                
+            document.getElementById('received-time').value = data.receivedtime;
+            logGenerate(data.logs);
         });
         }
 
+        
         function arm_server(event) {
             event.preventDefault();
             const data = { servo_1: document.getElementById('arm_servo_1').value,
@@ -308,45 +300,49 @@
             document.getElementById('received-arm_detect').value = received_data.detect;
             document.getElementById('received-arm_set_servo').value = received_data.set_servo;                
             document.getElementById('received-arm_time').value = received_data.receivedtime;
+            logGenerate(received_data.logs);
         });
         }
 
-        function downloadLog() {
-    fetch('/download_log', {
-                method: 'GET',
+
+        function sendData(event) {
+            event.preventDefault();
+            const data = { real_position: parseFloat(document.getElementById('real_position').value) };
+
+            fetch('/api/step', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
             })
-    .then(response => response.json())
-    .then(logs => {
-        const tbody = document.querySelector('#log-table tbody');
-        logs.forEach(log => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${log.time}</td>
-                <td>${log.device}</td>
-                <td>${log.command}</td>
-                <td>${log.status}</td>
-                <td>${log.operator}</td>
-            `;
-            tbody.appendChild(row);
+            .then(response => response.json())
+            .then(data => {
+            document.getElementById('received-real_position').value = data.real_position;
+            document.getElementById('received-step_time').value = data.step_time;
+            document.getElementById('received-step_ip').value = data.step_ip;
+            logGenerate(data.logs);
         });
-    })
-    .catch(error => console.error('Error downloading log:', error));
-}
+        }
 
-function clearLog() {
-    // 实现清除日志的逻辑，可以根据需要进行相应的后端处理
-    fetch('/clear_log', {
-        method: 'POST'
-    })
-    .then(response => {
-        // 清除成功的处理逻辑，例如重新加载页面或更新界面状态
-    })
-    .catch(error => console.error('Error clearing log:', error));
-}
+
+        function sendButtonPress(buttonId) {
+            fetch('/api/button', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ button_id: buttonId })
+            })
+            .then(response => response.json())
+            .then(received_data => {
+                document.getElementById('received-set_MC026_binding').value = received_data.set_MC026_binding;
+                document.getElementById('received-AN203_ON_OFF_test').value = received_data.AN203_ON_OFF_test;
+                document.getElementById('received-unet_time').value = received_data.unet_time;
+                document.getElementById('received-unet_ip').value = received_data.unet_ip;
+                logGenerate(received_data.logs);
+            });
+        }
 
     </script>
 </body>
