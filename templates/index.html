@@ -1,147 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Generator and Uploader</title>
-</head>
-<body>
-    <h1>帳號:{{username}} 登入時間:{{formatted_time}} ip:{{local_ip}}</h1>
-    <h1>操作面板</h1>
-    <form onsubmit="dut_server(event)">
-        <label for="servo_1">Servo 1:</label>
-        <input type="number" id="servo_1" name="servo_1"><br>
-        <label for="servo_2">Servo 2:</label>
-        <input type="number" id="servo_2" name="servo_2"><br>
-        <label for="servo_3">Servo 3:</label>
-        <input type="number" id="servo_3" name="servo_3"><br>
-        <label for="servo_4">Servo 4:</label>
-        <input type="number" id="servo_4" name="servo_4"><br>
-        <label for="servo_5">Servo 5:</label>
-        <input type="number" id="servo_5" name="servo_5"><br>
-        <label for="servo_6">Servo 6:</label>
-        <input type="number" id="servo_6" name="servo_6"><br>
-        <button type="submit">送出</button>
-    </form>
-
-    <h1>狀態面板</h1>
-        <label for="received-servo_1">Servo 1:</label>
-        <input type="text" id="received-servo_1" readonly><br>
-        <label for="received-servo_2">Servo 2:</label>
-        <input type="text" id="received-servo_2" readonly><br>
-        <label for="received-servo_3">Servo 3:</label>
-        <input type="text" id="received-servo_3" readonly><br>
-        <label for="received-servo_4">Servo 4:</label>
-        <input type="text" id="received-servo_4" readonly><br>
-        <label for="received-servo_5">Servo 5:</label>
-        <input type="text" id="received-servo_5" readonly><br>
-        <label for="received-servo_6">Servo 6:</label>
-        <input type="text" id="received-servo_6" readonly><br>
-
-        <label for="received-temperature">temperature</label>
-        <input type="text" id="received-temperature" readonly><br>
-        <label for="received-humidity">humidity</label>
-        <input type="text" id="received-humidity" readonly><br>
-        <label for="received-ip_address">ip_address</label>
-        <input type="text" id="received-ip_address" readonly><br>
-        <label for="received-detect">detect</label>
-        <input type="text" id="received-detect" readonly><br>
-        <label for="received-set_servo">communication</label>
-        <input type="text" id="received-set_servo" readonly><br>
-
-        <label for="received-time">更新時間</label>
-        <input type="text" id="received-time" readonly><br>
-        
-        
-    </form>
-    
-    <h1>arm_機器手臂操作面板</h1>
-    <form onsubmit="arm_server(event)">
-        <label for="arm_servo_1">Servo 1:</label>
-        <input type="number" id="arm_servo_1" name="arm_servo_1"><br>
-        <label for="arm_servo_2">Servo 2:</label>
-        <input type="number" id="arm_servo_2" name="arm_servo_2"><br>
-        <label for="arm_servo_3">Servo 3:</label>
-        <input type="number" id="arm_servo_3" name="arm_servo_3"><br>
-        <label for="arm_servo_4">Servo 4:</label>
-        <input type="number" id="arm_servo_4" name="arm_servo_4"><br>
-        <label for="servo_5">Servo 5:</label>
-        <input type="number" id="arm_servo_5" name="arm_servo_5"><br>
-        <label for="arm_servo_6">Servo 6:</label>
-        <input type="number" id="arm_servo_6" name="arm_servo_6"><br>
-        <button type="submit">送出</button>
-    </form>
-    
-    <h1>arm_機器手臂狀態面板</h1>
-    <label for="received-arm_servo_1">Servo 1:</label>
-    <input type="text" id="received-arm_servo_1" readonly><br>
-    <label for="received-arm_servo_2">Servo 2:</label>
-    <input type="text" id="received-arm_servo_2" readonly><br>
-    <label for="received-arm_servo_3">Servo 3:</label>
-    <input type="text" id="received-arm_servo_3" readonly><br>
-    <label for="received-arm_servo_4">Servo 4:</label>
-    <input type="text" id="received-arm_servo_4" readonly><br>
-    <label for="received-arm_servo_5">Servo 5:</label>
-    <input type="text" id="received-arm_servo_5" readonly><br>
-    <label for="received-arm_servo_6">Servo 6:</label>
-    <input type="text" id="received-arm_servo_6" readonly><br>
-
-    <label for="received-arm_temperature">temperature</label>
-    <input type="text" id="received-arm_temperature" readonly><br>
-    <label for="received-arm_humidity">humidity</label>
-    <input type="text" id="received-arm_humidity" readonly><br>
-    <label for="received-arm_ip_address">ip_address</label>
-    <input type="text" id="received-arm_ip_address" readonly><br>
-    <label for="received-arm_detect">detect</label>
-    <input type="text" id="received-arm_detect" readonly><br>
-    <label for="received-arm_set_servo">communication</label>
-    <input type="text" id="received-arm_set_servo" readonly><br>
-
-    <label for="received-arm_time">更新時間</label>
-    <input type="text" id="received-arm_time" readonly><br>
-
-
-    <h1>step_馬達操作面板</h1>
-    <form onsubmit="sendData(event)">
-    <label for="real_position">移動至距離原點:</label>
-    <input type="text" id="real_position" name="real_position">
-    <button type="submit">送出</button>
-    </form>
-    
-    <h1>step_馬達狀態面板</h1>
-    <label for="received-real_position">距離原點:</label>
-    <input type="number" id="received-real_position"><br>
-    <label for="received-step_time">更新時間:</label>
-    <input type="text" id="received-step_time"><br>
-    <label for="received-step_ip">ip位置    :</label>
-    <input type="text" id="received-step_ip"><br>
-
-   
-
-    <h1>unet_AN203操作面板</h1>
-        <button onclick="sendButtonPress('bing-btn')">Binding</button>
-        <button onclick="sendButtonPress('test-btn')">AN203_ON_OFF_test</button>
-        <button onclick="sendButtonPress('on-btn')">AN203_ON</button>
-        <button onclick="sendButtonPress('off-btn')">AN203_OFF</button>
-
-    <h1>unet_AN203_狀態面板</h1>
-        <label for="received-set_MC026_binding">AN203學碼:</label>
-        <input type="text" id="received-set_MC026_binding" readonly><br>
-        <label for="received-AN203_ON_OFF_test">AN203狀態:</label>
-        <input type="text" id="received-AN203_ON_OFF_test" readonly>
-        <label for="received-AN203_ON_OFF_test">(ON or OFF)</label><br>
-        <label for="received-unet_time">更新時間:</label>
-        <input type="text" id="received-unet_time" readonly><br>
-        <label for="received-unet_ip">ip位置:</label>
-        <input type="text" id="received-unet_ip" readonly><br>
-    
-    <div id="dynamic-tables"></div>
-    
-        <title>操作日誌</title>
+    <title>操作面板</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        h1 {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
+            min-width: 300px;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+            margin-bottom: 10px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 200px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        input[readonly] {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .button-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .led {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .led.green {
+            background-color: green;
+        }
+        .led.red {
+            background-color: red;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
         th, td {
             border: 1px solid black;
@@ -151,44 +68,176 @@
         th {
             background-color: #f2f2f2;
         }
-        .button-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-        }
-
-
-
-        .led {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: green;
-            display: inline-block;
-        }
-        .led.red {
-            background-color: red;
-        }
-
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
-<body>
-    <div class="led" id="ledIndicator"></div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="led green" id="ledIndicator"></div>
+    <h1>帳號: {{username}} 登入時間: {{formatted_time}} IP: {{local_ip}}</h1>
+
+    <div class="container">
+        <div class="panel">
+            <h1>操作面板</h1>
+            <form onsubmit="dut_server(event)">
+                <label for="servo_1">Servo 1:</label>
+                <input type="number" id="servo_1" name="servo_1"><br>
+                <label for="servo_2">Servo 2:</label>
+                <input type="number" id="servo_2" name="servo_2"><br>
+                <label for="servo_3">Servo 3:</label>
+                <input type="number" id="servo_3" name="servo_3"><br>
+                <label for="servo_4">Servo 4:</label>
+                <input type="number" id="servo_4" name="servo_4"><br>
+                <label for="servo_5">Servo 5:</label>
+                <input type="number" id="servo_5" name="servo_5"><br>
+                <label for="servo_6">Servo 6:</label>
+                <input type="number" id="servo_6" name="servo_6"><br>
+                <button type="submit">送出</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h1>狀態面板</h1>
+            <form>
+                <label for="received-servo_1">Servo 1:</label>
+                <input type="text" id="received-servo_1" readonly><br>
+                <label for="received-servo_2">Servo 2:</label>
+                <input type="text" id="received-servo_2" readonly><br>
+                <label for="received-servo_3">Servo 3:</label>
+                <input type="text" id="received-servo_3" readonly><br>
+                <label for="received-servo_4">Servo 4:</label>
+                <input type="text" id="received-servo_4" readonly><br>
+                <label for="received-servo_5">Servo 5:</label>
+                <input type="text" id="received-servo_5" readonly><br>
+                <label for="received-servo_6">Servo 6:</label>
+                <input type="text" id="received-servo_6" readonly><br>
+                <label for="received-temperature">Temperature:</label>
+                <input type="text" id="received-temperature" readonly><br>
+                <label for="received-humidity">Humidity:</label>
+                <input type="text" id="received-humidity" readonly><br>
+                <label for="received-ip_address">IP Address:</label>
+                <input type="text" id="received-ip_address" readonly><br>
+                <label for="received-detect">Detect:</label>
+                <input type="text" id="received-detect" readonly><br>
+                <label for="received-set_servo">Communication:</label>
+                <input type="text" id="received-set_servo" readonly><br>
+                <label for="received-time">更新時間:</label>
+                <input type="text" id="received-time" readonly><br>
+            </form>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="panel">
+            <h1>arm_機器手臂操作面板</h1>
+            <form onsubmit="arm_server(event)">
+                <label for="arm_servo_1">Servo 1:</label>
+                <input type="number" id="arm_servo_1" name="arm_servo_1"><br>
+                <label for="arm_servo_2">Servo 2:</label>
+                <input type="number" id="arm_servo_2" name="arm_servo_2"><br>
+                <label for="arm_servo_3">Servo 3:</label>
+                <input type="number" id="arm_servo_3" name="arm_servo_3"><br>
+                <label for="arm_servo_4">Servo 4:</label>
+                <input type="number" id="arm_servo_4" name="arm_servo_4"><br>
+                <label for="arm_servo_5">Servo 5:</label>
+                <input type="number" id="arm_servo_5" name="arm_servo_5"><br>
+                <label for="arm_servo_6">Servo 6:</label>
+                <input type="number" id="arm_servo_6" name="arm_servo_6"><br>
+                <button type="submit">送出</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h1>arm_機器手臂狀態面板</h1>
+            <form>
+                <label for="received-arm_servo_1">Servo 1:</label>
+                <input type="text" id="received-arm_servo_1" readonly><br>
+                <label for="received-arm_servo_2">Servo 2:</label>
+                <input type="text" id="received-arm_servo_2" readonly><br>
+                <label for="received-arm_servo_3">Servo 3:</label>
+                <input type="text" id="received-arm_servo_3" readonly><br>
+                <label for="received-arm_servo_4">Servo 4:</label>
+                <input type="text" id="received-arm_servo_4" readonly><br>
+                <label for="received-arm_servo_5">Servo 5:</label>
+                <input type="text" id="received-arm_servo_5" readonly><br>
+                <label for="received-arm_servo_6">Servo 6:</label>
+                <input type="text" id="received-arm_servo_6" readonly><br>
+                <label for="received-arm_temperature">Temperature:</label>
+                <input type="text" id="received-arm_temperature" readonly><br>
+                <label for="received-arm_humidity">Humidity:</label>
+                <input type="text" id="received-arm_humidity" readonly><br>
+                <label for="received-arm_ip_address">IP Address:</label>
+                <input type="text" id="received-arm_ip_address" readonly><br>
+                <label for="received-arm_detect">Detect:</label>
+                <input type="text" id="received-arm_detect" readonly><br>
+                <label for="received-arm_set_servo">Communication:</label>
+                <input type="text" id="received-arm_set_servo" readonly><br>
+                <label for="received-arm_time">更新時間:</label>
+                <input type="text" id="received-arm_time" readonly><br>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h1>step_馬達操作面板</h1>
+            <form onsubmit="sendData(event)">
+                <label for="real_position">移動至距離原點:</label>
+                <input type="text" id="real_position" name="real_position">
+                <button type="submit">送出</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h1>step_馬達狀態面板</h1>
+            <form>
+                <label for="received-real_position">距離原點:</label>
+                <input type="number" id="received-real_position" readonly><br>
+                <label for="received-step_time">更新時間:</label>
+                <input type="text" id="received-step_time" readonly><br>
+                <label for="received-step_ip">IP 位置:</label>
+                <input type="text" id="received-step_ip" readonly><br>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h1>unet_AN203操作面板</h1>
+            <button onclick="sendButtonPress('bing-btn')">Binding</button>
+            <button onclick="sendButtonPress('test-btn')">AN203_ON_OFF_test</button>
+            <button onclick="sendButtonPress('on-btn')">AN203_ON</button>
+            <button onclick="sendButtonPress('off-btn')">AN203_OFF</button>
+        </div>
+
+        <div class="panel">
+            <h1>unet_AN203狀態面板</h1>
+            <form>
+                <label for="received-set_MC026_binding">AN203學碼:</label>
+                <input type="text" id="received-set_MC026_binding" readonly><br>
+                <label for="received-AN203_ON_OFF_test">AN203狀態:</label>
+                <input type="text" id="received-AN203_ON_OFF_test" readonly>
+                <label for="received-AN203_ON_OFF_test">(ON or OFF)</label><br>
+                <label for="received-unet_time">更新時間:</label>
+                <input type="text" id="received-unet_time" readonly><br>
+                <label for="received-unet_ip">IP 位置:</label>
+                <input type="text" id="received-unet_ip" readonly><br>
+            </form>
+        </div>
+    </div>
+
+    <div id="dynamic-tables"></div>
+
+    <h1>操作日誌</h1>
+    <div id="log">
+        <p>時間 裝置 指令 狀態 操作者</p>
+    </div>
 
     <div class="button-container">
         <button onclick="downloadLog()">下載記錄</button>
-      <button onclick="clearLog()">清除</button>
+        <button onclick="clearLog()">清除</button>
     </div>
 </body>
-    <div id="log">
-    <p>時間  裝置  指令  狀態  操作者</p>
-    </div>
     <script>
         
         var socket = io();
