@@ -1,12 +1,14 @@
 from flask import Flask, request, render_template, jsonify, send_file, redirect, url_for,flash,session
 from flask_restful import Api, Resource
 from flask_socketio import SocketIO, emit
+import pandas as pd
 import json
 import requests
 import csv
 import io
 import os
 import datetime
+import time
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -21,6 +23,10 @@ global_unet_ip=[]
 
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
+
+def process_value(value):
+    # 這裡可以進行你需要的任何處理
+    print(f"處理值: {value}")
 
 @app.route('/')
 def index():
@@ -48,6 +54,141 @@ def welcome():
         return redirect(url_for('login'))
     username=session['username']
     return render_template('welcome.html',formatted_time=formatted_time,username=username,local_ip=local_ip)
+
+@app.route('/test',methods=['GET', 'POST'])
+def test():
+    excel_file = 'test.xlsx'
+# 讀取Excel文件
+    df = pd.read_excel(excel_file)
+# 查看Excel文件內容
+    print("Excel文件內容：")
+    print(df)
+    username=session['username']  # 获取会话中的用户名，默认为'Guest'
+    param1, param2, param3, param4, param5, param6 = (None, None, None, None, None, None)
+    for index, row in df.iterrows():
+        if row[0] == "arm_server": 
+             parameters = str(row['parameter']).split(',')
+             param1, param2, param3, param4, param5, param6 = parameters
+             global global_arm_ip
+             ip_address=global_arm_ip
+             test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
+        elif row[0] == "dut_server":
+             parameters = str(row['parameter']).split(',')
+             param1, param2, param3, param4, param5, param6 = parameters
+             print(param1)
+             print(param6)
+        elif row[0] == "unet_server":
+             parameters = row['parameter']
+             print(parameters)
+        elif row[0] == "step_server":
+             parameters = row['parameter']
+             print(parameters)
+        if test.status_code == 200:
+             # 解析 JSON 数据
+            data = test.json()
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            data['receivedtime'] = formatted_time
+        return render_template('index.html',formatted_time=formatted_time,username=username,local_ip=local_ip,data=data)
+
+
+@socketio.on('start_processing')
+def handle_start_processing():
+    excel_file = 'test.xlsx'
+    df = pd.read_excel(excel_file)
+    for index, row in df.iterrows():
+        delay_time=row['delay_time']
+        server_type = row['server_name']
+        if row[0] == "dut_server":
+         parameters = str(row['parameter']).split(',')
+         param1, param2, param3, param4, param5, param6 = parameters
+         global global_dut_ip
+         ip_address=global_dut_ip
+         test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
+         if test.status_code == 200:
+             # 解析 JSON 数据
+            data = test.json()
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            data['receivedtime'] = formatted_time
+            data['server_type'] = server_type
+            log_dut_data={
+            'time': f'{data['receivedtime']}',
+            'device': 'dut機器手臂',
+            'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
+            'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+            'operator': 'Frank'
+            }
+            data['logs'] = log_dut_data
+
+        elif row[0] == "arm_server":
+         parameters = str(row['parameter']).split(',')
+         param1, param2, param3, param4, param5, param6 = parameters
+         global global_arm_ip
+         ip_address=global_arm_ip
+         test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
+         if test.status_code == 200:
+             # 解析 JSON 数据
+            data = test.json()
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            data['receivedtime'] = formatted_time
+            data['server_type'] = server_type
+        elif row[0] == "step_server":
+         parameters = str(row['parameter'])
+         global global_step_ip
+         ip_address=global_step_ip
+         test = requests.post(f'http://{ip_address}/set_distance?position={parameters}')
+         if test.status_code == 200:
+             # 解析 JSON 数据
+            data = test.json()
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            data['server_type'] = server_type
+            data['step_time'] = formatted_time
+            data['step_ip'] = ip_address
+            log_step_data = {
+                'time': data['step_time'],
+                'device': 'step馬達',
+                'command': f'往前{parameters}(cm)',
+                'status': f'{data['real_position']},{data['step_ip']}',
+                'operator': 'Frank'
+            }
+            data['logs'] = log_step_data
+
+        elif row[0] == "unet_server":
+         parameters = str(row['parameter'])
+         global global_unet_ip
+         ip_address=global_unet_ip
+         test = requests.get(f'http://{ip_address}/AN203_{parameters}')
+         if test.status_code == 200:
+             # 解析 JSON 数据
+            data = {
+           'set_MC026_binding' : 'successfully',
+            }
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            data['AN203_ON_OFF_test']='AN203_ON'
+            data['server_type'] = server_type
+            data['unet_time'] = formatted_time 
+            data['unet_ip'] = ip_address
+            log_unet_data={
+            'time': f'{received_data['unet_time']}',
+            'device': 'unet_AN203',
+            'command': f'{received_data['AN203_ON_OFF_test']}',
+            'status': f'{received_data['AN203_ON_OFF_test']},{received_data['unet_ip']}',
+            'operator': 'Frank'
+            }
+            data['logs'] = log_unet_data
+        # 模拟一些处理时间
+        # 将结果发送给客户端
+        emit('update_result',data)
+        time.sleep(delay_time)
+
+# 處理每個值（這裡我們假設進行一些簡單的處理，如打印每個值）
+
+# 遍歷每個單元格的值並進行處理
+
 
 @app.route('/dashboard')
 def dashboard():
@@ -82,7 +223,7 @@ def receive_ip():
         return jsonify(response_data)
     else:
         return jsonify({'error': 'Invalid JSON format'}), 400
-
+ 
 @app.route('/detection', methods=['POST'])
 def detection():
     socketio.emit('led_trigger', {'status': 'triggered'})
