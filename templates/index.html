@@ -68,6 +68,9 @@
         th {
             background-color: #f2f2f2;
         }
+        .highlight {
+        color: red; /* 设置文字颜色为红色 */
+    }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
@@ -200,7 +203,6 @@
             </form>
         </div>
     </div>
-
     <div class="container">
         <div class="panel">
             <h1>unet_AN203操作面板</h1>
@@ -234,7 +236,9 @@
     <div id="log">
         <p>時間 裝置 指令 狀態 操作者</p>
     </div>
+    
 
+    
     <div class="button-container">
         <button onclick="downloadLog()">下載記錄</button>
         <button onclick="clearLog()">清除</button>
@@ -266,6 +270,16 @@ function changeLEDColor() {
         var newLogEntry = document.createElement("p");
         var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
         newLogEntry.textContent = logText;
+        logDiv.appendChild(newLogEntry);
+        logEntries.push(logs);
+      }
+
+      function detectGenerate(logs) {
+        var logDiv = document.getElementById("log");
+        var newLogEntry = document.createElement("p");
+        var logText = logs['command'] +'     '+logs['status'];
+        newLogEntry.textContent = logText;
+        newLogEntry.classList.add('highlight'); // 添加红色样式类
         logDiv.appendChild(newLogEntry);
         logEntries.push(logs);
       }
@@ -396,6 +410,11 @@ function changeLEDColor() {
         }
         
         document.addEventListener("DOMContentLoaded", function() {
+            var socket = io();
+
+            socket.on('update_detect', (data) => {
+                detectGenerate(data)
+            });
 
             socket.on('update_result', function(data) {
                 var serverType = data.server_type;

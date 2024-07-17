@@ -9,6 +9,7 @@ import io
 import os
 import datetime
 import time
+from threading import Thread
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -21,8 +22,14 @@ global_arm_ip=[]
 global_step_ip=[]
 global_unet_ip=[]
 
+log_arm_data=[]
+log_dut_data=[]
+log_step_data=[]
+log_unet_data=[]
+
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
+
 
 def process_value(value):
     # 這裡可以進行你需要的任何處理
@@ -92,6 +99,17 @@ def test():
         return render_template('index.html',formatted_time=formatted_time,username=username,local_ip=local_ip,data=data)
 
 
+def detection_thread(detect_time):
+    start_time = time.time()
+    while time.time() - start_time < detect_time:
+        with app.test_request_context('/detection', method='POST'):
+            data = {'detected': True}
+            response = requests.post('http://localhost:5000/detection', json=data, headers={'Content-Type': 'application/json'})
+
+def delay_thread(delay_time):
+    time.sleep(delay_time)
+
+
 @socketio.on('start_processing')
 def handle_start_processing():
     excel_file = 'test.xlsx'
@@ -99,6 +117,12 @@ def handle_start_processing():
     for index, row in df.iterrows():
         delay_time=row['delay_time']
         server_type = row['server_name']
+        active_detection = row['active_detection'].split(',')
+        if active_detection[0] == 'yes':
+           detect_time = int(active_detection[1])
+           detect_thread = Thread(target=detection_thread, args=(detect_time,))
+           detect_thread.start()
+
         if row[0] == "dut_server":
          parameters = str(row['parameter']).split(',')
          param1, param2, param3, param4, param5, param6 = parameters
@@ -112,15 +136,15 @@ def handle_start_processing():
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             data['receivedtime'] = formatted_time
             data['server_type'] = server_type
+            global log_dut_data
             log_dut_data={
             'time': f'{data['receivedtime']}',
-            'device': 'dut機器手臂',
+            'device': 'arm機器手臂',
             'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
             'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
             'operator': 'Frank'
             }
-            data['logs'] = log_dut_data
-
+            data['logs'] = log_dut_data   
         elif row[0] == "arm_server":
          parameters = str(row['parameter']).split(',')
          param1, param2, param3, param4, param5, param6 = parameters
@@ -134,6 +158,15 @@ def handle_start_processing():
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             data['receivedtime'] = formatted_time
             data['server_type'] = server_type
+            global log_arm_data
+            log_arm_data={
+            'time': f'{data['receivedtime']}',
+            'device': 'dut機器手臂',
+            'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
+            'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+            'operator': 'Frank'
+            }
+            data['logs'] = log_arm_data 
         elif row[0] == "step_server":
          parameters = str(row['parameter'])
          global global_step_ip
@@ -147,6 +180,7 @@ def handle_start_processing():
             data['server_type'] = server_type
             data['step_time'] = formatted_time
             data['step_ip'] = ip_address
+            global log_step_data
             log_step_data = {
                 'time': data['step_time'],
                 'device': 'step馬達',
@@ -154,8 +188,7 @@ def handle_start_processing():
                 'status': f'{data['real_position']},{data['step_ip']}',
                 'operator': 'Frank'
             }
-            data['logs'] = log_step_data
-
+            data['logs'] = log_step_data   
         elif row[0] == "unet_server":
          parameters = str(row['parameter'])
          global global_unet_ip
@@ -172,22 +205,24 @@ def handle_start_processing():
             data['server_type'] = server_type
             data['unet_time'] = formatted_time 
             data['unet_ip'] = ip_address
+            global log_unet_data
             log_unet_data={
-            'time': f'{received_data['unet_time']}',
+            'time': f'{data['unet_time']}',
             'device': 'unet_AN203',
-            'command': f'{received_data['AN203_ON_OFF_test']}',
-            'status': f'{received_data['AN203_ON_OFF_test']},{received_data['unet_ip']}',
+            'command': f'{data['AN203_ON_OFF_test']}',
+            'status': f'{data['AN203_ON_OFF_test']},{data['unet_ip']}',
             'operator': 'Frank'
             }
             data['logs'] = log_unet_data
         # 模拟一些处理时间
         # 将结果发送给客户端
         emit('update_result',data)
-        time.sleep(delay_time)
-
-# 處理每個值（這裡我們假設進行一些簡單的處理，如打印每個值）
-
-# 遍歷每個單元格的值並進行處理
+        
+        delay_thread_instance = Thread(target=delay_thread, args=(delay_time,))
+        delay_thread_instance.start()
+        if active_detection[0] == 'yes':
+            detect_thread.join()
+        delay_thread_instance.join()
 
 
 @app.route('/dashboard')
@@ -226,7 +261,17 @@ def receive_ip():
  
 @app.route('/detection', methods=['POST'])
 def detection():
-    socketio.emit('led_trigger', {'status': 'triggered'})
+    data = request.get_json()
+    if data['detected'] == True:
+      global log_arm_data
+      global log_dut_data
+      if isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
+       update_data = {
+                'status': log_arm_data['status'],
+                'command': log_dut_data['command']
+            }
+       socketio.emit('update_detect',update_data)
+      socketio.emit('led_trigger', {'status': 'triggered'})
     return {'message': 'detection received'}, 200
 
 
