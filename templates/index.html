@@ -84,17 +84,17 @@
             <h1>操作面板</h1>
             <form onsubmit="dut_server(event)">
                 <label for="servo_1">Servo 1:</label>
-                <input type="number" id="servo_1" name="servo_1"><br>
+                <input type="number" id="servo_1" name="servo_1" min="0" max="180" ><br>
                 <label for="servo_2">Servo 2:</label>
-                <input type="number" id="servo_2" name="servo_2"><br>
+                <input type="number" id="servo_2" name="servo_2" min="0" max="180" ><br>
                 <label for="servo_3">Servo 3:</label>
-                <input type="number" id="servo_3" name="servo_3"><br>
+                <input type="number" id="servo_3" name="servo_3" min="0" max="180" ><br>
                 <label for="servo_4">Servo 4:</label>
-                <input type="number" id="servo_4" name="servo_4"><br>
+                <input type="number" id="servo_4" name="servo_4" min="0" max="180" ><br>
                 <label for="servo_5">Servo 5:</label>
-                <input type="number" id="servo_5" name="servo_5"><br>
+                <input type="number" id="servo_5" name="servo_5" min="0" max="180" ><br>
                 <label for="servo_6">Servo 6:</label>
-                <input type="number" id="servo_6" name="servo_6"><br>
+                <input type="number" id="servo_6" name="servo_6" min="0" max="180" ><br>
                 <button type="submit">送出</button>
             </form>
         </div>
@@ -135,17 +135,17 @@
             <h1>arm_機器手臂操作面板</h1>
             <form onsubmit="arm_server(event)">
                 <label for="arm_servo_1">Servo 1:</label>
-                <input type="number" id="arm_servo_1" name="arm_servo_1"><br>
+                <input type="number" id="arm_servo_1" name="arm_servo_1" min="0" max="180" ><br>
                 <label for="arm_servo_2">Servo 2:</label>
-                <input type="number" id="arm_servo_2" name="arm_servo_2"><br>
+                <input type="number" id="arm_servo_2" name="arm_servo_2" min="0" max="180" ><br>
                 <label for="arm_servo_3">Servo 3:</label>
-                <input type="number" id="arm_servo_3" name="arm_servo_3"><br>
+                <input type="number" id="arm_servo_3" name="arm_servo_3" min="0" max="180" ><br>
                 <label for="arm_servo_4">Servo 4:</label>
-                <input type="number" id="arm_servo_4" name="arm_servo_4"><br>
+                <input type="number" id="arm_servo_4" name="arm_servo_4" min="0" max="180" ><br>
                 <label for="arm_servo_5">Servo 5:</label>
-                <input type="number" id="arm_servo_5" name="arm_servo_5"><br>
+                <input type="number" id="arm_servo_5" name="arm_servo_5" min="0" max="180" ><br>
                 <label for="arm_servo_6">Servo 6:</label>
-                <input type="number" id="arm_servo_6" name="arm_servo_6"><br>
+                <input type="number" id="arm_servo_6" name="arm_servo_6" min="0" max="180" ><br>
                 <button type="submit">送出</button>
             </form>
         </div>
@@ -186,7 +186,7 @@
             <h1>step_馬達操作面板</h1>
             <form onsubmit="sendData(event)">
                 <label for="real_position">移動至距離原點:</label>
-                <input type="text" id="real_position" name="real_position">
+                <input type="text" id="real_position" name="real_position" min="0" max="6" >
                 <button type="submit">送出</button>
             </form>
         </div>

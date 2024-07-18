@@ -27,6 +27,8 @@ log_dut_data=[]
 log_step_data=[]
 log_unet_data=[]
 
+detect_flag=False
+
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
 
@@ -102,12 +104,19 @@ def test():
 def detection_thread(detect_time):
     start_time = time.time()
     while time.time() - start_time < detect_time:
-        with app.test_request_context('/detection', method='POST'):
-            data = {'detected': True}
-            response = requests.post('http://localhost:5000/detection', json=data, headers={'Content-Type': 'application/json'})
+         app.test_request_context('/detection', method='POST')
 
-def delay_thread(delay_time):
-    time.sleep(delay_time)
+
+def load_ips_from_file():
+    ip_addresses = {}
+    if os.path.exists('ip_addresses.txt'):
+        with open('ip_addresses.txt', 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                name, ip = line.strip().split(': ')
+                ip_addresses[name] = ip
+    return ip_addresses
+
 
 
 @socketio.on('start_processing')
@@ -118,11 +127,14 @@ def handle_start_processing():
         delay_time=row['delay_time']
         server_type = row['server_name']
         active_detection = row['active_detection'].split(',')
+        global detect_flag
         if active_detection[0] == 'yes':
+           detect_flag = True
            detect_time = int(active_detection[1])
            detect_thread = Thread(target=detection_thread, args=(detect_time,))
            detect_thread.start()
-
+        else:
+           detect_flag = False
         if row[0] == "dut_server":
          parameters = str(row['parameter']).split(',')
          param1, param2, param3, param4, param5, param6 = parameters
@@ -217,12 +229,10 @@ def handle_start_processing():
         # 模拟一些处理时间
         # 将结果发送给客户端
         emit('update_result',data)
-        
-        delay_thread_instance = Thread(target=delay_thread, args=(delay_time,))
-        delay_thread_instance.start()
+        time.sleep(delay_time)
         if active_detection[0] == 'yes':
             detect_thread.join()
-        delay_thread_instance.join()
+
 
 
 @app.route('/dashboard')
@@ -230,6 +240,13 @@ def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
     username=session['username']
+    global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
+
+    ip_addresses = load_ips_from_file()
+    global_arm_ip = ip_addresses.get('arm_server', 'Not found')
+    global_dut_ip = ip_addresses.get('dut_server', 'Not found')
+    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_unet_ip = ip_addresses.get('unet_server', 'Not found')
     return render_template('index.html', received_data=received_data,formatted_time=formatted_time,username=username,local_ip=local_ip)
 
 
@@ -242,18 +259,28 @@ def receive_ip():
             ip_address = data.get('ip_address')
             global global_arm_ip
             global_arm_ip=ip_address
+
         elif data["name"] == 'dut_server':
             ip_address = data.get('ip_address')
             global global_dut_ip
             global_dut_ip=ip_address
+
         elif data["name"] == 'step_server':
             ip_address = data.get('ip_address')
             global global_step_ip
             global_step_ip=ip_address
+
         elif data["name"] == 'unet_server':
             ip_address = data.get('ip_address')
             global global_unet_ip
-            global_unet_ip=ip_address
+            global_unet_ip=ip_address  
+
+        with open('ip_addresses.txt', 'w') as file:
+            file.write(f"arm_server: {global_arm_ip}\n")
+            file.write(f"dut_server: {global_dut_ip}\n")
+            file.write(f"step_server: {global_step_ip}\n")
+            file.write(f"unet_server: {global_unet_ip}\n")
+
         response_data = {'message': "IP address received successfully", 'ip_received': ip_address}
         return jsonify(response_data)
     else:
@@ -262,7 +289,9 @@ def receive_ip():
 @app.route('/detection', methods=['POST'])
 def detection():
     data = request.get_json()
-    if data['detected'] == True:
+    global detect_flag
+    if detect_flag ==True:
+     if data['detected'] == True:
       global log_arm_data
       global log_dut_data
       if isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
@@ -270,7 +299,7 @@ def detection():
                 'status': log_arm_data['status'],
                 'command': log_dut_data['command']
             }
-       socketio.emit('update_detect',update_data)
+      socketio.emit('update_detect',update_data)
       socketio.emit('led_trigger', {'status': 'triggered'})
     return {'message': 'detection received'}, 200
 

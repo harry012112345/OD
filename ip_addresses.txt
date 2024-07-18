@@ -1,0 +1,4 @@
+arm_server: 192.168.15.107
+dut_server: 192.168.15.106
+step_server: 192.168.15.105
+unet_server: 192.168.15.102
