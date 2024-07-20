@@ -68,6 +68,9 @@
         th {
             background-color: #f2f2f2;
         }
+        .highlight {
+        color: red; /* 设置文字颜色为红色 */
+    }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
@@ -200,7 +203,6 @@
             </form>
         </div>
     </div>
-
     <div class="container">
         <div class="panel">
             <h1>unet_AN203操作面板</h1>
@@ -226,13 +228,17 @@
         </div>
     </div>
 
+    <button id="startButton">开始处理</button>
+
     <div id="dynamic-tables"></div>
 
     <h1>操作日誌</h1>
     <div id="log">
         <p>時間 裝置 指令 狀態 操作者</p>
     </div>
+    
 
+    
     <div class="button-container">
         <button onclick="downloadLog()">下載記錄</button>
         <button onclick="clearLog()">清除</button>
@@ -264,6 +270,16 @@ function changeLEDColor() {
         var newLogEntry = document.createElement("p");
         var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
         newLogEntry.textContent = logText;
+        logDiv.appendChild(newLogEntry);
+        logEntries.push(logs);
+      }
+
+      function detectGenerate(logs) {
+        var logDiv = document.getElementById("log");
+        var newLogEntry = document.createElement("p");
+        var logText = logs['command'] +'     '+logs['status'];
+        newLogEntry.textContent = logText;
+        newLogEntry.classList.add('highlight'); // 添加红色样式类
         logDiv.appendChild(newLogEntry);
         logEntries.push(logs);
       }
@@ -392,19 +408,64 @@ function changeLEDColor() {
                 logGenerate(received_data.logs);
             });
         }
-
+        
         document.addEventListener("DOMContentLoaded", function() {
-            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+            var socket = io();
 
-            socket.on('connect', function() {
-                console.log('Connected to server');
+            socket.on('update_detect', (data) => {
+                detectGenerate(data)
             });
 
             socket.on('update_result', function(data) {
-                var resultContainer = document.getElementById('result');
-                var newResult = document.createElement('div');
-                newResult.innerHTML = `<strong>服务器类型:</strong> ${data.server_type}, <strong>参数:</strong> ${data.parameters.join(', ')}`;
-                resultContainer.appendChild(newResult);
+                var serverType = data.server_type;
+
+                // 根据服务器类型设置相应的输入框的值
+                if (serverType === 'arm_server') {
+                    document.getElementById('received-arm_servo_1').value = data.servo_dict.servo_1;
+                    document.getElementById('received-arm_servo_2').value = data.servo_dict.servo_2;
+                    document.getElementById('received-arm_servo_3').value = data.servo_dict.servo_3;
+                    document.getElementById('received-arm_servo_4').value = data.servo_dict.servo_4;
+                    document.getElementById('received-arm_servo_5').value = data.servo_dict.servo_5;
+                    document.getElementById('received-arm_servo_6').value = data.servo_dict.servo_6;
+                    document.getElementById('received-arm_temperature').value = data.temperature;
+                    document.getElementById('received-arm_humidity').value = data.humidity;
+                    document.getElementById('received-arm_ip_address').value = data.ip_address;
+                    document.getElementById('received-arm_detect').value = data.detect;
+                    document.getElementById('received-arm_set_servo').value = data.set_servo;                
+                    document.getElementById('received-arm_time').value = data.receivedtime;
+                    logGenerate(data.logs);
+                }
+
+                if (serverType === 'dut_server') {
+                    document.getElementById('received-servo_1').value = data.servo_dict.servo_1;
+                    document.getElementById('received-servo_2').value = data.servo_dict.servo_2;
+                    document.getElementById('received-servo_3').value = data.servo_dict.servo_3;
+                    document.getElementById('received-servo_4').value = data.servo_dict.servo_4;
+                    document.getElementById('received-servo_5').value = data.servo_dict.servo_5;
+                    document.getElementById('received-servo_6').value = data.servo_dict.servo_6;
+                    document.getElementById('received-temperature').value = data.temperature;
+                    document.getElementById('received-humidity').value = data.humidity;
+                    document.getElementById('received-ip_address').value = data.ip_address;
+                    document.getElementById('received-detect').value = data.detect;
+                    document.getElementById('received-set_servo').value = data.set_servo;                
+                    document.getElementById('received-time').value = data.receivedtime;
+                    logGenerate(data.logs);
+                }
+
+                if (serverType === 'step_server') {
+                    document.getElementById('received-real_position').value = data.real_position;
+                    document.getElementById('received-step_time').value = data.step_time;
+                    document.getElementById('received-step_ip').value = data.step_ip;
+                    logGenerate(data.logs);
+                }
+
+                if (serverType === 'unet_server') {
+                    document.getElementById('received-set_MC026_binding').value = data.set_MC026_binding;
+                    document.getElementById('received-AN203_ON_OFF_test').value = data.AN203_ON_OFF_test;
+                    document.getElementById('received-unet_time').value = data.unet_time;
+                    document.getElementById('received-unet_ip').value = data.unet_ip;
+                    logGenerate(data.logs);
+                }
             });
 
             document.getElementById('startButton').addEventListener('click', function() {

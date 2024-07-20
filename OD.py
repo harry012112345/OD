@@ -27,15 +27,12 @@ log_dut_data=[]
 log_step_data=[]
 log_unet_data=[]
 
-detect_flag=False
+detect_flag=True
+return_flag=False
+detect_confirm_flag=False
 
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
-
-
-def process_value(value):
-    # 這裡可以進行你需要的任何處理
-    print(f"處理值: {value}")
 
 @app.route('/')
 def index():
@@ -66,46 +63,24 @@ def welcome():
 
 @app.route('/test',methods=['GET', 'POST'])
 def test():
-    excel_file = 'test.xlsx'
-# 讀取Excel文件
-    df = pd.read_excel(excel_file)
-# 查看Excel文件內容
-    print("Excel文件內容：")
-    print(df)
-    username=session['username']  # 获取会话中的用户名，默认为'Guest'
-    param1, param2, param3, param4, param5, param6 = (None, None, None, None, None, None)
-    for index, row in df.iterrows():
-        if row[0] == "arm_server": 
-             parameters = str(row['parameter']).split(',')
-             param1, param2, param3, param4, param5, param6 = parameters
-             global global_arm_ip
-             ip_address=global_arm_ip
-             test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
-        elif row[0] == "dut_server":
-             parameters = str(row['parameter']).split(',')
-             param1, param2, param3, param4, param5, param6 = parameters
-             print(param1)
-             print(param6)
-        elif row[0] == "unet_server":
-             parameters = row['parameter']
-             print(parameters)
-        elif row[0] == "step_server":
-             parameters = row['parameter']
-             print(parameters)
-        if test.status_code == 200:
-             # 解析 JSON 数据
-            data = test.json()
-            now = datetime.datetime.now()
-            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-            data['receivedtime'] = formatted_time
-        return render_template('index.html',formatted_time=formatted_time,username=username,local_ip=local_ip,data=data)
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    username=session['username']
+    global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
+
+    ip_addresses = load_ips_from_file()
+    global_arm_ip = ip_addresses.get('arm_server', 'Not found')
+    global_dut_ip = ip_addresses.get('dut_server', 'Not found')
+    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_unet_ip = ip_addresses.get('unet_server', 'Not found')
+    return render_template('test.html',formatted_time=formatted_time,username=username,local_ip=local_ip)
 
 
 def detection_thread(detect_time):
     start_time = time.time()
     while time.time() - start_time < detect_time:
-         app.test_request_context('/detection', method='POST')
-
+        app.test_request_context('/detection', method='POST')
+               
 
 def load_ips_from_file():
     ip_addresses = {}
@@ -123,7 +98,11 @@ def load_ips_from_file():
 def handle_start_processing():
     excel_file = 'test.xlsx'
     df = pd.read_excel(excel_file)
+    global return_flag
+    global detect_confirm_flag
     for index, row in df.iterrows():
+        return_flag=False
+        detect_confirm_flag=False
         delay_time=row['delay_time']
         server_type = row['server_name']
         active_detection = row['active_detection'].split(',')
@@ -228,10 +207,17 @@ def handle_start_processing():
             data['logs'] = log_unet_data
         # 模拟一些处理时间
         # 将结果发送给客户端
+        return_flag=True
         emit('update_result',data)
         time.sleep(delay_time)
         if active_detection[0] == 'yes':
             detect_thread.join()
+        if return_flag == True and detect_confirm_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
+            update_data = {
+                  'status': log_arm_data['status'],
+                 'command': log_dut_data['command']
+              }
+            emit('update_detect',update_data)
 
 
 
@@ -290,17 +276,10 @@ def receive_ip():
 def detection():
     data = request.get_json()
     global detect_flag
-    if detect_flag ==True:
-     if data['detected'] == True:
-      global log_arm_data
-      global log_dut_data
-      if isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
-       update_data = {
-                'status': log_arm_data['status'],
-                'command': log_dut_data['command']
-            }
-      socketio.emit('update_detect',update_data)
-      socketio.emit('led_trigger', {'status': 'triggered'})
+    global detect_confirm_flag
+    if detect_flag ==True and data['detected'] == True:
+        detect_confirm_flag =True
+    socketio.emit('led_trigger', {'status': 'triggered'})
     return {'message': 'detection received'}, 200
 
 
