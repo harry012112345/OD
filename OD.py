@@ -76,11 +76,18 @@ def test():
     return render_template('test.html',formatted_time=formatted_time,username=username,local_ip=local_ip)
 
 
+#def detection_thread(detect_time):
+#    start_time = time.time()
+#    global detect_flag
+#    while time.time() - start_time < detect_time:
+#        app.test_request_context('/detection', method='POST')
+#    detect_flag=False
+
+
 def detection_thread(detect_time):
-    start_time = time.time()
-    while time.time() - start_time < detect_time:
-        app.test_request_context('/detection', method='POST')
-               
+    global detect_flag
+    time.sleep(detect_time)
+    detect_flag = False
 
 def load_ips_from_file():
     ip_addresses = {}
@@ -100,13 +107,13 @@ def handle_start_processing():
     df = pd.read_excel(excel_file)
     global return_flag
     global detect_confirm_flag
+    global detect_flag
     for index, row in df.iterrows():
         return_flag=False
         detect_confirm_flag=False
         delay_time=row['delay_time']
         server_type = row['server_name']
         active_detection = row['active_detection'].split(',')
-        global detect_flag
         if active_detection[0] == 'yes':
            detect_flag = True
            detect_time = int(active_detection[1])
@@ -130,7 +137,7 @@ def handle_start_processing():
             global log_dut_data
             log_dut_data={
             'time': f'{data['receivedtime']}',
-            'device': 'arm機器手臂',
+            'device': 'dut機器手臂',
             'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
             'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
             'operator': 'Frank'
@@ -152,7 +159,7 @@ def handle_start_processing():
             global log_arm_data
             log_arm_data={
             'time': f'{data['receivedtime']}',
-            'device': 'dut機器手臂',
+            'device': 'arm機器手臂',
             'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
             'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
             'operator': 'Frank'
@@ -192,7 +199,7 @@ def handle_start_processing():
             }
             now = datetime.datetime.now()
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-            data['AN203_ON_OFF_test']='AN203_ON'
+            data['AN203_ON_OFF_test']=f'AN203_{parameters}'
             data['server_type'] = server_type
             data['unet_time'] = formatted_time 
             data['unet_ip'] = ip_address
@@ -207,17 +214,17 @@ def handle_start_processing():
             data['logs'] = log_unet_data
         # 模拟一些处理时间
         # 将结果发送给客户端
-        return_flag=True
         emit('update_result',data)
-        time.sleep(delay_time)
-        if active_detection[0] == 'yes':
-            detect_thread.join()
+        return_flag=True
         if return_flag == True and detect_confirm_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
             update_data = {
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command']
               }
             emit('update_detect',update_data)
+        time.sleep(delay_time)
+        if active_detection[0] == 'yes':
+            detect_thread.join()
 
 
 
@@ -227,7 +234,6 @@ def dashboard():
         return redirect(url_for('login'))
     username=session['username']
     global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
-
     ip_addresses = load_ips_from_file()
     global_arm_ip = ip_addresses.get('arm_server', 'Not found')
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
@@ -275,10 +281,16 @@ def receive_ip():
 @app.route('/detection', methods=['POST'])
 def detection():
     data = request.get_json()
-    global detect_flag
     global detect_confirm_flag
+    global detect_flag
     if detect_flag ==True and data['detected'] == True:
         detect_confirm_flag =True
+        if return_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
+            update_data = {
+                  'status': log_arm_data['status'],
+                 'command': log_dut_data['command']
+              }
+            socketio.emit('update_detect',update_data)
     socketio.emit('led_trigger', {'status': 'triggered'})
     return {'message': 'detection received'}, 200
 
