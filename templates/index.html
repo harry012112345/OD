@@ -81,26 +81,26 @@
 
     <div class="container">
         <div class="panel">
-            <h1>操作面板</h1>
+            <h1>dut_server_controll</h1>
             <form onsubmit="dut_server(event)">
                 <label for="servo_1">Servo 1:</label>
-                <input type="number" id="servo_1" name="servo_1" min="0" max="180" ><br>
+                <input type="number" id="servo_1" name="servo_1" min="0" max="180" required><br>
                 <label for="servo_2">Servo 2:</label>
-                <input type="number" id="servo_2" name="servo_2" min="0" max="180" ><br>
+                <input type="number" id="servo_2" name="servo_2" min="0" max="180" required><br>
                 <label for="servo_3">Servo 3:</label>
-                <input type="number" id="servo_3" name="servo_3" min="0" max="180" ><br>
+                <input type="number" id="servo_3" name="servo_3" min="0" max="180" required><br>
                 <label for="servo_4">Servo 4:</label>
-                <input type="number" id="servo_4" name="servo_4" min="0" max="180" ><br>
+                <input type="number" id="servo_4" name="servo_4" min="0" max="180" required><br>
                 <label for="servo_5">Servo 5:</label>
-                <input type="number" id="servo_5" name="servo_5" min="0" max="180" ><br>
+                <input type="number" id="servo_5" name="servo_5" min="0" max="180" required><br>
                 <label for="servo_6">Servo 6:</label>
-                <input type="number" id="servo_6" name="servo_6" min="0" max="180" ><br>
+                <input type="number" id="servo_6" name="servo_6" min="0" max="180" required><br>
                 <button type="submit">送出</button>
             </form>
         </div>
 
         <div class="panel">
-            <h1>狀態面板</h1>
+            <h1>dut_server_status</h1>
             <form>
                 <label for="received-servo_1">Servo 1:</label>
                 <input type="text" id="received-servo_1" readonly><br>
@@ -132,26 +132,26 @@
     
     <div class="container">
         <div class="panel">
-            <h1>arm_機器手臂操作面板</h1>
+            <h1>arm_server_controll</h1>
             <form onsubmit="arm_server(event)">
                 <label for="arm_servo_1">Servo 1:</label>
-                <input type="number" id="arm_servo_1" name="arm_servo_1" min="0" max="180" ><br>
+                <input type="number" id="arm_servo_1" name="arm_servo_1" min="0" max="180" required><br>
                 <label for="arm_servo_2">Servo 2:</label>
-                <input type="number" id="arm_servo_2" name="arm_servo_2" min="0" max="180" ><br>
+                <input type="number" id="arm_servo_2" name="arm_servo_2" min="0" max="180" required><br>
                 <label for="arm_servo_3">Servo 3:</label>
-                <input type="number" id="arm_servo_3" name="arm_servo_3" min="0" max="180" ><br>
+                <input type="number" id="arm_servo_3" name="arm_servo_3" min="0" max="180" required><br>
                 <label for="arm_servo_4">Servo 4:</label>
-                <input type="number" id="arm_servo_4" name="arm_servo_4" min="0" max="180" ><br>
+                <input type="number" id="arm_servo_4" name="arm_servo_4" min="0" max="180" required><br>
                 <label for="arm_servo_5">Servo 5:</label>
-                <input type="number" id="arm_servo_5" name="arm_servo_5" min="0" max="180" ><br>
+                <input type="number" id="arm_servo_5" name="arm_servo_5" min="0" max="180" required><br>
                 <label for="arm_servo_6">Servo 6:</label>
-                <input type="number" id="arm_servo_6" name="arm_servo_6" min="0" max="180" ><br>
+                <input type="number" id="arm_servo_6" name="arm_servo_6" min="0" max="180" required><br>
                 <button type="submit">送出</button>
             </form>
         </div>
 
         <div class="panel">
-            <h1>arm_機器手臂狀態面板</h1>
+            <h1>arm_server_status</h1>
             <form>
                 <label for="received-arm_servo_1">Servo 1:</label>
                 <input type="text" id="received-arm_servo_1" readonly><br>
@@ -183,16 +183,16 @@
 
     <div class="container">
         <div class="panel">
-            <h1>step_馬達操作面板</h1>
+            <h1>step_server_controll</h1>
             <form onsubmit="sendData(event)">
                 <label for="real_position">移動至距離原點:</label>
-                <input type="text" id="real_position" name="real_position" min="0" max="6" >
+                <input type="text" id="real_position" name="real_position" min="0" max="6" required>
                 <button type="submit">送出</button>
             </form>
         </div>
 
         <div class="panel">
-            <h1>step_馬達狀態面板</h1>
+            <h1>step_server_status</h1>
             <form>
                 <label for="received-real_position">距離原點:</label>
                 <input type="number" id="received-real_position" readonly><br>
@@ -205,7 +205,7 @@
     </div>
     <div class="container">
         <div class="panel">
-            <h1>unet_AN203操作面板</h1>
+            <h1>unet_server_controll</h1>
             <button onclick="sendButtonPress('bing-btn')">Binding</button>
             <button onclick="sendButtonPress('test-btn')">AN203_ON_OFF_test</button>
             <button onclick="sendButtonPress('on-btn')">AN203_ON</button>
@@ -213,7 +213,7 @@
         </div>
 
         <div class="panel">
-            <h1>unet_AN203狀態面板</h1>
+            <h1>unet_server_status</h1>
             <form>
                 <label for="received-set_MC026_binding">AN203學碼:</label>
                 <input type="text" id="received-set_MC026_binding" readonly><br>
@@ -243,8 +243,10 @@
     </div>
 </body>
     <script>
-        
-        var socket = io();
+
+
+     const socket = io();
+
 
 socket.on('led_trigger', function(data) {
     if (data.status === 'triggered') {
