@@ -40,7 +40,29 @@ detect_confirm_flag=False
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
 
+server_ips = [f'http://{global_dut_ip}/get_info', f'http://{global_arm_ip}/get_info', f'http://{global_step_ip}/get_info', f'http://{global_step_ip}/get_info']
 
+async def check_connection(ip):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(ip) as response:
+                if response.status != 200:
+                    return False
+                return True
+    except Exception as e:
+        print(f"Request failed for {ip} with exception: {e}")
+        return False
+
+async def check_connections():
+    server_ips = [
+        f'http://{global_arm_ip}/get_info',
+        f'http://{global_dut_ip}/get_info',
+        f'http://{global_step_ip}/get_info',
+        f'http://{global_unet_ip}/get_info'
+    ]
+    tasks = [check_connection(ip) for ip in server_ips]
+    results = await asyncio.gather(*tasks)
+    return all(results)
 
 
 async def send_request(url):
@@ -51,6 +73,8 @@ async def send_request(url):
                     return await response.json()
                 except aiohttp.ContentTypeError:
                     return {'error': 'Invalid content type', 'content': await response.text()}
+                except requests.exceptions.RequestException:
+                    test
             else:
                 return {'error': f'HTTP {response.status}', 'content': await response.text()}
 
@@ -76,6 +100,7 @@ def check_init_data(input_data):
     excel_file = os.path.join(UPLOAD_FOLDER, file)
     # 读取 Excel 数据到 DataFrame
     df = pd.read_excel(excel_file)
+
 # 更新 DataFrame 中的多行
     for index, row in df.iterrows():
         row_value = row.iloc[0]  # 读取 row[0] 的值
@@ -157,20 +182,20 @@ def test():
 def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
-    username=session['username']
-    return render_template('index.html', received_data=received_data,formatted_time=formatted_time,username=username,local_ip=local_ip)
-
-
-@app.route('/dashboard_ip')
-def dashboard_ip():
-    username=session['username']
     ip_addresses = load_ips_from_file()
     global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
     global_arm_ip = ip_addresses.get('arm_server', 'Not found')
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
     global_step_ip = ip_addresses.get('step_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
-    return render_template('dashboard_ip.html',formatted_time=formatted_time,username=username,local_ip=local_ip)
+    username=session['username']
+    return render_template('index.html', received_data=received_data,formatted_time=formatted_time,username=username,local_ip=local_ip)
+
+
+#@app.route('/dashboard_ip')
+#def dashboard_ip():
+#    username=session['username']
+#    return render_template('dashboard_ip.html',formatted_time=formatted_time,username=username,local_ip=local_ip)
 
 
 @app.route('/test_ip')
@@ -185,79 +210,80 @@ def test_ip():
     files = [f for f in os.listdir(UPLOAD_FOLDER) if f.endswith(('.xlsx', '.xls'))]
     return render_template('test_ip.html',formatted_time=formatted_time,username=username,local_ip=local_ip,files=files)
 
-@app.route('/dashboard_data', methods=["POST"])
-async def dashboard_data():
-    data = request.json
-    dut_servo_1 = data['servo_1']
-    dut_servo_2 = data['servo_2']
-    dut_servo_3 = data['servo_3']
-    dut_servo_4 = data['servo_4']
-    dut_servo_5 = data['servo_5']
-    dut_servo_6 = data['servo_6']
-    arm_servo_1 = data['arm_servo_1']
-    arm_servo_2 = data['arm_servo_2']
-    arm_servo_3 = data['arm_servo_3']
-    arm_servo_4 = data['arm_servo_4']
-    arm_servo_5 = data['arm_servo_5']
-    arm_servo_6 = data['arm_servo_6']
-    step_value = data['real_position']
-
-    test_1_url = f'http://{global_dut_ip}/set_servo?servo_1={dut_servo_1}&servo_2={dut_servo_2}&servo_3={dut_servo_3}&servo_4={dut_servo_4}&servo_5={dut_servo_5}&servo_6={dut_servo_6}'
-    test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
-    test_3_url = f'http://{global_step_ip}/set_distance?position={step_value}'
-
-    # 并发执行所有请求
-    responses = await asyncio.gather(
-        send_request(test_1_url),
-        send_request(test_2_url),
-        send_request(test_3_url)
-    )
-
-    now = datetime.datetime.now()
-    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-
-    # 处理 test_1 的响应
-    test_1_data = responses[0]
-    if test_1_data:
-        test_1_data['receivedtime'] = formatted_time
-        global log_dut_data
-        log_dut_data = {
-            'time': test_1_data['receivedtime'],
-            'device': 'dut機器手臂',
-            'command': f'{dut_servo_1},{dut_servo_2},{dut_servo_3},{dut_servo_4},{dut_servo_5},{dut_servo_6}',
-            'status': f"{test_1_data.get('servo_dict', {}).get('servo_1', '')},{test_1_data.get('servo_dict', {}).get('servo_2', '')},{test_1_data.get('servo_dict', {}).get('servo_3', '')},{test_1_data.get('servo_dict', {}).get('servo_4', '')},{test_1_data.get('servo_dict', {}).get('servo_5', '')},{test_1_data.get('servo_dict', {}).get('servo_6', '')},{test_1_data.get('temperature', '')},{test_1_data.get('humidity', '')},{test_1_data.get('detect', '')},{test_1_data.get('ip_address', '')}",
-            'operator': 'Frank'
-        }
-
-    # 处理 test_2 的响应
-    test_2_data = responses[1]
-
-    if test_2_data:
-        test_2_data['receivedtime'] = formatted_time
-        global log_arm_data
-        log_arm_data = {
-            'time': test_2_data['receivedtime'],
-            'device': 'arm機器手臂',
-            'command': f'{arm_servo_1},{arm_servo_2},{arm_servo_3},{arm_servo_4},{arm_servo_5},{arm_servo_6}',
-            'status': f"{test_2_data.get('servo_dict', {}).get('servo_1', '')},{test_2_data.get('servo_dict', {}).get('servo_2', '')},{test_2_data.get('servo_dict', {}).get('servo_3', '')},{test_2_data.get('servo_dict', {}).get('servo_4', '')},{test_2_data.get('servo_dict', {}).get('servo_5', '')},{test_2_data.get('servo_dict', {}).get('servo_6', '')},{test_2_data.get('temperature', '')},{test_2_data.get('humidity', '')},{test_2_data.get('detect', '')},{test_2_data.get('ip_address', '')}",
-            'operator': 'Frank'
-        }
-
-    # 处理 test_3 的响应
-    test_3_data = responses[2]
-    if test_3_data:
-        test_3_data['step_time'] = formatted_time
-        test_3_data['step_ip'] = global_step_ip
-        global log_step_data
-        log_step_data = {
-            'time': test_3_data['step_time'],
-            'device': 'step馬達',
-            'command': f'往前{step_value}(cm)',
-            'status': f"{test_3_data.get('real_position', '')},{test_3_data.get('step_ip', '')}",
-            'operator': 'Frank'
-        }
-
-    return jsonify(status='success')
+#@app.route('/dashboard_data', methods=["POST"])
+#async def dashboard_data():
+#    data = request.json
+#    dut_servo_1 = data['servo_1']
+#    dut_servo_2 = data['servo_2']
+#    dut_servo_3 = data['servo_3']
+#    dut_servo_4 = data['servo_4']
+#    dut_servo_5 = data['servo_5']
+#    dut_servo_6 = data['servo_6']
+#    arm_servo_1 = data['arm_servo_1']
+#    arm_servo_2 = data['arm_servo_2']
+#    arm_servo_3 = data['arm_servo_3']
+#    arm_servo_4 = data['arm_servo_4']
+#    arm_servo_5 = data['arm_servo_5']
+#    arm_servo_6 = data['arm_servo_6']
+#    step_value = data['real_position']
+#    
+#    now = datetime.datetime.now()
+#    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+#
+#    test_1_url = f'http://{global_dut_ip}/set_servo?servo_1={dut_servo_1}&servo_2={dut_servo_2}&servo_3={dut_servo_3}&servo_4={dut_servo_4}&servo_5={dut_servo_5}&servo_6={dut_servo_6}'
+#    test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
+#    test_3_url = f'http://{global_step_ip}/set_distance?position={step_value}'
+#
+#    # 并发执行所有请求
+#    responses = await asyncio.gather(
+#        send_request(test_1_url),
+#        send_request(test_2_url),
+#        send_request(test_3_url)
+#    )
+#
+#
+#    # 处理 test_1 的响应
+#    test_1_data = responses[0]
+#    if test_1_data:
+#        test_1_data['receivedtime'] = formatted_time
+#        global log_dut_data
+#        log_dut_data = {
+#            'time': test_1_data['receivedtime'],
+#            'device': 'dut機器手臂',
+#            'command': f'{dut_servo_1},{dut_servo_2},{dut_servo_3},{dut_servo_4},{dut_servo_5},{dut_servo_6}',
+#            'status': f"{test_1_data.get('servo_dict', {}).get('servo_1', '')},{test_1_data.get('servo_dict', {}).get('servo_2', '')},{test_1_data.get('servo_dict', {}).get('servo_3', '')},{test_1_data.get('servo_dict', {}).get('servo_4', '')},{test_1_data.get('servo_dict', {}).get('servo_5', '')},{test_1_data.get('servo_dict', {}).get('servo_6', '')},{test_1_data.get('temperature', '')},{test_1_data.get('humidity', '')},{test_1_data.get('detect', '')},{test_1_data.get('ip_address', '')}",
+#            'operator': 'Frank'
+#        }
+#
+#    # 处理 test_2 的响应
+#    test_2_data = responses[1]
+#
+#    if test_2_data:
+#        test_2_data['receivedtime'] = formatted_time
+#        global log_arm_data
+#        log_arm_data = {
+#            'time': test_2_data['receivedtime'],
+#            'device': 'arm機器手臂',
+#            'command': f'{arm_servo_1},{arm_servo_2},{arm_servo_3},{arm_servo_4},{arm_servo_5},{arm_servo_6}',
+#            'status': f"{test_2_data.get('servo_dict', {}).get('servo_1', '')},{test_2_data.get('servo_dict', {}).get('servo_2', '')},{test_2_data.get('servo_dict', {}).get('servo_3', '')},{test_2_data.get('servo_dict', {}).get('servo_4', '')},{test_2_data.get('servo_dict', {}).get('servo_5', '')},{test_2_data.get('servo_dict', {}).get('servo_6', '')},{test_2_data.get('temperature', '')},{test_2_data.get('humidity', '')},{test_2_data.get('detect', '')},{test_2_data.get('ip_address', '')}",
+#            'operator': 'Frank'
+#        }
+#    
+#    # 处理 test_3 的响应
+#    test_3_data = responses[2]
+#    if test_3_data:
+#        test_3_data['step_time'] = formatted_time
+#        test_3_data['step_ip'] = global_step_ip
+#        global log_step_data
+#        log_step_data = {
+#            'time': test_3_data['step_time'],
+#            'device': 'step馬達',
+#            'command': f'往前{step_value}(cm)',
+#            'status': f"{test_3_data.get('real_position', '')},{test_3_data.get('step_ip', '')}",
+#            'operator': 'Frank'
+#        }
+#
+#    return jsonify(status='success')
 
 @app.route('/test_data', methods=["POST"])
 async def test_data():
@@ -279,6 +305,22 @@ async def test_data():
     arm_servo_6 = data['arm_servo_6']
     step_value = data['real_position']
     unet_status = data['check_unet']
+    new_data = [
+        ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, 1, 'no'],
+        ['arm_server', arm_servo_1, arm_servo_2, arm_servo_3, arm_servo_4, arm_servo_5, arm_servo_6, 1, 'no'],
+        ['step_server', 1, None, None, None, None, None, 1, 'no'],
+        ['unet_server', unet_status, None, None, None, None, None, 1, 'no']
+    ]
+    new_df = pd.DataFrame(new_data, columns=[
+        'server_name', 'parameter_1', 'parameter_2', 'parameter_3', 'parameter_4',
+        'parameter_5', 'parameter_6', 'delay_time', 'active_detection'
+    ])
+    excel_file = os.path.join(UPLOAD_FOLDER, execute_excel)
+    # 读取 Excel 数据到 DataFrame
+    df = pd.read_excel(excel_file)
+    df.iloc[:4] = new_df
+    df.to_excel(excel_file, index=False)
+
     check_init_data(data)
     test_1_url = f'http://{global_dut_ip}/set_servo?servo_1={dut_servo_1}&servo_2={dut_servo_2}&servo_3={dut_servo_3}&servo_4={dut_servo_4}&servo_5={dut_servo_5}&servo_6={dut_servo_6}'
     test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
@@ -727,4 +769,4 @@ def button_pressed():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port='16666')
