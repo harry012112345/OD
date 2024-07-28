@@ -39,7 +39,9 @@ detect_confirm_flag=False
 
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
-
+now = datetime.datetime.now()
+formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+local_ip='192.168.15.108'
 server_ips = [f'http://{global_dut_ip}/get_info', f'http://{global_arm_ip}/get_info', f'http://{global_step_ip}/get_info', f'http://{global_step_ip}/get_info']
 
 async def check_connection(ip):
@@ -53,17 +55,27 @@ async def check_connection(ip):
         print(f"Request failed for {ip} with exception: {e}")
         return False
 
+async def check_all_connections(server_ips):
+    tasks = [check_connection(ip) for ip in server_ips]
+    results = await asyncio.gather(*tasks)
+    return results  # Return the list of results (True/False)
+
+@app.route('/check_connections', methods=['GET'])
 async def check_connections():
+    global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
+    ip_addresses = load_ips_from_file()
+    global_arm_ip = ip_addresses.get('arm_server', 'Not found')
+    global_dut_ip = ip_addresses.get('dut_server', 'Not found')
+    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_unet_ip = ip_addresses.get('unet_server', 'Not found')
     server_ips = [
         f'http://{global_arm_ip}/get_info',
         f'http://{global_dut_ip}/get_info',
         f'http://{global_step_ip}/get_info',
         f'http://{global_unet_ip}/get_info'
     ]
-    tasks = [check_connection(ip) for ip in server_ips]
-    results = await asyncio.gather(*tasks)
-    return all(results)
-
+    results = await check_all_connections(server_ips)
+    return jsonify({'results': results})
 
 async def send_request(url):
     async with aiohttp.ClientSession() as session:
@@ -149,14 +161,10 @@ def login():
         password = request.form['password']
         if username in users and users[username] == password:
             session['username'] = username
-            return redirect(url_for('welcome'))
+            return render_template('ip_confirm.html')
         else:
             flash('Invalid username or password!')
     return render_template('login.html')
-
-now = datetime.datetime.now()
-formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-local_ip='192.168.15.108'
 
 @app.route('/welcome')
 def welcome():
@@ -769,4 +777,4 @@ def button_pressed():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port='16666')
+    app.run(host='0.0.0.0')
