@@ -168,6 +168,30 @@
 
     <br />
 
+    <h1>溫度與濕度區間</h1>
+    <label for="temperature-max">溫度 - 最大值</label>
+    <input
+      type="number"
+      id="temperature-max"
+      name="temperature-max"
+      step="0.1"
+    />
+
+    <label for="temperature-min">溫度 - 最小值</label>
+    <input
+      type="number"
+      id="temperature-min"
+      name="temperature-min"
+      step="0.1"
+    />
+
+    <label for="humidity-max">濕度 - 最大值</label>
+    <input type="number" id="humidity-max" name="humidity-max" step="0.1" />
+
+    <label for="humidity-min">濕度 - 最小值</label>
+    <input type="number" id="humidity-min" name="humidity-min" step="0.1" />
+    <br />
+
     <h1>選擇Excel檔案</h1>
     <form id="dataForm" onsubmit="Test_data(event)">
       <label for="file">選擇檔案:</label>
@@ -199,11 +223,41 @@
         );
         let fileSelected = fileSelect.value.trim() !== "";
 
+        // Check min and max values
+        const temperatureMin = parseFloat(
+          document.getElementById("temperature-min").value
+        );
+        const temperatureMax = parseFloat(
+          document.getElementById("temperature-max").value
+        );
+        const humidityMin = parseFloat(
+          document.getElementById("humidity-min").value
+        );
+        const humidityMax = parseFloat(
+          document.getElementById("humidity-max").value
+        );
+
+        const isTemperatureValid =
+          isNaN(temperatureMin) ||
+          isNaN(temperatureMax) ||
+          temperatureMin <= temperatureMax;
+        const isHumidityValid =
+          isNaN(humidityMin) ||
+          isNaN(humidityMax) ||
+          humidityMin <= humidityMax;
+
+        // Display error if values are invalid
+        if (!isTemperatureValid || !isHumidityValid) {
+          alert("温度和湿度的最小值不能大于最大值。");
+        }
+
         submitButton.disabled = !(
           allNumberInputsFilled &&
           allTextInputsFilled &&
           atLeastOneRadioChecked &&
-          fileSelected
+          fileSelected &&
+          isTemperatureValid &&
+          isHumidityValid
         );
       }
 

@@ -12,11 +12,15 @@ import time
 import asyncio
 import aiohttp
 from threading import Thread
+import queue
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
 UPLOAD_FOLDER = 'C:\\Users\\Harry\\Desktop\\OD\\test_excel'
+
+# 队列用于存储中断的请求
+request_queue = queue.Queue()
 
 # 用于存储上传的数据
 received_data = []
@@ -25,6 +29,11 @@ global_dut_ip=[]
 global_arm_ip=[]
 global_step_ip=[]
 global_unet_ip=[]
+
+temperature_max=0
+temperature_min=0
+humidity_max=0
+humidity_min=0
 
 execute_excel=[]
 
@@ -44,38 +53,21 @@ formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
 local_ip='192.168.15.108'
 server_ips = [f'http://{global_dut_ip}/get_info', f'http://{global_arm_ip}/get_info', f'http://{global_step_ip}/get_info', f'http://{global_step_ip}/get_info']
 
-async def check_connection(ip):
+async def check_connection(name, ip):
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(ip) as response:
                 if response.status != 200:
-                    return False
-                return True
+                    return {name: 'Not connected'}
+                return {name: 'Connected'}
     except Exception as e:
         print(f"Request failed for {ip} with exception: {e}")
-        return False
+        return {name: 'Not connected'}
 
 async def check_all_connections(server_ips):
-    tasks = [check_connection(ip) for ip in server_ips]
+    tasks = [check_connection(name, ip) for name, ip in server_ips.items()]
     results = await asyncio.gather(*tasks)
-    return results  # Return the list of results (True/False)
-
-@app.route('/check_connections', methods=['GET'])
-async def check_connections():
-    global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
-    ip_addresses = load_ips_from_file()
-    global_arm_ip = ip_addresses.get('arm_server', 'Not found')
-    global_dut_ip = ip_addresses.get('dut_server', 'Not found')
-    global_step_ip = ip_addresses.get('step_server', 'Not found')
-    global_unet_ip = ip_addresses.get('unet_server', 'Not found')
-    server_ips = [
-        f'http://{global_arm_ip}/get_info',
-        f'http://{global_dut_ip}/get_info',
-        f'http://{global_step_ip}/get_info',
-        f'http://{global_unet_ip}/get_info'
-    ]
-    results = await check_all_connections(server_ips)
-    return jsonify({'results': results})
+    return dict((k, v) for d in results for k, v in d.items())  # Flatten the list of dicts
 
 async def send_request(url):
     async with aiohttp.ClientSession() as session:
@@ -85,8 +77,6 @@ async def send_request(url):
                     return await response.json()
                 except aiohttp.ContentTypeError:
                     return {'error': 'Invalid content type', 'content': await response.text()}
-                except requests.exceptions.RequestException:
-                    test
             else:
                 return {'error': f'HTTP {response.status}', 'content': await response.text()}
 
@@ -165,6 +155,25 @@ def login():
         else:
             flash('Invalid username or password!')
     return render_template('login.html')
+
+@app.route('/check_connections', methods=['GET'])
+async def check_connections():
+    global global_dut_ip, global_arm_ip, global_step_ip, global_unet_ip
+    ip_addresses = load_ips_from_file()
+    global_arm_ip = ip_addresses.get('arm_server', 'Not found')
+    global_dut_ip = ip_addresses.get('dut_server', 'Not found')
+    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_unet_ip = ip_addresses.get('unet_server', 'Not found')
+    
+    server_ips = {
+        'arm_server': f'http://{global_arm_ip}/get_info',
+        'dut_server': f'http://{global_dut_ip}/get_info',
+        'step_server': f'http://{global_step_ip}/get_info',
+        'unet_server': f'http://{global_unet_ip}/get_info'
+    }
+
+    results = await check_all_connections(server_ips)
+    return jsonify(results)
 
 @app.route('/welcome')
 def welcome():
@@ -313,10 +322,15 @@ async def test_data():
     arm_servo_6 = data['arm_servo_6']
     step_value = data['real_position']
     unet_status = data['check_unet']
+    global temperature_max,temperature_min,humidity_max,humidity_min
+    temperature_max = float(data['temperature-max'])
+    temperature_min = float(data['temperature-min'])
+    humidity_max = float(data['humidity-max'])
+    humidity_min = float(data['humidity-min'])
     new_data = [
         ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, 1, 'no'],
         ['arm_server', arm_servo_1, arm_servo_2, arm_servo_3, arm_servo_4, arm_servo_5, arm_servo_6, 1, 'no'],
-        ['step_server', 1, None, None, None, None, None, 1, 'no'],
+        ['step_server', step_value, None, None, None, None, None, 1, 'no'],
         ['unet_server', unet_status, None, None, None, None, None, 1, 'no']
     ]
     new_df = pd.DataFrame(new_data, columns=[
@@ -342,81 +356,94 @@ async def test_data():
         send_request(test_4_url)
     )
   
-    now = datetime.datetime.now()
-    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-    # 处理 test_1 的响应
-    test_1_data = responses[0]
-    if test_1_data:
-        test_1_data['receivedtime'] = formatted_time
-        test_1_data['server_type'] = 'dut_server'
-        global log_dut_data
-        log_dut_data = {
-            'time': test_1_data['receivedtime'],
-            'device': 'dut機器手臂',
-            'command': f'{dut_servo_1},{dut_servo_2},{dut_servo_3},{dut_servo_4},{dut_servo_5},{dut_servo_6}',
-            'status': f"{test_1_data.get('servo_dict', {}).get('servo_1', '')},{test_1_data.get('servo_dict', {}).get('servo_2', '')},{test_1_data.get('servo_dict', {}).get('servo_3', '')},{test_1_data.get('servo_dict', {}).get('servo_4', '')},{test_1_data.get('servo_dict', {}).get('servo_5', '')},{test_1_data.get('servo_dict', {}).get('servo_6', '')},{test_1_data.get('temperature', '')},{test_1_data.get('humidity', '')},{test_1_data.get('detect', '')},{test_1_data.get('ip_address', '')}",
-            'operator': 'Frank'
-        }
-        test_1_data['logs'] = log_dut_data
-        print(test_1_data)
-        socketio.emit('update_result',test_1_data)
-    # 处理 test_2 的响应
+#    now = datetime.datetime.now()
+#    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+#    # 处理 test_1 的响应
+#    test_1_data = responses[0]
+#    if test_1_data:
+#        test_1_data['receivedtime'] = formatted_time
+#        test_1_data['server_type'] = 'dut_server'
+#        global log_dut_data
+#        log_dut_data = {
+#            'time': test_1_data['receivedtime'],
+#            'device': 'dut機器手臂',
+#            'command': f'{dut_servo_1},{dut_servo_2},{dut_servo_3},{dut_servo_4},{dut_servo_5},{dut_servo_6}',
+#            'status': f"{test_1_data.get('servo_dict', {}).get('servo_1', '')},{test_1_data.get('servo_dict', {}).get('servo_2', '')},{test_1_data.get('servo_dict', {}).get('servo_3', '')},{test_1_data.get('servo_dict', {}).get('servo_4', '')},{test_1_data.get('servo_dict', {}).get('servo_5', '')},{test_1_data.get('servo_dict', {}).get('servo_6', '')},{test_1_data.get('temperature', '')},{test_1_data.get('humidity', '')},{test_1_data.get('detect', '')},{test_1_data.get('ip_address', '')}",
+#            'operator': 'Frank'
+#        }
+#        test_1_data['logs'] = log_dut_data
+#        print(test_1_data)
+#    #    socketio.emit('update_result',test_1_data)
+#    # 处理 test_2 的响应
     test_2_data = responses[1]
-    if test_2_data:
-        test_2_data['receivedtime'] = formatted_time
-        test_2_data['server_type'] = 'arm_server'
-        global log_arm_data
-        log_arm_data = {
-            'time': test_2_data['receivedtime'],
-            'device': 'arm機器手臂',
-            'command': f'{arm_servo_1},{arm_servo_2},{arm_servo_3},{arm_servo_4},{arm_servo_5},{arm_servo_6}',
-            'status': f"{test_2_data.get('servo_dict', {}).get('servo_1', '')},{test_2_data.get('servo_dict', {}).get('servo_2', '')},{test_2_data.get('servo_dict', {}).get('servo_3', '')},{test_2_data.get('servo_dict', {}).get('servo_4', '')},{test_2_data.get('servo_dict', {}).get('servo_5', '')},{test_2_data.get('servo_dict', {}).get('servo_6', '')},{test_2_data.get('temperature', '')},{test_2_data.get('humidity', '')},{test_2_data.get('detect', '')},{test_2_data.get('ip_address', '')}",
-            'operator': 'Frank'
-        }
-        test_2_data['logs'] = log_arm_data
-        print(test_2_data)
-        socketio.emit('update_result',test_2_data)
-
-    # 处理 test_3 的响应
-    test_3_data = responses[2]
-    if test_3_data:
-        test_3_data['step_time'] = formatted_time
-        test_3_data['step_ip'] = global_step_ip
-        test_3_data['server_type'] = 'step_server'
-        global log_step_data
-        log_step_data = {
-            'time': test_3_data['step_time'],
-            'device': 'step馬達',
-            'command': f'往前{step_value}(cm)',
-            'status': f"{test_3_data.get('real_position', '')},{test_3_data.get('step_ip', '')}",
-            'operator': 'Frank'
-        }
-        test_3_data['logs'] = log_arm_data
-        print(test_3_data)
-        socketio.emit('update_result',test_3_data)
-    
-    test_4_data = responses[3]
-    if test_4_data:
-        data = {
-           'set_MC026_binding' : 'successfully',
-            }
-        now = datetime.datetime.now()
-        formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-        data['AN203_ON_OFF_test']=f'AN203_{unet_status}'
-        data['server_type'] = 'unet_server'
-        data['unet_time'] = formatted_time 
-        data['unet_ip'] = global_unet_ip
-        global log_unet_data
-        log_unet_data={
-            'time': f'{data['unet_time']}',
-            'device': 'unet_AN203',
-            'command': f'{data['AN203_ON_OFF_test']}',
-            'status': f'{data['AN203_ON_OFF_test']},{data['unet_ip']}',
-            'operator': 'Frank'
-            }
-        data['logs'] = log_unet_data
-        print(test_4_data)
-        socketio.emit('update_result',data)
+    content = json.loads(test_2_data['content'])
+    temperature = float(content['temperature'])
+    humidity = float(content['humidity'])
+    if humidity>humidity_max or humidity<humidity_min or temperature>temperature_max or temperature<temperature_min:
+        while True:
+              arm_response = requests.get(f'http://{global_arm_ip}/get_info')
+              data = arm_response.json()
+              print(data)
+              if temperature_min>data['temperature']:
+                 test = requests.post(f'http://{global_unet_ip}/AN203_ON')
+              elif data['temperature']>temperature_max:
+                 test = requests.post(f'http://{global_unet_ip}/AN203_OFF')
+              if humidity_min<data['humidity']<humidity_max and temperature_min<data['temperature']<temperature_max:
+                  break
+#        test_2_data['receivedtime'] = formatted_time
+#        test_2_data['server_type'] = 'arm_server'
+#        global log_arm_data
+#        log_arm_data = {
+#            'time': test_2_data['receivedtime'],
+#            'device': 'arm機器手臂',
+#            'command': f'{arm_servo_1},{arm_servo_2},{arm_servo_3},{arm_servo_4},{arm_servo_5},{arm_servo_6}',
+#            'status': f"{test_2_data.get('servo_dict', {}).get('servo_1', '')},{test_2_data.get('servo_dict', {}).get('servo_2', '')},{test_2_data.get('servo_dict', {}).get('servo_3', '')},{test_2_data.get('servo_dict', {}).get('servo_4', '')},{test_2_data.get('servo_dict', {}).get('servo_5', '')},{test_2_data.get('servo_dict', {}).get('servo_6', '')},{test_2_data.get('temperature', '')},{test_2_data.get('humidity', '')},{test_2_data.get('detect', '')},{test_2_data.get('ip_address', '')}",
+#            'operator': 'Frank'
+#        }
+#        test_2_data['logs'] = log_arm_data
+#        print(test_2_data)
+#    #    socketio.emit('update_result',test_2_data)
+#
+#    # 处理 test_3 的响应
+#    test_3_data = responses[2]
+#    if test_3_data:
+#        test_3_data['step_time'] = formatted_time
+#        test_3_data['step_ip'] = global_step_ip
+#        test_3_data['server_type'] = 'step_server'
+#        global log_step_data
+#        log_step_data = {
+#            'time': test_3_data['step_time'],
+#            'device': 'step馬達',
+#            'command': f'往前{step_value}(cm)',
+#            'status': f"{test_3_data.get('real_position', '')},{test_3_data.get('step_ip', '')}",
+#            'operator': 'Frank'
+#        }
+#        test_3_data['logs'] = log_arm_data
+#        print(test_3_data)
+#    #    socketio.emit('update_result',test_3_data)
+#    
+#    test_4_data = responses[3]
+#    if test_4_data:
+#        data = {
+#           'set_MC026_binding' : 'successfully',
+#            }
+#        now = datetime.datetime.now()
+#        formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+#        data['AN203_ON_OFF_test']=f'AN203_{unet_status}'
+#        data['server_type'] = 'unet_server'
+#        data['unet_time'] = formatted_time 
+#        data['unet_ip'] = global_unet_ip
+#        global log_unet_data
+#        log_unet_data={
+#            'time': f'{data['unet_time']}',
+#            'device': 'unet_AN203',
+#            'command': f'{data['AN203_ON_OFF_test']}',
+#            'status': f'{data['AN203_ON_OFF_test']},{data['unet_ip']}',
+#            'operator': 'Frank'
+#            }
+#        data['logs'] = log_unet_data
+#        print(test_4_data)
+    #    socketio.emit('update_result',data)
     return jsonify(status='success')
     
 #def detection_thread(detect_time):
@@ -428,12 +455,21 @@ async def test_data():
 
 @socketio.on('start_processing')
 def handle_start_processing():
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    data={
+          'time': formatted_time,
+        'device': '開始處理'
+        }
+    emit('start_button',data)
     excel_file = os.path.join(UPLOAD_FOLDER, execute_excel)
     df = pd.read_excel(excel_file)
     global return_flag
     global detect_confirm_flag
     global detect_flag
+    connection_break_flag=False
     for index, row in df.iterrows():
+        print(connection_break_flag)
         return_flag=False
         detect_confirm_flag=False
         delay_time=row['delay_time']
@@ -446,119 +482,177 @@ def handle_start_processing():
            detect_thread.start()
         else:
            detect_flag = False
-        if row[0] == "dut_server":
-         param1 = str(row['parameter_1'])
-         param2 = str(row['parameter_2'])
-         param3 = str(row['parameter_3'])
-         param4 = str(row['parameter_4'])
-         param5 = str(row['parameter_5'])
-         param6 = str(row['parameter_6'])
-         global global_dut_ip
-         ip_address=global_dut_ip
-         test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
-         if test.status_code == 200:
-             # 解析 JSON 数据
-            data = test.json()
-            now = datetime.datetime.now()
-            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-            data['receivedtime'] = formatted_time
-            data['server_type'] = server_type
-            global log_dut_data
-            log_dut_data={
-            'time': f'{data['receivedtime']}',
-            'device': 'dut機器手臂',
-            'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
-            'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
-            'operator': 'Frank'
-            }
-            data['logs'] = log_dut_data   
-        elif row[0] == "arm_server":
-         param1 = str(row['parameter_1'])
-         param2 = str(row['parameter_2'])
-         param3 = str(row['parameter_3'])
-         param4 = str(row['parameter_4'])
-         param5 = str(row['parameter_5'])
-         param6 = str(row['parameter_6'])
-         global global_arm_ip
-         ip_address=global_arm_ip
-         test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
-         if test.status_code == 200:
-             # 解析 JSON 数据
-            data = test.json()
-            now = datetime.datetime.now()
-            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-            data['receivedtime'] = formatted_time
-            data['server_type'] = server_type
-            global log_arm_data
-            log_arm_data={
-            'time': f'{data['receivedtime']}',
-            'device': 'arm機器手臂',
-            'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
-            'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
-            'operator': 'Frank'
-            }
-            data['logs'] = log_arm_data 
-        elif row[0] == "step_server":
-         param1 = str(row['parameter_1'])
-         global global_step_ip
-         ip_address=global_step_ip
-         test = requests.post(f'http://{ip_address}/set_distance?position={param1}')
-         if test.status_code == 200:
-             # 解析 JSON 数据
-            data = test.json()
-            now = datetime.datetime.now()
-            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-            data['server_type'] = server_type
-            data['step_time'] = formatted_time
-            data['step_ip'] = ip_address
-            global log_step_data
-            log_step_data = {
-                'time': data['step_time'],
-                'device': 'step馬達',
-                'command': f'往前{param1}(cm)',
-                'status': f'{data['real_position']},{data['step_ip']}',
+        try:
+            if connection_break_flag:
+               index-=1
+               connection_break_flag=False
+            if row[0] == "dut_server":
+             param1 = str(row['parameter_1'])
+             param2 = str(row['parameter_2'])
+             param3 = str(row['parameter_3'])
+             param4 = str(row['parameter_4'])
+             param5 = str(row['parameter_5'])
+             param6 = str(row['parameter_6'])
+             global global_dut_ip
+             ip_address=global_dut_ip
+             test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
+             if test.status_code == 200:
+                 # 解析 JSON 数据
+                data = test.json()
+                now = datetime.datetime.now()
+                formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+                data['receivedtime'] = formatted_time
+                data['server_type'] = server_type
+                global log_dut_data
+                log_dut_data={
+                'time': f'{data['receivedtime']}',
+                'device': 'dut機器手臂',
+                'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
+                'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
                 'operator': 'Frank'
-            }
-            data['logs'] = log_step_data   
-        elif row[0] == "unet_server":
-         param1 = str(row['parameter_1'])
-         global global_unet_ip
-         ip_address=global_unet_ip
-         test = requests.get(f'http://{ip_address}/AN203_{param1}')
-         if test.status_code == 200:
-             # 解析 JSON 数据
-            data = {
-           'set_MC026_binding' : 'successfully',
-            }
+                }
+                data['logs'] = log_dut_data   
+            elif row[0] == "arm_server":
+             param1 = str(row['parameter_1'])
+             param2 = str(row['parameter_2'])
+             param3 = str(row['parameter_3'])
+             param4 = str(row['parameter_4'])
+             param5 = str(row['parameter_5'])
+             param6 = str(row['parameter_6'])
+             global global_arm_ip
+             ip_address=global_arm_ip
+             test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
+             if test.status_code == 200:
+                 # 解析 JSON 数据
+                data = test.json()
+                now = datetime.datetime.now()
+                formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+                data['receivedtime'] = formatted_time
+                data['server_type'] = server_type
+                global log_arm_data
+                log_arm_data={
+                'time': f'{data['receivedtime']}',
+                'device': 'arm機器手臂',
+                'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
+                'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+                'operator': 'Frank'
+                }
+                data['logs'] = log_arm_data
+                if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
+                    while True:
+                          arm_response = requests.get(f'http://{global_arm_ip}/get_info')
+                          arm_data = arm_response.json()
+                          print(arm_data)
+                          if temperature_min>arm_data['temperature']:
+                             test = requests.post(f'http://{global_unet_ip}/AN203_ON')
+                          elif arm_data['temperature']>temperature_max:
+                             test = requests.post(f'http://{global_unet_ip}/AN203_OFF')
+                          if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
+                             break
+            elif row[0] == "step_server":
+             param1 = str(row['parameter_1'])
+             global global_step_ip
+             ip_address=global_step_ip
+             test = requests.post(f'http://{ip_address}/set_distance?position={param1}')
+             if test.status_code == 200:
+                 # 解析 JSON 数据
+                data = test.json()
+                now = datetime.datetime.now()
+                formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+                data['server_type'] = server_type
+                data['step_time'] = formatted_time
+                data['step_ip'] = ip_address
+                global log_step_data
+                log_step_data = {
+                    'time': data['step_time'],
+                    'device': 'step馬達',
+                    'command': f'往前{param1}(cm)',
+                    'status': f'{data['real_position']},{data['step_ip']}',
+                    'operator': 'Frank'
+                }
+                data['logs'] = log_step_data   
+            elif row[0] == "unet_server":
+             param1 = str(row['parameter_1'])
+             ip_address=global_unet_ip
+             test = requests.post(f'http://{ip_address}/AN203_{param1}')
+             if test.status_code == 200:
+                 # 解析 JSON 数据
+                data = {
+               'set_MC026_binding' : 'successfully',
+                }
+                now = datetime.datetime.now()
+                formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+                data['AN203_ON_OFF_test']=f'AN203_{param1}'
+                data['server_type'] = server_type
+                data['unet_time'] = formatted_time 
+                data['unet_ip'] = ip_address
+                global log_unet_data
+                log_unet_data={
+                'time': f'{data['unet_time']}',
+                'device': 'unet_AN203',
+                'command': f'{data['AN203_ON_OFF_test']}',
+                'status': f'{data['AN203_ON_OFF_test']},{data['unet_ip']}',
+                'operator': 'Frank'
+                }
+                data['logs'] = log_unet_data
+            # 模拟一些处理时间
+            # 将结果发送给客户端
+            emit('update_result',data)
+            return_flag=True
+            if return_flag == True and detect_confirm_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
+                update_data = {
+                      'status': log_arm_data['status'],
+                     'command': log_dut_data['command'],
+                      'device': log_step_data['status'].split(',')[0], 
+                  }
+                emit('update_detect',update_data)
+            time.sleep(delay_time)
+            if active_detection[0] == 'yes':
+                detect_thread.join()
+        except requests.RequestException as e:
+            connection_break_flag=True
+            print(f"请求失败: {e}")
+            # 处理 POST 请求失败
             now = datetime.datetime.now()
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-            data['AN203_ON_OFF_test']=f'AN203_{param1}'
-            data['server_type'] = server_type
-            data['unet_time'] = formatted_time 
-            data['unet_ip'] = ip_address
-            global log_unet_data
-            log_unet_data={
-            'time': f'{data['unet_time']}',
-            'device': 'unet_AN203',
-            'command': f'{data['AN203_ON_OFF_test']}',
-            'status': f'{data['AN203_ON_OFF_test']},{data['unet_ip']}',
-            'operator': 'Frank'
+            data={
+                  'time': formatted_time,
+                'device': 'connection fail'
+                }
+            emit('connection_fail',data)
+            # 对四个服务器发送 get_info 请求
+            servers = {
+                'dut': global_dut_ip,
+                'arm': global_arm_ip,
+                'step': global_step_ip,
+                'unet': global_unet_ip
             }
-            data['logs'] = log_unet_data
-        # 模拟一些处理时间
-        # 将结果发送给客户端
-        emit('update_result',data)
-        return_flag=True
-        if return_flag == True and detect_confirm_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
-            update_data = {
-                  'status': log_arm_data['status'],
-                 'command': log_dut_data['command'],
-                  'device': log_step_data['status']['real_position']
-              }
-            emit('update_detect',update_data)
-        time.sleep(delay_time)
-        if active_detection[0] == 'yes':
-            detect_thread.join()
+            for server_name, ip in servers.items():
+                try:
+                    info_response = requests.get(f'http://{ip}/get_info')
+                    info_response.raise_for_status()
+                    if info_response.status_code == 200:
+                        print(f"{server_name} 服务器正常")
+                except requests.RequestException:
+                    # 服务器未响应，弹出提示窗口
+                    emit('show_popup', {'server': server_name, 'status': '需要重启'})
+                    # 继续尝试请求直到收到响应
+                    while True:
+                        try:
+                            info_response = requests.get(f'http://{ip}/get_info')
+                            info_response.raise_for_status()
+                            break
+                        except requests.RequestException:
+                            continue
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            data={
+                  'time': formatted_time,
+                'device': 'connection restore'
+                }
+            emit('reconnection',data)
+            # 继续执行当前任务
+            return_flag = False
 
 
 @app.route('/receive_ip', methods=["POST"])
@@ -603,13 +697,17 @@ def detection():
     data = request.get_json()
     global detect_confirm_flag
     global detect_flag
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     if detect_flag ==True and data['detected'] == True:
         detect_confirm_flag =True
         if return_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
             update_data = {
+                    'time': formatted_time,
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                  'device': log_step_data['status']['real_position']
+                  'device': log_step_data['status'].split(',')[0],
+                'operator': 'Frank'
               }
             socketio.emit('update_detect',update_data)
     socketio.emit('led_trigger', {'status': 'triggered'})

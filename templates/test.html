@@ -68,9 +68,17 @@
         th {
             background-color: #f2f2f2;
         }
-        .highlight {
-        color: red; /* 设置文字颜色为红色 */
-    }
+        .highlight-purple {
+    color: purple; /* 紫色字体 */
+}
+
+        .highlight-red {
+    color: red; /* 红色字体 */
+}
+
+        .highlight-green {
+    color: green; /* 綠色字体 */
+}
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
@@ -217,12 +225,42 @@ function changeLEDColor() {
         logEntries.push(logs);
       }
 
+      function startGenerate(logs) {
+        var logDiv = document.getElementById("log");
+        var newLogEntry = document.createElement("p");
+        var logText = logs['time'] + '   '+ logs['device'];
+        newLogEntry.textContent = logText;
+        newLogEntry.classList.add('highlight-red');
+        logDiv.appendChild(newLogEntry);
+        logEntries.push(logs);
+      }
+      
+      function connectfailGenerate(logs) {
+        var logDiv = document.getElementById("log");
+        var newLogEntry = document.createElement("p");
+        var logText = logs['time'] + '   '+ logs['device'];
+        newLogEntry.textContent = logText;
+        newLogEntry.classList.add('highlight-red');
+        logDiv.appendChild(newLogEntry);
+        logEntries.push(logs);
+      }
+
+      function reconnectGenerate(logs) {
+        var logDiv = document.getElementById("log");
+        var newLogEntry = document.createElement("p");
+        var logText = logs['time'] + '   '+ logs['device'];
+        newLogEntry.textContent = logText;
+        newLogEntry.classList.add('highlight-green');
+        logDiv.appendChild(newLogEntry);
+        logEntries.push(logs);
+      }
+
       function detectGenerate(logs) {
         var logDiv = document.getElementById("log");
         var newLogEntry = document.createElement("p");
-        var logText = logs['command'] +'     '+logs['status'];
+       var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
         newLogEntry.textContent = logText;
-        newLogEntry.classList.add('highlight'); // 添加红色样式类
+        newLogEntry.classList.add('highlight-purple');
         logDiv.appendChild(newLogEntry);
         logEntries.push(logs);
       }
@@ -358,7 +396,19 @@ function changeLEDColor() {
             socket.on('update_detect', (data) => {
                 detectGenerate(data)
             });
-
+            socket.on('start_button', (data) => {
+                startGenerate(data)
+            });
+            socket.on('connection_fail', (data) => {
+                connectfailGenerate(data)
+            });
+            socket.on('reconnection', (data) => {
+                reconnectGenerate(data)
+            });
+            socket.on('show_popup', (data) => {
+                alert(`服务器 ${data.server} ${data.status}`);
+            });
+            
             socket.on('update_result', function(data) {
                 var serverType = data.server_type;
 

@@ -9,13 +9,24 @@
         try {
           let response = await fetch("/check_connections");
           let data = await response.json();
-          if (data.results.every((result) => result)) {
+          let statusText = "";
+          let allConnected = true;
+
+          for (let [server, status] of Object.entries(data)) {
+            if (status === "Not connected") {
+              statusText += `${server} is not connected.\n`;
+              allConnected = false;
+            }
+          }
+
+          if (allConnected) {
             document.getElementById("next-button").disabled = false;
             document.getElementById("status").textContent =
               "All servers are connected.";
           } else {
             document.getElementById("next-button").disabled = true;
             document.getElementById("status").textContent =
+              statusText ||
               "Some servers are not connected. Please check the IPs.";
           }
         } catch (error) {
@@ -31,13 +42,24 @@
           try {
             let response = await fetch("/check_connections");
             let data = await response.json();
-            if (data.results.every((result) => result)) {
+            let statusText = "";
+            let allConnected = true;
+
+            for (let [server, status] of Object.entries(data)) {
+              if (status === "Not connected") {
+                statusText += `${server} is not connected.\n`;
+                allConnected = false;
+              }
+            }
+
+            if (allConnected) {
               clearInterval(intervalId);
               document.getElementById("status").textContent =
                 "All servers are connected.";
               document.getElementById("next-button").disabled = false;
             } else {
               document.getElementById("status").textContent =
+                statusText ||
                 "Some servers are not connected. Please check the IPs.";
             }
           } catch (error) {
