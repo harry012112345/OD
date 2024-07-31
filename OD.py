@@ -45,6 +45,7 @@ log_unet_data=[]
 detect_flag=True
 return_flag=False
 detect_confirm_flag=False
+stop_processing = False
 
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
@@ -456,6 +457,8 @@ async def test_data():
 @socketio.on('start_processing')
 def handle_start_processing():
     now = datetime.datetime.now()
+    global stop_processing
+    stop_processing = False
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     data={
           'time': formatted_time,
@@ -467,9 +470,9 @@ def handle_start_processing():
     global return_flag
     global detect_confirm_flag
     global detect_flag
-    connection_break_flag=False
     for index, row in df.iterrows():
-        print(connection_break_flag)
+        if stop_processing ==True:
+            break
         return_flag=False
         detect_confirm_flag=False
         delay_time=row['delay_time']
@@ -483,9 +486,6 @@ def handle_start_processing():
         else:
            detect_flag = False
         try:
-            if connection_break_flag:
-               index-=1
-               connection_break_flag=False
             if row[0] == "dut_server":
              param1 = str(row['parameter_1'])
              param2 = str(row['parameter_2'])
@@ -495,7 +495,8 @@ def handle_start_processing():
              param6 = str(row['parameter_6'])
              global global_dut_ip
              ip_address=global_dut_ip
-             test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
+             url=f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}'
+             test = requests.post(url)
              if test.status_code == 200:
                  # 解析 JSON 数据
                 data = test.json()
@@ -521,7 +522,8 @@ def handle_start_processing():
              param6 = str(row['parameter_6'])
              global global_arm_ip
              ip_address=global_arm_ip
-             test = requests.post(f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}')
+             url=f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}'
+             test = requests.post(url)
              if test.status_code == 200:
                  # 解析 JSON 数据
                 data = test.json()
@@ -553,7 +555,8 @@ def handle_start_processing():
              param1 = str(row['parameter_1'])
              global global_step_ip
              ip_address=global_step_ip
-             test = requests.post(f'http://{ip_address}/set_distance?position={param1}')
+             url=f'http://{ip_address}/set_distance?position={param1}'
+             test = requests.post(url)
              if test.status_code == 200:
                  # 解析 JSON 数据
                 data = test.json()
@@ -574,7 +577,8 @@ def handle_start_processing():
             elif row[0] == "unet_server":
              param1 = str(row['parameter_1'])
              ip_address=global_unet_ip
-             test = requests.post(f'http://{ip_address}/AN203_{param1}')
+             url=f'http://{ip_address}/AN203_{param1}'
+             test = requests.post(url)
              if test.status_code == 200:
                  # 解析 JSON 数据
                 data = {
@@ -600,11 +604,15 @@ def handle_start_processing():
             emit('update_result',data)
             return_flag=True
             if return_flag == True and detect_confirm_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
+                now = datetime.datetime.now()
+                formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
                 update_data = {
-                      'status': log_arm_data['status'],
-                     'command': log_dut_data['command'],
-                      'device': log_step_data['status'].split(',')[0], 
-                  }
+                    'time': formatted_time,
+                  'device': log_step_data['status'].split(',')[0],
+                  'status': log_arm_data['status'],
+                 'command': log_dut_data['command'],
+                'operator': 'Frank'
+              }
                 emit('update_detect',update_data)
             time.sleep(delay_time)
             if active_detection[0] == 'yes':
@@ -651,8 +659,93 @@ def handle_start_processing():
                 'device': 'connection restore'
                 }
             emit('reconnection',data)
+            if active_detection[0] == 'yes':
+               detect_flag = True
+               detect_time = int(active_detection[1])
+               detect_thread = Thread(target=detection_thread, args=(detect_time,))
+               detect_thread.start()
+            else:
+               detect_flag = False
+            test = requests.post(url)
+            data = test.json()
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            data['receivedtime'] = formatted_time
+            data['server_type'] = server_type
+            if data['name']=='dut_server':
+               log_dut_data={
+               'time': f'{data['receivedtime']}',
+               'device': 'dut機器手臂',
+               'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
+               'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_dut_ip}',
+               'operator': 'Frank'
+               }
+               data['logs'] = log_dut_data 
+            elif data['name']=='arm_server':
+                log_arm_data={
+                'time': f'{data['receivedtime']}',
+                'device': 'arm機器手臂',
+                'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
+                'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_arm_ip}',
+                'operator': 'Frank'
+                }
+                data['logs'] = log_arm_data
+                if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
+                    while True:
+                          arm_response = requests.get(f'http://{global_arm_ip}/get_info')
+                          arm_data = arm_response.json()
+                          print(arm_data)
+                          if temperature_min>arm_data['temperature']:
+                             test = requests.post(f'http://{global_unet_ip}/AN203_ON')
+                          elif arm_data['temperature']>temperature_max:
+                             test = requests.post(f'http://{global_unet_ip}/AN203_OFF')
+                          if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
+                             break
+            elif data['name']=='step_server':
+                log_step_data = {
+                    'time': data['receivedtime'],
+                    'device': 'step馬達',
+                    'command': f'往前{param1}(cm)',
+                    'status': f'{data['real_position']},{global_step_ip}',
+                    'operator': 'Frank'
+                }
+                data['logs'] = log_step_data
+            elif data['name']=='unet_server':
+                data['AN203_ON_OFF_test']=f'AN203_{param1}'
+                log_unet_data={
+                'time': f'{data['receivedtime']}',
+                'device': 'unet_AN203',
+                'command': f'{data['AN203_ON_OFF_test']}',
+                'status': f'{data['AN203_ON_OFF_test']},{global_unet_ip}',
+                'operator': 'Frank'
+                }
+                data['logs'] = log_unet_data
+                # 模拟一些处理时间
+                # 将结果发送给客户端
+            emit('update_result',data)
+            return_flag=True
+            if return_flag == True and detect_confirm_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
+                now = datetime.datetime.now()
+                formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+                update_data = {
+                    'time': formatted_time,
+                  'device': log_step_data['status'].split(',')[0],
+                  'status': log_arm_data['status'],
+                 'command': log_dut_data['command'],
+                'operator': 'Frank'
+              }
+                emit('update_detect',update_data)
+            time.sleep(delay_time)
+            if active_detection[0] == 'yes':
+                detect_thread.join()
             # 继续执行当前任务
             return_flag = False
+
+@socketio.on('stop_processing')
+def handle_stop_processing():
+    global stop_processing
+    stop_processing = True
+    emit('processing_stopped', {'status': 'Process stopped'})
 
 
 @app.route('/receive_ip', methods=["POST"])
@@ -697,18 +790,19 @@ def detection():
     data = request.get_json()
     global detect_confirm_flag
     global detect_flag
-    now = datetime.datetime.now()
-    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     if detect_flag ==True and data['detected'] == True:
         detect_confirm_flag =True
         if return_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
+            now = datetime.datetime.now()
+            formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             update_data = {
                     'time': formatted_time,
+                  'device': log_step_data['status'].split(',')[0],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                  'device': log_step_data['status'].split(',')[0],
                 'operator': 'Frank'
               }
+            print(update_data)
             socketio.emit('update_detect',update_data)
     socketio.emit('led_trigger', {'status': 'triggered'})
     return {'message': 'detection received'}, 200

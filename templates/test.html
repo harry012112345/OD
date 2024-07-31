@@ -180,7 +180,7 @@
         </div>
 
     <button id="startButton">开始处理</button>
-
+    <button onclick="stopProcessing()">Stop Processing</button>
     <div id="dynamic-tables"></div>
 
     <h1>操作日誌</h1>
@@ -258,7 +258,7 @@ function changeLEDColor() {
       function detectGenerate(logs) {
         var logDiv = document.getElementById("log");
         var newLogEntry = document.createElement("p");
-       var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
+        var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
         newLogEntry.textContent = logText;
         newLogEntry.classList.add('highlight-purple');
         logDiv.appendChild(newLogEntry);
@@ -389,10 +389,16 @@ function changeLEDColor() {
                 logGenerate(received_data.logs);
             });
         }
-        
+        function stopProcessing() {
+            // 触发停止处理事件
+            socket.emit('stop_processing');
+        }
         document.addEventListener("DOMContentLoaded", function() {
             var socket = io();
-
+            socket.on('processing_stopped', function (data) {
+            console.log(data.status);
+            alert(data.status); // 显示停止消息
+        });
             socket.on('update_detect', (data) => {
                 detectGenerate(data)
             });
