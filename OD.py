@@ -503,10 +503,10 @@ def handle_start_processing():
                 data['server_type'] = server_type
                 global log_dut_data
                 log_dut_data={
-                'time': f'{data['receivedtime']}',
+                'time': f"{data['receivedtime']}",
                 'device': 'dut機器手臂',
-                'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
-                'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+                'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
+                'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
                 'operator': 'Frank'
                 }
                 data['logs'] = log_dut_data   
@@ -530,10 +530,10 @@ def handle_start_processing():
                 data['server_type'] = server_type
                 global log_arm_data
                 log_arm_data={
-                'time': f'{data['receivedtime']}',
+                'time': f"{data['receivedtime']}",
                 'device': 'arm機器手臂',
-                'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
-                'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+                'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
+                'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
                 'operator': 'Frank'
                 }
                 data['logs'] = log_arm_data
@@ -567,7 +567,7 @@ def handle_start_processing():
                     'time': data['step_time'],
                     'device': 'step馬達',
                     'command': f'往前{param1}(cm)',
-                    'status': f'{data['real_position']},{data['step_ip']}',
+                    'status': f"{data['real_position']},{data['step_ip']}",
                     'operator': 'Frank'
                 }
                 data['logs'] = log_step_data   
@@ -589,10 +589,10 @@ def handle_start_processing():
                 data['unet_ip'] = ip_address
                 global log_unet_data
                 log_unet_data={
-                'time': f'{data['unet_time']}',
+                'time': f"{data['unet_time']}",
                 'device': 'unet_AN203',
-                'command': f'{data['AN203_ON_OFF_test']}',
-                'status': f'{data['AN203_ON_OFF_test']},{data['unet_ip']}',
+                'command': f"{data['AN203_ON_OFF_test']}",
+                'status': f"{data['AN203_ON_OFF_test']},{data['unet_ip']}",
                 'operator': 'Frank'
                 }
                 data['logs'] = log_unet_data
@@ -671,19 +671,19 @@ def handle_start_processing():
             data['server_type'] = server_type
             if data['name']=='dut_server':
                log_dut_data={
-               'time': f'{data['receivedtime']}',
+               'time': f"{data['receivedtime']}",
                'device': 'dut機器手臂',
-               'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
-               'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_dut_ip}',
+               'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
+               'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_dut_ip}",
                'operator': 'Frank'
                }
                data['logs'] = log_dut_data 
             elif data['name']=='arm_server':
                 log_arm_data={
-                'time': f'{data['receivedtime']}',
+                'time': f"{data['receivedtime']}",
                 'device': 'arm機器手臂',
                 'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
-                'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_arm_ip}',
+                'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_arm_ip}",
                 'operator': 'Frank'
                 }
                 data['logs'] = log_arm_data
@@ -703,17 +703,17 @@ def handle_start_processing():
                     'time': data['receivedtime'],
                     'device': 'step馬達',
                     'command': f'往前{param1}(cm)',
-                    'status': f'{data['real_position']},{global_step_ip}',
+                    'status': f"{data['real_position']},{global_step_ip}",
                     'operator': 'Frank'
                 }
                 data['logs'] = log_step_data
             elif data['name']=='unet_server':
                 data['AN203_ON_OFF_test']=f'AN203_{param1}'
                 log_unet_data={
-                'time': f'{data['receivedtime']}',
+                'time': f"{data['receivedtime']}",
                 'device': 'unet_AN203',
-                'command': f'{data['AN203_ON_OFF_test']}',
-                'status': f'{data['AN203_ON_OFF_test']},{global_unet_ip}',
+                'command': f"{data['AN203_ON_OFF_test']}",
+                'status': f"{data['AN203_ON_OFF_test']},{global_unet_ip}",
                 'operator': 'Frank'
                 }
                 data['logs'] = log_unet_data
@@ -829,10 +829,10 @@ def dut():
     else:
         print("Failed to retrieve data:", test.status_code)
     log_dut_data={
-        'time': f'{data['receivedtime']}',
+        'time': f"{data['receivedtime']}",
         'device': 'dut機器手臂',
         'command': f'{servo_1_value},{servo_2_value},{servo_3_value},{servo_4_value},{servo_5_value},{servo_6_value}',
-        'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+        'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
         'operator': 'Frank'
         }
     
@@ -863,10 +863,10 @@ def arm():
     else:
         print("Failed to retrieve data:", test.status_code)
     log_arm_data={
-        'time': f'{data['receivedtime']}',
+        'time': f"{data['receivedtime']}",
         'device': 'arm機器手臂',
         'command': f'{servo_1_value},{servo_2_value},{servo_3_value},{servo_4_value},{servo_5_value},{servo_6_value}',
-        'status': f'{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}',
+        'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
         'operator': 'Frank'
         }
     data['logs'] = log_arm_data
@@ -893,7 +893,7 @@ def step():
         'time': data['step_time'],
         'device': 'step馬達',
         'command': f'往前{in_real_position}(cm)',
-        'status': f'{data['real_position']},{data['step_ip']}',
+        'status': f"{data['real_position']},{data['step_ip']}",
         'operator': 'Frank'
     }
     data['logs'] = log_step_data
@@ -952,10 +952,10 @@ def button_pressed():
     received_data['unet_time'] = formatted_time 
     received_data['unet_ip'] = ip_address
     log_unet_data={
-        'time': f'{received_data['unet_time']}',
+        'time': f"{received_data['unet_time']}",
         'device': 'unet_AN203',
-        'command': f'{received_data['AN203_ON_OFF_test']}',
-        'status': f'{received_data['AN203_ON_OFF_test']},{received_data['unet_ip']}',
+        'command': f"{received_data['AN203_ON_OFF_test']}",
+        'status': f"{received_data['AN203_ON_OFF_test']},{received_data['unet_ip']}",
         'operator': 'Frank'
         }
     received_data['logs'] = log_unet_data
