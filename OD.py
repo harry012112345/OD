@@ -12,17 +12,14 @@ import time
 import asyncio
 import aiohttp
 from threading import Thread
-import queue
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
 UPLOAD_FOLDER = 'C:\\Users\\Harry\\Desktop\\OD\\test_excel'
 
-# 队列用于存储中断的请求
-request_queue = queue.Queue()
 
-# 用于存储上传的数据
+# 用於儲存上傳的數據
 received_data = []
 
 global_dut_ip=[]
@@ -82,17 +79,17 @@ async def send_request(url):
                 return {'error': f'HTTP {response.status}', 'content': await response.text()}
 
 def check_init_data(input_data):
-    # 初始化结果字典
+    # 初始化結果字典
     result = {}
 
-    # 处理servo
+    # 處理servo
     for i in range(1, 7):
         check_key = f'check_servo_{i}'
         servo_key = f'servo_{i}'
         if input_data.get(check_key) == 'true':
             result[servo_key] = input_data[servo_key]
 
-    # 处理arm_servo
+    # 處理arm_servo
     for i in range(1, 7):
         check_key = f'check_arm_servo_{i}'
         arm_servo_key = f'arm_servo_{i}'
@@ -101,7 +98,7 @@ def check_init_data(input_data):
 
     file =input_data['file']
     excel_file = os.path.join(UPLOAD_FOLDER, file)
-    # 读取 Excel 数据到 DataFrame
+    # 讀取 Excel 數據到 DataFrame
     df = pd.read_excel(excel_file)
 
 # 更新 DataFrame 中的多行
@@ -252,7 +249,7 @@ def test_ip():
 #    test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
 #    test_3_url = f'http://{global_step_ip}/set_distance?position={step_value}'
 #
-#    # 并发执行所有请求
+#    # 同時發送所有請求
 #    responses = await asyncio.gather(
 #        send_request(test_1_url),
 #        send_request(test_2_url),
@@ -260,7 +257,7 @@ def test_ip():
 #    )
 #
 #
-#    # 处理 test_1 的响应
+#    # 處理 test_1 的回傳資料
 #    test_1_data = responses[0]
 #    if test_1_data:
 #        test_1_data['receivedtime'] = formatted_time
@@ -273,7 +270,7 @@ def test_ip():
 #            'operator': 'Frank'
 #        }
 #
-#    # 处理 test_2 的响应
+#    # 處理 test_2 的回傳資料
 #    test_2_data = responses[1]
 #
 #    if test_2_data:
@@ -287,7 +284,7 @@ def test_ip():
 #            'operator': 'Frank'
 #        }
 #    
-#    # 处理 test_3 的响应
+#    # 處理 test_3 的回傳資料
 #    test_3_data = responses[2]
 #    if test_3_data:
 #        test_3_data['step_time'] = formatted_time
@@ -339,7 +336,7 @@ async def test_data():
         'parameter_5', 'parameter_6', 'delay_time', 'active_detection'
     ])
     excel_file = os.path.join(UPLOAD_FOLDER, execute_excel)
-    # 读取 Excel 数据到 DataFrame
+    # 讀取 Excel 數據到 DataFrame
     df = pd.read_excel(excel_file)
     df.iloc[:4] = new_df
     df.to_excel(excel_file, index=False)
@@ -349,7 +346,7 @@ async def test_data():
     test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
     test_3_url = f'http://{global_step_ip}/set_distance?position={step_value}'
     test_4_url = f'http://{global_unet_ip}/AN203_{unet_status}'
-    # 并发执行所有请求
+    # 同時執行所有請求
     responses = await asyncio.gather(
         send_request(test_1_url),
         send_request(test_2_url),
@@ -359,7 +356,7 @@ async def test_data():
   
 #    now = datetime.datetime.now()
 #    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-#    # 处理 test_1 的响应
+#    # 處理 test_1 的回傳資料
 #    test_1_data = responses[0]
 #    if test_1_data:
 #        test_1_data['receivedtime'] = formatted_time
@@ -375,7 +372,7 @@ async def test_data():
 #        test_1_data['logs'] = log_dut_data
 #        print(test_1_data)
 #    #    socketio.emit('update_result',test_1_data)
-#    # 处理 test_2 的响应
+#    # 處理 test_2 的回傳資料
     test_2_data = responses[1]
     content = json.loads(test_2_data['content'])
     temperature = float(content['temperature'])
@@ -405,7 +402,7 @@ async def test_data():
 #        print(test_2_data)
 #    #    socketio.emit('update_result',test_2_data)
 #
-#    # 处理 test_3 的响应
+#    # 處理 test_3 的回傳資料
 #    test_3_data = responses[2]
 #    if test_3_data:
 #        test_3_data['step_time'] = formatted_time
@@ -498,7 +495,7 @@ def handle_start_processing():
              url=f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}'
              test = requests.post(url)
              if test.status_code == 200:
-                 # 解析 JSON 数据
+                 # 解析 JSON 數據
                 data = test.json()
                 now = datetime.datetime.now()
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -525,7 +522,7 @@ def handle_start_processing():
              url=f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}'
              test = requests.post(url)
              if test.status_code == 200:
-                 # 解析 JSON 数据
+                 # 解析 JSON 數據
                 data = test.json()
                 now = datetime.datetime.now()
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -558,7 +555,7 @@ def handle_start_processing():
              url=f'http://{ip_address}/set_distance?position={param1}'
              test = requests.post(url)
              if test.status_code == 200:
-                 # 解析 JSON 数据
+                 # 解析 JSON 數據
                 data = test.json()
                 now = datetime.datetime.now()
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -580,7 +577,7 @@ def handle_start_processing():
              url=f'http://{ip_address}/AN203_{param1}'
              test = requests.post(url)
              if test.status_code == 200:
-                 # 解析 JSON 数据
+                 # 解析 JSON 數據
                 data = {
                'set_MC026_binding' : 'successfully',
                 }
@@ -599,8 +596,8 @@ def handle_start_processing():
                 'operator': 'Frank'
                 }
                 data['logs'] = log_unet_data
-            # 模拟一些处理时间
-            # 将结果发送给客户端
+            # 模擬一些處理時間
+            # 將結果發送給客戶端
             emit('update_result',data)
             return_flag=True
             if return_flag == True and detect_confirm_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
@@ -620,7 +617,7 @@ def handle_start_processing():
         except requests.RequestException as e:
             connection_break_flag=True
             print(f"请求失败: {e}")
-            # 处理 POST 请求失败
+            # 處理 POST 請求失敗
             now = datetime.datetime.now()
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             data={
@@ -628,7 +625,7 @@ def handle_start_processing():
                 'device': 'connection fail'
                 }
             emit('connection_fail',data)
-            # 对四个服务器发送 get_info 请求
+            # 對四個服務器發送 get_info 請求
             servers = {
                 'dut': global_dut_ip,
                 'arm': global_arm_ip,
@@ -642,9 +639,9 @@ def handle_start_processing():
                     if info_response.status_code == 200:
                         print(f"{server_name} 服务器正常")
                 except requests.RequestException:
-                    # 服务器未响应，弹出提示窗口
+                    # 服務器沒有回覆，彈出提示視窗
                     emit('show_popup', {'server': server_name, 'status': '需要重启'})
-                    # 继续尝试请求直到收到响应
+                    # 繼續嘗試直到收到回覆
                     while True:
                         try:
                             info_response = requests.get(f'http://{ip}/get_info')
@@ -720,8 +717,7 @@ def handle_start_processing():
                 'operator': 'Frank'
                 }
                 data['logs'] = log_unet_data
-                # 模拟一些处理时间
-                # 将结果发送给客户端
+                # 將結果發送給客戶端
             emit('update_result',data)
             return_flag=True
             if return_flag == True and detect_confirm_flag == True and isinstance(log_arm_data, dict) and isinstance(log_dut_data, dict):
@@ -738,7 +734,6 @@ def handle_start_processing():
             time.sleep(delay_time)
             if active_detection[0] == 'yes':
                 detect_thread.join()
-            # 继续执行当前任务
             return_flag = False
 
 @socketio.on('stop_processing')
@@ -825,7 +820,7 @@ def dut():
     servo_6_value = data['servo_6']
     test = requests.post(f'http://{ip_address}/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
     if test.status_code == 200:
-             # 解析 JSON 数据
+             # 解析 JSON 數據
             data = test.json()
             now = datetime.datetime.now()
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -860,7 +855,7 @@ def arm():
     servo_6_value = data['servo_6']
     test = requests.post(f'http://{ip_address}/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
     if test.status_code == 200:
-             # 解析 JSON 数据
+             # 解析 JSON 數據
             data = test.json()
             now = datetime.datetime.now()
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
