@@ -1,414 +1,628 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <title>操作面板</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-        }
-        h1 {
-            font-size: 24px;
-            margin-top: 20px;
-        }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .panel {
-            flex: 1;
-            min-width: 300px;
-        }
-        label {
-            display: inline-block;
-            width: 150px;
-            margin-bottom: 10px;
-        }
-        input[type="text"], input[type="number"] {
-            width: 200px;
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-        input[readonly] {
-            background-color: #f2f2f2;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-        }
-        .button-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .led {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .led.green {
-            background-color: green;
-        }
-        .led.red {
-            background-color: red;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .highlight {
-        color: red; /* 设置文字颜色为红色 */
-    }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
-</head>
-<body>
-    <div class="led green" id="ledIndicator"></div>
-    <h1>帳號: {{username}} 登入時間: {{formatted_time}} IP: {{local_ip}}</h1>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png" />
+    <title>Ela - Bootstrap Admin Dashboard Template</title>
 
-    <div class="container">
-        <div class="panel">
-            <h1>dut_server_controll</h1>
-            <form onsubmit="dut_server(event)">
-                <label for="servo_1">Servo 1:</label>
-                <input type="number" id="servo_1" name="servo_1" min="0" max="180" required><br>
-                <label for="servo_2">Servo 2:</label>
-                <input type="number" id="servo_2" name="servo_2" min="0" max="180" required><br>
-                <label for="servo_3">Servo 3:</label>
-                <input type="number" id="servo_3" name="servo_3" min="0" max="180" required><br>
-                <label for="servo_4">Servo 4:</label>
-                <input type="number" id="servo_4" name="servo_4" min="0" max="180" required><br>
-                <label for="servo_5">Servo 5:</label>
-                <input type="number" id="servo_5" name="servo_5" min="0" max="180" required><br>
-                <label for="servo_6">Servo 6:</label>
-                <input type="number" id="servo_6" name="servo_6" min="0" max="180" required><br>
-                <button type="submit">送出</button>
-            </form>
-        </div>
+    <link href="css/lib/chartist/chartist.min.css" rel="stylesheet" />
+    <link href="css/lib/owl.carousel.min.css" rel="stylesheet" />
+    <link href="css/lib/owl.theme.default.min.css" rel="stylesheet" />
+    <!-- Bootstrap Core CSS -->
+    <link href="css/lib/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link href="css/helper.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:** -->
+    <!--[if lt IE 9]>
+      <script src="https:**oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https:**oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
 
-        <div class="panel">
-            <h1>dut_server_status</h1>
-            <form>
-                <label for="received-servo_1">Servo 1:</label>
-                <input type="text" id="received-servo_1" readonly><br>
-                <label for="received-servo_2">Servo 2:</label>
-                <input type="text" id="received-servo_2" readonly><br>
-                <label for="received-servo_3">Servo 3:</label>
-                <input type="text" id="received-servo_3" readonly><br>
-                <label for="received-servo_4">Servo 4:</label>
-                <input type="text" id="received-servo_4" readonly><br>
-                <label for="received-servo_5">Servo 5:</label>
-                <input type="text" id="received-servo_5" readonly><br>
-                <label for="received-servo_6">Servo 6:</label>
-                <input type="text" id="received-servo_6" readonly><br>
-                <label for="received-temperature">Temperature:</label>
-                <input type="text" id="received-temperature" readonly><br>
-                <label for="received-humidity">Humidity:</label>
-                <input type="text" id="received-humidity" readonly><br>
-                <label for="received-ip_address">IP Address:</label>
-                <input type="text" id="received-ip_address" readonly><br>
-                <label for="received-detect">Detect:</label>
-                <input type="text" id="received-detect" readonly><br>
-                <label for="received-set_servo">Communication:</label>
-                <input type="text" id="received-set_servo" readonly><br>
-                <label for="received-time">更新時間:</label>
-                <input type="text" id="received-time" readonly><br>
-            </form>
-        </div>
+  <body class="fix-header fix-sidebar">
+    <!-- Preloader - style you can find in spinners.css -->
+    <div class="preloader">
+      <svg class="circular" viewBox="25 25 50 50">
+        <circle
+          class="path"
+          cx="50"
+          cy="50"
+          r="20"
+          fill="none"
+          stroke-width="2"
+          stroke-miterlimit="10"
+        />
+      </svg>
     </div>
-    
-    <div class="container">
-        <div class="panel">
-            <h1>arm_server_controll</h1>
-            <form onsubmit="arm_server(event)">
-                <label for="arm_servo_1">Servo 1:</label>
-                <input type="number" id="arm_servo_1" name="arm_servo_1" min="0" max="180" required><br>
-                <label for="arm_servo_2">Servo 2:</label>
-                <input type="number" id="arm_servo_2" name="arm_servo_2" min="0" max="180" required><br>
-                <label for="arm_servo_3">Servo 3:</label>
-                <input type="number" id="arm_servo_3" name="arm_servo_3" min="0" max="180" required><br>
-                <label for="arm_servo_4">Servo 4:</label>
-                <input type="number" id="arm_servo_4" name="arm_servo_4" min="0" max="180" required><br>
-                <label for="arm_servo_5">Servo 5:</label>
-                <input type="number" id="arm_servo_5" name="arm_servo_5" min="0" max="180" required><br>
-                <label for="arm_servo_6">Servo 6:</label>
-                <input type="number" id="arm_servo_6" name="arm_servo_6" min="0" max="180" required><br>
-                <button type="submit">送出</button>
-            </form>
-        </div>
+    <!-- Main wrapper  -->
+    <div id="main-wrapper">
+      <!-- header header  -->
+      <div class="header">
+        <nav class="navbar top-navbar navbar-expand-md navbar-light">
+          <!-- Logo -->
+          <div class="navbar-header">
+            <a class="navbar-brand" href="index.html">
+              <!-- Logo icon -->
+              <b
+                ><img src="images/logo.png" alt="homepage" class="dark-logo"
+              /></b>
+              <!--End Logo icon -->
+              <!-- Logo text -->
+              <span
+                ><img
+                  src="images/logo-text.png"
+                  alt="homepage"
+                  class="dark-logo"
+              /></span>
+            </a>
+          </div>
+          <!-- End Logo -->
+          <div class="navbar-collapse">
+            <!-- toggle and nav items -->
+            <ul class="navbar-nav mr-auto mt-md-0">
+              <!-- This is  -->
+              <li class="nav-item">
+                <a
+                  class="nav-link nav-toggler hidden-md-up text-muted"
+                  href="javascript:void(0)"
+                  ><i class="mdi mdi-menu"></i
+                ></a>
+              </li>
+              <li class="nav-item m-l-10">
+                <a
+                  class="nav-link sidebartoggler hidden-sm-down text-muted"
+                  href="javascript:void(0)"
+                  ><i class="ti-menu"></i
+                ></a>
+              </li>
+            </ul>
+            <!-- User profile and search -->
+            <ul class="navbar-nav my-lg-0">
+              <!-- Search -->
+              <li class="nav-item hidden-sm-down search-box">
+                <a
+                  class="nav-link hidden-sm-down text-muted"
+                  href="javascript:void(0)"
+                  ><i class="ti-search"></i
+                ></a>
+                <form class="app-search">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search here"
+                  />
+                  <a class="srh-btn"><i class="ti-close"></i></a>
+                </form>
+              </li>
 
-        <div class="panel">
-            <h1>arm_server_status</h1>
-            <form>
-                <label for="received-arm_servo_1">Servo 1:</label>
-                <input type="text" id="received-arm_servo_1" readonly><br>
-                <label for="received-arm_servo_2">Servo 2:</label>
-                <input type="text" id="received-arm_servo_2" readonly><br>
-                <label for="received-arm_servo_3">Servo 3:</label>
-                <input type="text" id="received-arm_servo_3" readonly><br>
-                <label for="received-arm_servo_4">Servo 4:</label>
-                <input type="text" id="received-arm_servo_4" readonly><br>
-                <label for="received-arm_servo_5">Servo 5:</label>
-                <input type="text" id="received-arm_servo_5" readonly><br>
-                <label for="received-arm_servo_6">Servo 6:</label>
-                <input type="text" id="received-arm_servo_6" readonly><br>
-                <label for="received-arm_temperature">Temperature:</label>
-                <input type="text" id="received-arm_temperature" readonly><br>
-                <label for="received-arm_humidity">Humidity:</label>
-                <input type="text" id="received-arm_humidity" readonly><br>
-                <label for="received-arm_ip_address">IP Address:</label>
-                <input type="text" id="received-arm_ip_address" readonly><br>
-                <label for="received-arm_detect">Detect:</label>
-                <input type="text" id="received-arm_detect" readonly><br>
-                <label for="received-arm_set_servo">Communication:</label>
-                <input type="text" id="received-arm_set_servo" readonly><br>
-                <label for="received-arm_time">更新時間:</label>
-                <input type="text" id="received-arm_time" readonly><br>
-            </form>
+              <!-- Profile -->
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle text-muted"
+                  href="#"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  ><img src="images/users/5.jpg" alt="user" class="profile-pic"
+                /></a>
+                <div class="dropdown-menu dropdown-menu-right animated zoomIn">
+                  <ul class="dropdown-user">
+                    <li>
+                      <a href="#"><i class="ti-user"></i> Profile</a>
+                    </li>
+                    <li>
+                      <a href="#"><i class="ti-wallet"></i> Balance</a>
+                    </li>
+                    <li>
+                      <a href="#"><i class="ti-email"></i> Inbox</a>
+                    </li>
+                    <li>
+                      <a href="#"><i class="ti-settings"></i> Setting</a>
+                    </li>
+                    <li>
+                      <a href="#"><i class="fa fa-power-off"></i> Logout</a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+      <!-- End header header -->
+      <!-- Left Sidebar  -->
+      <div class="left-sidebar">
+        <!-- Sidebar scroll-->
+        <div class="scroll-sidebar">
+          <!-- Sidebar navigation-->
+          <nav class="sidebar-nav">
+            <ul id="sidebarnav">
+              <li class="nav-devider"></li>
+              <li class="nav-label">Home</li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-tachometer"></i
+                  ><span class="hide-menu">儀表板 </span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="index.html">所有裝置</a></li>
+                </ul>
+              </li>
+              <li class="nav-label">Apps</li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-envelope"></i
+                  ><span class="hide-menu">設備測試</span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="email-compose.html">Compose</a></li>
+                  <li><a href="email-read.html">Read</a></li>
+                  <li><a href="email-inbox.html">Inbox</a></li>
+                </ul>
+              </li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-bar-chart"></i
+                  ><span class="hide-menu">法規自動化</span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="chart-flot.html">Flot</a></li>
+                  <li><a href="chart-morris.html">Morris</a></li>
+                  <li><a href="chart-chartjs.html">ChartJs</a></li>
+                  <li><a href="chart-chartist.html">Chartist </a></li>
+                  <li><a href="chart-amchart.html">AmChart</a></li>
+                  <li><a href="chart-echart.html">EChart</a></li>
+                  <li><a href="chart-sparkline.html">Sparkline</a></li>
+                  <li><a href="chart-peity.html">Peity</a></li>
+                </ul>
+              </li>
+              <li class="nav-label">Features</li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-suitcase"></i
+                  ><span class="hide-menu">Bootstrap UI </span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="ui-alert.html">Alert</a></li>
+                  <li><a href="ui-button.html">Button</a></li>
+                  <li><a href="ui-dropdown.html">Dropdown</a></li>
+                  <li><a href="ui-progressbar.html">Progressbar</a></li>
+                  <li><a href="ui-tab.html">Tab</a></li>
+                  <li><a href="ui-typography.html">Typography</a></li>
+                </ul>
+              </li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-suitcase"></i
+                  ><span class="hide-menu">Components </span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="uc-calender.html">Calender</a></li>
+                  <li><a href="uc-datamap.html">Datamap</a></li>
+                  <li><a href="uc-nestedable.html">Nestedable</a></li>
+                  <li><a href="uc-sweetalert.html">Sweetalert</a></li>
+                  <li><a href="uc-toastr.html">Toastr</a></li>
+                  <li><a href="uc-weather.html">Weather</a></li>
+                </ul>
+              </li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-wpforms"></i
+                  ><span class="hide-menu">Forms</span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="form-basic.html">Basic Forms</a></li>
+                  <li><a href="form-layout.html">Form Layout</a></li>
+                  <li><a href="form-validation.html">Form Validation</a></li>
+                  <li><a href="form-editor.html">Editor</a></li>
+                  <li><a href="form-dropzone.html">Dropzone</a></li>
+                </ul>
+              </li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-table"></i
+                  ><span class="hide-menu">Tables</span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="table-bootstrap.html">Basic Tables</a></li>
+                  <li><a href="table-datatable.html">Data Tables</a></li>
+                </ul>
+              </li>
+              <li class="nav-label">Layout</li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-columns"></i
+                  ><span class="hide-menu">Layout</span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="layout-blank.html">Blank</a></li>
+                  <li><a href="layout-boxed.html">Boxed</a></li>
+                  <li><a href="layout-fix-header.html">Fix Header</a></li>
+                  <li><a href="layout-fix-sidebar.html">Fix Sidebar</a></li>
+                </ul>
+              </li>
+              <li class="nav-label">EXTRA</li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-book"></i
+                  ><span class="hide-menu">Pages</span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li>
+                    <a href="#" class="has-arrow"
+                      >Authentication
+                      <span class="label label-rounded label-success"
+                        >6</span
+                      ></a
+                    >
+                    <ul aria-expanded="false" class="collapse">
+                      <li><a href="page-login.html">Login</a></li>
+                      <li><a href="page-register.html">Register</a></li>
+                      <li><a href="page-invoice.html">Invoice</a></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#" class="has-arrow">Error Pages</a>
+                    <ul aria-expanded="false" class="collapse">
+                      <li><a href="page-error-400.html">400</a></li>
+                      <li><a href="page-error-403.html">403</a></li>
+                      <li><a href="page-error-404.html">404</a></li>
+                      <li><a href="page-error-500.html">500</a></li>
+                      <li><a href="page-error-503.html">503</a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-map-marker"></i
+                  ><span class="hide-menu">Maps</span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="map-google.html">Google</a></li>
+                  <li><a href="map-vector.html">Vector</a></li>
+                </ul>
+              </li>
+              <li>
+                <a class="has-arrow" href="#" aria-expanded="false"
+                  ><i class="fa fa-level-down"></i
+                  ><span class="hide-menu">Multi level dd</span></a
+                >
+                <ul aria-expanded="false" class="collapse">
+                  <li><a href="#">item 1.1</a></li>
+                  <li><a href="#">item 1.2</a></li>
+                  <li>
+                    <a class="has-arrow" href="#" aria-expanded="false"
+                      >Menu 1.3</a
+                    >
+                    <ul aria-expanded="false" class="collapse">
+                      <li><a href="#">item 1.3.1</a></li>
+                      <li><a href="#">item 1.3.2</a></li>
+                      <li><a href="#">item 1.3.3</a></li>
+                      <li><a href="#">item 1.3.4</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="#">item 1.4</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+          <!-- End Sidebar navigation -->
         </div>
+        <!-- End Sidebar scroll-->
+      </div>
+      <!-- End Left Sidebar  -->
+      <!-- Page wrapper  -->
+      <div class="page-wrapper">
+        <!-- Bread crumb -->
+        <div class="row page-titles">
+          <div class="col-md-5 align-self-center">
+            <h3 class="text-primary">儀表板/所有裝置</h3>
+          </div>
+          <div class="col-md-7 align-self-center">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item">
+                <a href="javascript:void(0)">Home</a>
+              </li>
+              <li class="breadcrumb-item active">儀表板</li>
+            </ol>
+          </div>
+        </div>
+        <!-- End Bread crumb -->
+        <h2>所有狀態</h2>
+        <!-- Container fluid  -->
+        <div class="container-fluid">
+          <!-- Start Page Content -->
+          <div class="row">
+            <div class="col-md-3">
+              <div class="card p-30">
+                <h2>DUT手臂</h2>
+                <div class="card-body">
+                  <div class="input-states">
+                    <form class="form-horizontal">
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_1</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_2</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_3</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_4</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_5</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_6</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label class="col-sm-3 control-label"
+                          >Temperature</label
+                        >
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Humidity</label>
+                        <div class="col-sm-9">
+                          <div class="input-group">
+                            <input type="text" class="form-control" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Detection</label>
+                        <div class="col-sm-9">
+                          <div class="input-group">
+                            <input type="text" class="form-control" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label"
+                          >Communication</label
+                        >
+                        <div class="col-sm-9">
+                          <div class="input-group">
+                            <input type="text" class="form-control" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">IP address</label>
+                        <div class="col-sm-9">
+                          <div class="input-group">
+                            <input type="text" class="form-control" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label"
+                          >Update time</label
+                        >
+                        <div class="col-sm-9">
+                          <div class="input-group">
+                            <input type="text" class="form-control" />
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-30">
+                <h2>ARM手臂</h2>
+                <div class="card-body">
+                  <div class="input-states">
+                    <form class="form-horizontal">
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_1</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_2</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_3</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_4</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_5</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Servo_6</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label class="col-sm-3 control-label"
+                          >Temperature</label
+                        >
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Humidity</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">Detection</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label"
+                          >Communication</label
+                        >
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label">IP address</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <label class="col-sm-3 control-label"
+                          >Update time</label
+                        >
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" />
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-30">
+                <h2>STEP馬達</h2>
+                <div class="input-states">
+                  <form class="form-horizontal">
+                    <div class="row">
+                      <label class="col-sm-3 control-label"
+                        >Postion from origin</label
+                      >
+                      <div class="col-sm-9">
+                        <input type="text" class="form-control" />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label class="col-sm-3 control-label">IP address</label>
+                      <div class="col-sm-9">
+                        <input type="text" class="form-control" />
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-30">
+                <h2>UNET DONGLE</h2>
+                <div class="input-states">
+                  <form class="form-horizontal">
+                    <div class="row">
+                      <label class="col-sm-3 control-label">AN203</label>
+                      <div class="col-sm-9">
+                        <input type="text" class="form-control" />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label class="col-sm-3 control-label">IP address</label>
+                      <div class="col-sm-9">
+                        <input type="text" class="form-control" />
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- End PAge Content -->
+        </div>
+        <!-- End Container fluid  -->
+        <!-- footer -->
+        <footer class="footer">
+          © 2018 All rights reserved. Template designed by
+          <a href="https://colorlib.com">Colorlib</a>
+        </footer>
+        <!-- End footer -->
+      </div>
+      <!-- End Page wrapper  -->
     </div>
+    <!-- End Wrapper -->
+    <!-- All Jquery -->
+    <script src="js/lib/jquery/jquery.min.js"></script>
+    <!-- Bootstrap tether Core JavaScript -->
+    <script src="js/lib/bootstrap/js/popper.min.js"></script>
+    <script src="js/lib/bootstrap/js/bootstrap.min.js"></script>
+    <!-- slimscrollbar scrollbar JavaScript -->
+    <script src="js/jquery.slimscroll.js"></script>
+    <!--Menu sidebar -->
+    <script src="js/sidebarmenu.js"></script>
+    <!--stickey kit -->
+    <script src="js/lib/sticky-kit-master/dist/sticky-kit.min.js"></script>
 
-    <div class="container">
-        <div class="panel">
-            <h1>step_server_controll</h1>
-            <form onsubmit="sendData(event)">
-                <label for="real_position">移動至距離原點:</label>
-                <input type="text" id="real_position" name="real_position" min="0" max="6" required>
-                <button type="submit">送出</button>
-            </form>
-        </div>
+    <script src="js/lib/datamap/d3.min.js"></script>
+    <script src="js/lib/datamap/topojson.js"></script>
+    <script src="js/lib/datamap/datamaps.world.min.js"></script>
+    <script src="js/lib/datamap/datamap-init.js"></script>
 
-        <div class="panel">
-            <h1>step_server_status</h1>
-            <form>
-                <label for="received-real_position">距離原點:</label>
-                <input type="number" id="received-real_position" readonly><br>
-                <label for="received-step_time">更新時間:</label>
-                <input type="text" id="received-step_time" readonly><br>
-                <label for="received-step_ip">IP 位置:</label>
-                <input type="text" id="received-step_ip" readonly><br>
-            </form>
-        </div>
-    </div>
-    <div class="container">
-        <div class="panel">
-            <h1>unet_server_controll</h1>
-            <button onclick="sendButtonPress('bing-btn')">Binding</button>
-            <button onclick="sendButtonPress('test-btn')">AN203_ON_OFF_test</button>
-            <button onclick="sendButtonPress('on-btn')">AN203_ON</button>
-            <button onclick="sendButtonPress('off-btn')">AN203_OFF</button>
-        </div>
+    <script src="js/lib/weather/jquery.simpleWeather.min.js"></script>
+    <script src="js/lib/weather/weather-init.js"></script>
+    <script src="js/lib/owl-carousel/owl.carousel.min.js"></script>
+    <script src="js/lib/owl-carousel/owl.carousel-init.js"></script>
 
-        <div class="panel">
-            <h1>unet_server_status</h1>
-            <form>
-                <label for="received-set_MC026_binding">AN203學碼:</label>
-                <input type="text" id="received-set_MC026_binding" readonly><br>
-                <label for="received-AN203_ON_OFF_test">AN203狀態:</label>
-                <input type="text" id="received-AN203_ON_OFF_test" readonly>
-                <label for="received-AN203_ON_OFF_test">(ON or OFF)</label><br>
-                <label for="received-unet_time">更新時間:</label>
-                <input type="text" id="received-unet_time" readonly><br>
-                <label for="received-unet_ip">IP 位置:</label>
-                <input type="text" id="received-unet_ip" readonly><br>
-            </form>
-        </div>
-    </div>
-
-    <div id="dynamic-tables"></div>
-
-    <h1>操作日誌</h1>
-    <div id="log">
-        <p>時間 裝置 指令 狀態 操作者</p>
-    </div>
-    
-
-    
-    <div class="button-container">
-        <button onclick="downloadLog()">下載記錄</button>
-        <button onclick="clearLog()">清除</button>
-    </div>
-</body>
-    <script>
-
-
-     const socket = io();
-
-
-socket.on('led_trigger', function(data) {
-    if (data.status === 'triggered') {
-        changeLEDColor();
-    }
-});
-
-function changeLEDColor() {
-    const led = document.getElementById('ledIndicator');
-    led.classList.add('red');
-    setTimeout(() => {
-        led.classList.remove('red');
-    }, 3000); // 3000 milliseconds = 3 seconds
-}
-
-
-      var logEntries = [];
-
-      function logGenerate(logs) {
-        var logDiv = document.getElementById("log");
-        var newLogEntry = document.createElement("p");
-        var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
-        newLogEntry.textContent = logText;
-        logDiv.appendChild(newLogEntry);
-        logEntries.push(logs);
-      }
-
-      function detectGenerate(logs) {
-        var logDiv = document.getElementById("log");
-        var newLogEntry = document.createElement("p");
-        var logText = logs['command'] +'     '+logs['status'];
-        newLogEntry.textContent = logText;
-        newLogEntry.classList.add('highlight'); // 添加红色样式类
-        logDiv.appendChild(newLogEntry);
-        logEntries.push(logs);
-      }
-
-      function downloadLog() {
-        var worksheet = XLSX.utils.json_to_sheet(logEntries);
-        var workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Log");
-
-        XLSX.writeFile(workbook, "log.xlsx");
-      }
-
-      function clearLog() {
-        var logDiv = document.getElementById("log");
-        logDiv.innerHTML = "<p>時間  裝置  指令  狀態  操作者</p>";
-        logEntries = [];
-      }
-      
-      function dut_server(event) {
-            event.preventDefault();
-            const data = { servo_1: document.getElementById('servo_1').value,
-                           servo_2: document.getElementById('servo_2').value,
-                           servo_3: document.getElementById('servo_3').value,
-                           servo_4: document.getElementById('servo_4').value,
-                           servo_5: document.getElementById('servo_5').value,
-                           servo_6: document.getElementById('servo_6').value
-            };
-
-            fetch('/api/dut', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-            document.getElementById('received-servo_1').value = data.servo_dict.servo_1;
-            document.getElementById('received-servo_2').value = data.servo_dict.servo_2;
-            document.getElementById('received-servo_3').value = data.servo_dict.servo_3;
-            document.getElementById('received-servo_4').value = data.servo_dict.servo_4;
-            document.getElementById('received-servo_5').value = data.servo_dict.servo_5;
-            document.getElementById('received-servo_6').value = data.servo_dict.servo_6;
-            document.getElementById('received-temperature').value = data.temperature;
-            document.getElementById('received-humidity').value = data.humidity;
-            document.getElementById('received-ip_address').value = data.ip_address;
-            document.getElementById('received-detect').value = data.detect;
-            document.getElementById('received-set_servo').value = data.set_servo;                
-            document.getElementById('received-time').value = data.receivedtime;
-            logGenerate(data.logs);
-        });
-        }
-
-        
-        function arm_server(event) {
-            event.preventDefault();
-            const data = { servo_1: document.getElementById('arm_servo_1').value,
-                           servo_2: document.getElementById('arm_servo_2').value,
-                           servo_3: document.getElementById('arm_servo_3').value,
-                           servo_4: document.getElementById('arm_servo_4').value,
-                           servo_5: document.getElementById('arm_servo_5').value,
-                           servo_6: document.getElementById('arm_servo_6').value
-            };
-
-            fetch('/api/arm', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(received_data => {
-            document.getElementById('received-arm_servo_1').value = received_data.servo_dict.servo_1;
-            document.getElementById('received-arm_servo_2').value = received_data.servo_dict.servo_2;
-            document.getElementById('received-arm_servo_3').value = received_data.servo_dict.servo_3;
-            document.getElementById('received-arm_servo_4').value = received_data.servo_dict.servo_4;
-            document.getElementById('received-arm_servo_5').value = received_data.servo_dict.servo_5;
-            document.getElementById('received-arm_servo_6').value = received_data.servo_dict.servo_6;
-            document.getElementById('received-arm_temperature').value = received_data.temperature;
-            document.getElementById('received-arm_humidity').value = received_data.humidity;
-            document.getElementById('received-arm_ip_address').value = received_data.ip_address;
-            document.getElementById('received-arm_detect').value = received_data.detect;
-            document.getElementById('received-arm_set_servo').value = received_data.set_servo;                
-            document.getElementById('received-arm_time').value = received_data.receivedtime;
-            logGenerate(received_data.logs);
-        });
-        }
-
-
-        function sendData(event) {
-            event.preventDefault();
-            const data = { real_position: parseFloat(document.getElementById('real_position').value) };
-
-            fetch('/api/step', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-            document.getElementById('received-real_position').value = data.real_position;
-            document.getElementById('received-step_time').value = data.step_time;
-            document.getElementById('received-step_ip').value = data.step_ip;
-            logGenerate(data.logs);
-        });
-        }
-
-
-        function sendButtonPress(buttonId) {
-            fetch('/api/button', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ button_id: buttonId })
-            })
-            .then(response => response.json())
-            .then(received_data => {
-                document.getElementById('received-set_MC026_binding').value = received_data.set_MC026_binding;
-                document.getElementById('received-AN203_ON_OFF_test').value = received_data.AN203_ON_OFF_test;
-                document.getElementById('received-unet_time').value = received_data.unet_time;
-                document.getElementById('received-unet_ip').value = received_data.unet_ip;
-                logGenerate(received_data.logs);
-            });
-        }
-
-    </script>
-</body>
+    <script src="js/lib/chartist/chartist.min.js"></script>
+    <script src="js/lib/chartist/chartist-plugin-tooltip.min.js"></script>
+    <script src="js/lib/chartist/chartist-init.js"></script>
+    <!--Custom JavaScript -->
+    <script src="js/custom.min.js"></script>
+  </body>
 </html>

@@ -13,10 +13,10 @@ import asyncio
 import aiohttp
 from threading import Thread
 
-app = Flask(__name__)
+app = Flask(__name__,static_folder='static',template_folder='templates')
 socketio = SocketIO(app)
 
-UPLOAD_FOLDER = 'C:\\Users\\Harry\\Desktop\\OD\\test_excel'
+UPLOAD_FOLDER = 'C:\\Users\\Harry\\Desktop\\OD新HTML\\test_excel'
 
 
 # 用於儲存上傳的數據
@@ -140,7 +140,13 @@ def save_ips_to_file(ip_addresses):
 
 @app.route('/')
 def index():
-    return redirect(url_for('login'))
+    global global_dut_ip, global_arm_ip, global_step_ip, global_unet_ip
+    ip_addresses = load_ips_from_file()
+    global_arm_ip = ip_addresses.get('arm_server', 'Not found')
+    global_dut_ip = ip_addresses.get('dut_server', 'Not found')
+    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_unet_ip = ip_addresses.get('unet_server', 'Not found')
+    return render_template(('email-compose.html'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -364,7 +370,7 @@ async def test_data():
 #        global log_dut_data
 #        log_dut_data = {
 #            'time': test_1_data['receivedtime'],
-#            'device': 'dut機器手臂',
+#            'device': 'dut機器手臂',   
 #            'command': f'{dut_servo_1},{dut_servo_2},{dut_servo_3},{dut_servo_4},{dut_servo_5},{dut_servo_6}',
 #            'status': f"{test_1_data.get('servo_dict', {}).get('servo_1', '')},{test_1_data.get('servo_dict', {}).get('servo_2', '')},{test_1_data.get('servo_dict', {}).get('servo_3', '')},{test_1_data.get('servo_dict', {}).get('servo_4', '')},{test_1_data.get('servo_dict', {}).get('servo_5', '')},{test_1_data.get('servo_dict', {}).get('servo_6', '')},{test_1_data.get('temperature', '')},{test_1_data.get('humidity', '')},{test_1_data.get('detect', '')},{test_1_data.get('ip_address', '')}",
 #            'operator': 'Frank'
@@ -881,6 +887,7 @@ def step():
     global global_step_ip
     ip_address=global_step_ip
     in_real_position=data.get('real_position')
+    print(in_real_position)
     test = requests.post(f'http://{ip_address}/set_distance?position={in_real_position}')
     if test.status_code == 200:
             data = test.json()
