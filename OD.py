@@ -13,7 +13,7 @@ import asyncio
 import aiohttp
 from threading import Thread
 
-app = Flask(__name__,static_folder='static',template_folder='templates')
+app = Flask(__name__,static_folder='templates',template_folder='templates')
 socketio = SocketIO(app)
 
 UPLOAD_FOLDER = 'C:\\Users\\Harry\\Desktop\\OD新HTML\\test_excel'
@@ -31,7 +31,7 @@ temperature_max=0
 temperature_min=0
 humidity_max=0
 humidity_min=0
-
+detect_axis=''
 execute_excel=[]
 
 log_arm_data=[]
@@ -39,11 +39,12 @@ log_dut_data=[]
 log_step_data=[]
 log_unet_data=[]
 
+server_dead_flag=True
 detect_flag=True
 return_flag=False
 detect_confirm_flag=False
 stop_processing = False
-
+end_processing=False
 app.secret_key = 'your_secret_key'
 users = {'admin': 'admin'}
 now = datetime.datetime.now()
@@ -96,8 +97,7 @@ def check_init_data(input_data):
         if input_data.get(check_key) == 'true':
             result[arm_servo_key] = input_data[arm_servo_key]
 
-    file =input_data['file']
-    excel_file = os.path.join(UPLOAD_FOLDER, file)
+    excel_file = os.path.join(UPLOAD_FOLDER, 'IEC13680.xlsx')
     # 讀取 Excel 數據到 DataFrame
     df = pd.read_excel(excel_file)
 
@@ -138,6 +138,13 @@ def save_ips_to_file(ip_addresses):
 
 
 
+ip_addresses = load_ips_from_file()
+global_arm_ip = ip_addresses.get('arm_server', 'Not found')
+global_dut_ip = ip_addresses.get('dut_server', 'Not found')
+global_step_ip = ip_addresses.get('step_server', 'Not found')
+global_unet_ip = ip_addresses.get('unet_server', 'Not found')
+
+
 @app.route('/')
 def index():
     global global_dut_ip, global_arm_ip, global_step_ip, global_unet_ip
@@ -146,7 +153,7 @@ def index():
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
     global_step_ip = ip_addresses.get('step_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
-    return render_template(('email-compose.html'))
+    return render_template(('login.html'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -155,7 +162,7 @@ def login():
         password = request.form['password']
         if username in users and users[username] == password:
             session['username'] = username
-            return render_template('ip_confirm.html')
+            return render_template('index.html')
         else:
             flash('Invalid username or password!')
     return render_template('login.html')
@@ -311,7 +318,7 @@ async def test_data():
     data = request.json
     print(data)
     global execute_excel
-    execute_excel = data['file']
+    execute_excel =  'IEC13680.xlsx'
     dut_servo_1 = data['servo_1']
     dut_servo_2 = data['servo_2']
     dut_servo_3 = data['servo_3']
@@ -332,16 +339,16 @@ async def test_data():
     humidity_max = float(data['humidity-max'])
     humidity_min = float(data['humidity-min'])
     new_data = [
-        ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, 1, 'no'],
-        ['arm_server', arm_servo_1, arm_servo_2, arm_servo_3, arm_servo_4, arm_servo_5, arm_servo_6, 1, 'no'],
-        ['step_server', step_value, None, None, None, None, None, 1, 'no'],
-        ['unet_server', unet_status, None, None, None, None, None, 1, 'no']
+        ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, 1, 'no', None],
+        ['arm_server', arm_servo_1, arm_servo_2, arm_servo_3, arm_servo_4, arm_servo_5, arm_servo_6, 1, 'no', None],
+        ['step_server', step_value, None, None, None, None, None, 1, 'no', None],
+        ['unet_server', unet_status, None, None, None, None, None, 1, 'no', None]
     ]
     new_df = pd.DataFrame(new_data, columns=[
         'server_name', 'parameter_1', 'parameter_2', 'parameter_3', 'parameter_4',
-        'parameter_5', 'parameter_6', 'delay_time', 'active_detection'
+        'parameter_5', 'parameter_6', 'delay_time', 'active_detection','axis'
     ])
-    excel_file = os.path.join(UPLOAD_FOLDER, execute_excel)
+    excel_file = os.path.join(UPLOAD_FOLDER, 'IEC13680.xlsx')
     # 讀取 Excel 數據到 DataFrame
     df = pd.read_excel(excel_file)
     df.iloc[:4] = new_df
@@ -462,19 +469,28 @@ def handle_start_processing():
     now = datetime.datetime.now()
     global stop_processing
     stop_processing = False
+    global end_processing
+    end_processing = False
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     data={
           'time': formatted_time,
         'device': '開始處理'
         }
     emit('start_button',data)
-    excel_file = os.path.join(UPLOAD_FOLDER, execute_excel)
+    excel_file = os.path.join(UPLOAD_FOLDER,'IEC13680.xlsx')
     df = pd.read_excel(excel_file)
     global return_flag
     global detect_confirm_flag
     global detect_flag
+    global server_dead_flag
+    global detect_axis
     for index, row in df.iterrows():
-        if stop_processing ==True:
+        if server_dead_flag==True:
+           break
+        server_dead_flag=True
+        while stop_processing ==True:
+            continue
+        if end_processing==True:
             break
         return_flag=False
         detect_confirm_flag=False
@@ -482,6 +498,7 @@ def handle_start_processing():
         server_type = row['server_name']
         active_detection = row['active_detection'].split(',')
         if active_detection[0] == 'yes':
+           detect_axis = row['axis']
            detect_flag = True
            detect_time = int(active_detection[1])
            detect_thread = Thread(target=detection_thread, args=(detect_time,))
@@ -697,7 +714,6 @@ def handle_start_processing():
                     while True:
                           arm_response = requests.get(f'http://{global_arm_ip}/get_info')
                           arm_data = arm_response.json()
-                          print(arm_data)
                           if temperature_min>arm_data['temperature']:
                              test = requests.post(f'http://{global_unet_ip}/AN203_ON')
                           elif arm_data['temperature']>temperature_max:
@@ -734,7 +750,7 @@ def handle_start_processing():
                   'device': log_step_data['status'].split(',')[0],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                'operator': 'Frank'
+                'operator': detect_axis
               }
                 emit('update_detect',update_data)
             time.sleep(delay_time)
@@ -742,11 +758,37 @@ def handle_start_processing():
                 detect_thread.join()
             return_flag = False
 
+
+@socketio.on('page_still_active')
+def page_still_active():
+    global server_dead_flag
+    server_dead_flag=False
+
+
+@socketio.on('pause_processing')
+def handle_pause_processing():
+    global stop_processing
+    stop_processing = True
+    global end_processing
+    end_processing = False
+    emit('pause_processing', {'status': 'paused'})
+
+@socketio.on('continue_processing')
+def handle_continue_processing():
+    global stop_processing
+    stop_processing = False
+    global end_processing
+    end_processing = False
+    emit('continue_processing', {'status': 'continued'})
+
 @socketio.on('stop_processing')
 def handle_stop_processing():
     global stop_processing
-    stop_processing = True
-    emit('processing_stopped', {'status': 'Process stopped'})
+    stop_processing = False
+    global end_processing
+    end_processing = True
+    emit('stop_processing', {'status': 'stopped'})
+
 
 
 @app.route('/receive_ip', methods=["POST"])
@@ -786,6 +828,25 @@ def receive_ip():
     else:
         return jsonify({'error': 'Invalid JSON format'}), 400
  
+
+
+
+@app.route('/server_keep_alive', methods=["POST"])
+def server_keep_alive():
+    data = request.get_json()
+    name = data.get('name')
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    data['server_type']=name
+    data['receivedtime']=formatted_time
+    socketio.emit('server_keep_alive',data)
+    response_data = {'message': "server_keep_alive received successfully"}
+    return jsonify(response_data)
+
+
+
+
+
 @app.route('/detection', methods=['POST'])
 def detection():
     data = request.get_json()
@@ -801,11 +862,10 @@ def detection():
                   'device': log_step_data['status'].split(',')[0],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                'operator': 'Frank'
+                'operator': detect_axis
               }
             print(update_data)
             socketio.emit('update_detect',update_data)
-    socketio.emit('led_trigger', {'status': 'triggered'})
     return {'message': 'detection received'}, 200
 
 
@@ -887,7 +947,6 @@ def step():
     global global_step_ip
     ip_address=global_step_ip
     in_real_position=data.get('real_position')
-    print(in_real_position)
     test = requests.post(f'http://{ip_address}/set_distance?position={in_real_position}')
     if test.status_code == 200:
             data = test.json()
@@ -895,7 +954,6 @@ def step():
         print("Failed to retrieve data:", test.status_code)
     data['step_time'] = formatted_time
     data['step_ip'] = ip_address
-    print(data)
     log_step_data = {
         'time': data['step_time'],
         'device': 'step馬達',

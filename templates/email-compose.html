@@ -11,14 +11,14 @@
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png" />
     <title>Ela - Bootstrap Admin Dashboard Template</title>
 
-    <link href="/static/css/lib/chartist/chartist.min.css" rel="stylesheet" />
-    <link href="/static/css/lib/owl.carousel.min.css" rel="stylesheet" />
-    <link href="/static/css/lib/owl.theme.default.min.css" rel="stylesheet" />
+    <link href="/templates/css/lib/chartist/chartist.min.css" rel="stylesheet" />
+    <link href="/templates/css/lib/owl.carousel.min.css" rel="stylesheet" />
+    <link href="/templates/css/lib/owl.theme.default.min.css" rel="stylesheet" />
     <!-- Bootstrap Core CSS -->
-    <link href="/static/css/lib/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="/templates/css/lib/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
-    <link href="/static/css/helper.css" rel="stylesheet" />
-    <link href="/static/css/style.css" rel="stylesheet" />
+    <link href="/templates/css/helper.css" rel="stylesheet" />
+    <link href="/templates/css/style.css" rel="stylesheet" />
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:** -->
     <!--[if lt IE 9]>
@@ -26,7 +26,54 @@
       <script src="https:**oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
+  <style>
+.dropdown-menu {
+    display: none; /* Hide the dropdown menu initially */
+}
 
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8); /* 半透明背景 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000; /* 确保图示在其他内容之上 */
+    }
+.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+  </style>
   <body class="fix-header fix-sidebar">
     <!-- Preloader - style you can find in spinners.css -->
     <div class="preloader">
@@ -52,13 +99,13 @@
             <a class="navbar-brand" href="/templates/index.html">
               <!-- Logo icon -->
               <b
-                ><img src="/static/images/logo.png" alt="homepage" class="dark-logo"
+                ><img src="/templates/images/logo.png" alt="homepage" class="dark-logo"
               /></b>
               <!--End Logo icon -->
               <!-- Logo text -->
               <span
                 ><img
-                  src="/static/images/logo-text.png"
+                  src="/templates/images/logo-text.png"
                   alt="homepage"
                   class="dark-logo"
               /></span>
@@ -102,36 +149,12 @@
                   <a class="srh-btn"><i class="ti-close"></i></a>
                 </form>
               </li>
-
               <!-- Profile -->
               <li class="nav-item dropdown">
                 <a
                   class="nav-link dropdown-toggle text-muted"
-                  href="#"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                  ><img src="/static/images/users/5.jpg" alt="user" class="profile-pic"
+                  ><img src="/templates/images/users/5.jpg" alt="user" class="profile-pic"
                 /></a>
-                <div class="dropdown-menu dropdown-menu-right animated zoomIn">
-                  <ul class="dropdown-user">
-                    <li>
-                      <a href="#"><i class="ti-user"></i> Profile</a>
-                    </li>
-                    <li>
-                      <a href="#"><i class="ti-wallet"></i> Balance</a>
-                    </li>
-                    <li>
-                      <a href="#"><i class="ti-email"></i> Inbox</a>
-                    </li>
-                    <li>
-                      <a href="#"><i class="ti-settings"></i> Setting</a>
-                    </li>
-                    <li>
-                      <a href="#"><i class="fa fa-power-off"></i> Logout</a>
-                    </li>
-                  </ul>
-                </div>
               </li>
             </ul>
           </div>
@@ -153,7 +176,7 @@
                   ><span class="hide-menu">儀表板 </span></a
                 >
                 <ul aria-expanded="false" class="collapse">
-                  <li><a href="index.html">所有裝置</a></li>
+                  <li><a href="/templates/index.html">所有裝置</a></li>
                 </ul>
               </li>
               <li class="nav-label">Apps</li>
@@ -236,6 +259,7 @@
                   ><i class="fa fa-columns"></i
                   ><span class="hide-menu">Layout</span></a
                 >
+                
                 <ul aria-expanded="false" class="collapse">
                   <li><a href="/templates/layout-blank.html">Blank</a></li>
                   <li><a href="/templates/layout-boxed.html">Boxed</a></li>
@@ -326,10 +350,45 @@
               <li class="breadcrumb-item">
                 <a href="javascript:void(0)">APPS</a>
               </li>
-              <li class="breadcrumb-item active">設備控制</li>
+              <li class="breadcrumb-item active">法規自動化</li>
             </ol>
           </div>
         </div>
+
+
+        <li class="nav-item dropdown mega-dropdown">
+          <a
+            class="nav-link dropdown-toggle text-muted"
+            href="#"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+            ><i class="fa fa-th-large">log</i></a
+          >
+          <div class="dropdown-menu animated zoomIn">
+            <div class="dropdown-menu-header">
+
+              <span id="closePopup" class="close">&times;</span>
+
+            </div>
+            <ul class="mega-dropdown-menu row">
+              <li class="col-lg-3 m-b-30">
+                <h4 class="m-b-20">操作日誌</h4>
+                <!-- Contact -->
+                <div id="log">
+                  <p>時間 裝置 指令 狀態 操作者</p>
+                </div>
+                <div class="button-container">
+                  <button onclick="downloadLog()">下載記錄</button>
+                  <button onclick="clearLog()">清除</button>
+              </div>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <div id="spinner-overlay" class="spinner-overlay" style="display: none;">
+          <div class="spinner"></div>
+      </div>
         <!-- End Bread crumb -->
         <h2>所有狀態</h2>
         <!-- Container fluid  -->
@@ -340,7 +399,6 @@
               <div class="card p-30">
                 <h2>DUT手臂</h2>
                 <div class="card-body">
-                  <div class="input-states">
                       <form onsubmit="dut_server(event)">
                       <div class="row">
                         <label for="servo_1" class="col-sm-3 control-label">Servo_1</label>
@@ -383,7 +441,6 @@
                       </div>
                       <button type="submit">送出</button>
                     </form>
-                  </div>
                 </div>
               </div>
             </div>
@@ -460,7 +517,7 @@
               </div>
             </div>
           </div>
-
+        
         <div class="container-fluid">
           <!-- Start Page Content -->
           <div class="row">
@@ -670,7 +727,7 @@
                         >Postion from origin</label
                       > 
                       <div class="col-sm-9">
-                        <input type="number" class="form-control" id="received-real_position" readonly/>
+                        <input type="number" id="received-real_position" readonly/>
                       </div>
                     </div>
                     <div class="row">
@@ -710,6 +767,13 @@
                         <input type="text" id="received-unet_ip" readonly><br>
                       </div>
                     </div>
+
+                    <div class="row">
+                      <label for="received-unet_time" class="col-sm-3 control-label">更新時間:</label>
+                      <div class="col-sm-9">
+                        <input type="text" id="received-unet_time" readonly><br>
+                      </div>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -726,19 +790,43 @@
     </div>
     <!-- End Wrapper -->
     <!-- All Jquery -->
-    <script src="/static/js/lib/jquery/jquery.min.js"></script>
+    <script src="/templates/js/lib/jquery/jquery.min.js"></script>
     <!-- Bootstrap tether Core JavaScript -->
-    <script src="/static/js/lib/bootstrap/js/popper.min.js"></script>
-    <script src="/static/js/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/templates/js/lib/bootstrap/js/popper.min.js"></script>
+    <script src="/templates/js/lib/bootstrap/js/bootstrap.min.js"></script>
     <!-- slimscrollbar scrollbar JavaScript -->
-    <script src="/static/js/jquery.slimscroll.js"></script>
+    <script src="/templates/js/jquery.slimscroll.js"></script>
     <!--Menu sidebar -->
-    <script src="/static/js/sidebarmenu.js"></script>
+    <script src="/templates/js/sidebarmenu.js"></script>
     <!--stickey kit -->
-    <script src="/static/js/lib/sticky-kit-master/dist/sticky-kit.min.js"></script>
+    <script src="/templates/js/lib/sticky-kit-master/dist/sticky-kit.min.js"></script>
     <script>
-function dut_server(event) {
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="/templates/js/lib/datamap/d3.min.js"></script>
+    <script src="/templates/js/lib/datamap/topojson.js"></script>
+    <script src="/templates/js/lib/datamap/datamaps.world.min.js"></script>
+    <script src="/templates/js/lib/datamap/datamap-init.js"></script>
+
+    <script src="/templates/js/lib/weather/jquery.simpleWeather.min.js"></script>
+    <script src="/templates/js/lib/weather/weather-init.js"></script>
+    <script src="/templates/js/lib/owl-carousel/owl.carousel.min.js"></script>
+    <script src="/templates/js/lib/owl-carousel/owl.carousel-init.js"></script>
+
+    <script src="/templates/js/lib/chartist/chartist.min.js"></script>
+    <script src="/templates/js/lib/chartist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/templates/js/lib/chartist/chartist-init.js"></script>
+    <!--Custom JavaScript -->
+    <script src="/templates/js/custom.min.js"></script>
+    <script>
+      function dut_server(event) {
             event.preventDefault();
+            var spinnerOverlay = document.getElementById("spinner-overlay");
+            var buttons = document.querySelectorAll("button");
+    
+            spinnerOverlay.style.display = "flex";
+            buttons.forEach((button) => button.classList.add("disabled"));
             const data = { servo_1: document.getElementById('servo_1').value,
                            servo_2: document.getElementById('servo_2').value,
                            servo_3: document.getElementById('servo_3').value,
@@ -768,12 +856,23 @@ function dut_server(event) {
             document.getElementById('received-detect').value = data.detect;
             document.getElementById('received-set_servo').value = data.set_servo;                
             document.getElementById('received-time').value = data.receivedtime;
+            logGenerate(data.logs);
+            setTimeout(function () {
+              // 隐藏旋转图示并启用所有按钮
+              spinnerOverlay.style.display = "none";
+              buttons.forEach((button) => button.classList.remove("disabled"));
+            }); // 3秒后隐藏图示
         });
         }
 
         
         function arm_server(event) {
             event.preventDefault();
+            var spinnerOverlay = document.getElementById("spinner-overlay");
+        var buttons = document.querySelectorAll("button");
+
+        spinnerOverlay.style.display = "flex";
+        buttons.forEach((button) => button.classList.add("disabled"));
             const data = { servo_1: document.getElementById('arm_servo_1').value,
                            servo_2: document.getElementById('arm_servo_2').value,
                            servo_3: document.getElementById('arm_servo_3').value,
@@ -803,6 +902,12 @@ function dut_server(event) {
             document.getElementById('received-arm_detect').value = received_data.detect;
             document.getElementById('received-arm_set_servo').value = received_data.set_servo;                
             document.getElementById('received-arm_time').value = received_data.receivedtime;
+            logGenerate(received_data.logs);
+            setTimeout(function () {
+              // 隐藏旋转图示并启用所有按钮
+              spinnerOverlay.style.display = "none";
+              buttons.forEach((button) => button.classList.remove("disabled"));
+            }); // 3秒后隐藏图示
         });
         }
 
@@ -810,6 +915,11 @@ function dut_server(event) {
 
         function sendData(event) {
             event.preventDefault();
+            var spinnerOverlay = document.getElementById("spinner-overlay");
+        var buttons = document.querySelectorAll("button");
+
+        spinnerOverlay.style.display = "flex";
+        buttons.forEach((button) => button.classList.add("disabled"));
             const data = { real_position: parseFloat(document.getElementById('real_position').value) };
 
             fetch('/api/step', {
@@ -824,11 +934,21 @@ function dut_server(event) {
             document.getElementById('received-real_position').value = data.real_position;
             document.getElementById('received-step_time').value = data.step_time;
             document.getElementById('received-step_ip').value = data.step_ip;
-
+            logGenerate(data.logs);
+            setTimeout(function () {
+              // 隐藏旋转图示并启用所有按钮
+              spinnerOverlay.style.display = "none";
+              buttons.forEach((button) => button.classList.remove("disabled"));
+            }); // 3秒后隐藏图示
         });
         }
 
         function sendButtonPress(buttonId) {
+          var spinnerOverlay = document.getElementById("spinner-overlay");
+        var buttons = document.querySelectorAll("button");
+
+        spinnerOverlay.style.display = "flex";
+        buttons.forEach((button) => button.classList.add("disabled"));
             fetch('/api/button', {
                 method: 'POST',
                 headers: {
@@ -839,24 +959,64 @@ function dut_server(event) {
             .then(response => response.json())
             .then(received_data => {
                 document.getElementById('received-AN203_ON_OFF_test').value = received_data.AN203_ON_OFF_test;
+                document.getElementById('received-unet_time').value = received_data.unet_time;
                 document.getElementById('received-unet_ip').value = received_data.unet_ip;
+                logGenerate(received_data.logs);
             });
+            setTimeout(function () {
+              // 隐藏旋转图示并启用所有按钮
+              spinnerOverlay.style.display = "none";
+              buttons.forEach((button) => button.classList.remove("disabled"));
+            }); // 3秒后隐藏图示
         }
+      
+      
+
+        var logEntries = [];
+
+      function logGenerate(logs) {
+        var logDiv = document.getElementById("log");
+        var newLogEntry = document.createElement("p");
+        var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
+        newLogEntry.textContent = logText;
+        logDiv.appendChild(newLogEntry);
+        logEntries.push(logs);
+      }
+
+        function downloadLog() {
+        var worksheet = XLSX.utils.json_to_sheet(logEntries);
+        var workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Log");
+
+        XLSX.writeFile(workbook, "log.xlsx");
+      }
+
+      function clearLog() {
+        var logDiv = document.getElementById("log");
+        logDiv.innerHTML = "<p>時間  裝置  指令  狀態  操作者</p>";
+        logEntries = [];
+      }
+
+
+      document.addEventListener('DOMContentLoaded', function() {
+    var dropdownToggle = document.querySelector('.nav-link.dropdown-toggle');
+    var dropdownMenu = document.querySelector('.dropdown-menu');
+    var closePopupButton = document.getElementById('closePopup');
+
+    // Show the dropdown menu when the button is clicked
+    dropdownToggle.addEventListener('click', function() {
+        dropdownMenu.classList.toggle('show');
+    });
+
+    // Close the dropdown menu when the "X" button is clicked
+    closePopupButton.addEventListener('click', function() {
+        dropdownMenu.classList.remove('show');
+        // Simulate clicking the dropdown toggle button
+        dropdownToggle.click();
+    });
+});
+
+
     </script>
-    <script src="/static/js/lib/datamap/d3.min.js"></script>
-    <script src="/static/js/lib/datamap/topojson.js"></script>
-    <script src="/static/js/lib/datamap/datamaps.world.min.js"></script>
-    <script src="/static/js/lib/datamap/datamap-init.js"></script>
-
-    <script src="/static/js/lib/weather/jquery.simpleWeather.min.js"></script>
-    <script src="/static/js/lib/weather/weather-init.js"></script>
-    <script src="/static/js/lib/owl-carousel/owl.carousel.min.js"></script>
-    <script src="/static/js/lib/owl-carousel/owl.carousel-init.js"></script>
-
-    <script src="/static/js/lib/chartist/chartist.min.js"></script>
-    <script src="/static/js/lib/chartist/chartist-plugin-tooltip.min.js"></script>
-    <script src="/static/js/lib/chartist/chartist-init.js"></script>
-    <!--Custom JavaScript -->
-    <script src="/static/js/custom.min.js"></script>
   </body>
 </html>
