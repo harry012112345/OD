@@ -16,7 +16,9 @@ from threading import Thread
 app = Flask(__name__,static_folder='templates',template_folder='templates')
 socketio = SocketIO(app)
 
-UPLOAD_FOLDER = 'C:\\Users\\Harry\\Desktop\\OD新HTML\\test_excel'
+current_path = os.getcwd()
+additional_path = "test_excel"
+UPLOAD_FOLDER = os.path.join(current_path, additional_path)
 
 
 # 用於儲存上傳的數據
@@ -103,7 +105,7 @@ def check_init_data(input_data):
 
 # 更新 DataFrame 中的多行
     for index, row in df.iterrows():
-        row_value = row.iloc[0]  # 读取 row[0] 的值
+        row_value = row.iloc[0]  # 讀取 row[0] 的值
         if row_value in ['dut_server', 'arm_server']:
             new_values = {}
             for key, value in result.items():
@@ -413,9 +415,9 @@ async def test_data():
 #        }
 #        test_2_data['logs'] = log_arm_data
 #        print(test_2_data)
-#    #    socketio.emit('update_result',test_2_data)
+#        socketio.emit('update_result',test_2_data)
 #
-#    # 處理 test_3 的回傳資料
+#     處理 test_3 的回傳資料
 #    test_3_data = responses[2]
 #    if test_3_data:
 #        test_3_data['step_time'] = formatted_time
@@ -431,7 +433,7 @@ async def test_data():
 #        }
 #        test_3_data['logs'] = log_arm_data
 #        print(test_3_data)
-#    #    socketio.emit('update_result',test_3_data)
+#        socketio.emit('update_result',test_3_data)
 #    
 #    test_4_data = responses[3]
 #    if test_4_data:
@@ -530,7 +532,7 @@ def handle_start_processing():
                 'device': 'dut機器手臂',
                 'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
                 'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-                'operator': 'Frank'
+                'operator': 'admin'
                 }
                 data['logs'] = log_dut_data   
             elif row[0] == "arm_server":
@@ -557,7 +559,7 @@ def handle_start_processing():
                 'device': 'arm機器手臂',
                 'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
                 'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-                'operator': 'Frank'
+                'operator': 'admin'
                 }
                 data['logs'] = log_arm_data
                 if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
@@ -591,7 +593,7 @@ def handle_start_processing():
                     'device': 'step馬達',
                     'command': f'往前{param1}(cm)',
                     'status': f"{data['real_position']},{data['step_ip']}",
-                    'operator': 'Frank'
+                    'operator': 'admin'
                 }
                 data['logs'] = log_step_data   
             elif row[0] == "unet_server":
@@ -616,7 +618,7 @@ def handle_start_processing():
                 'device': 'unet_AN203',
                 'command': f"{data['AN203_ON_OFF_test']}",
                 'status': f"{data['AN203_ON_OFF_test']},{data['unet_ip']}",
-                'operator': 'Frank'
+                'operator': 'admin'
                 }
                 data['logs'] = log_unet_data
             # 模擬一些處理時間
@@ -631,7 +633,7 @@ def handle_start_processing():
                   'device': log_step_data['status'].split(',')[0],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                'operator': 'Frank'
+                'operator': 'admin'
               }
                 emit('update_detect',update_data)
             time.sleep(delay_time)
@@ -698,7 +700,7 @@ def handle_start_processing():
                'device': 'dut機器手臂',
                'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
                'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_dut_ip}",
-               'operator': 'Frank'
+               'operator': 'admin'
                }
                data['logs'] = log_dut_data 
             elif data['name']=='arm_server':
@@ -707,7 +709,7 @@ def handle_start_processing():
                 'device': 'arm機器手臂',
                 'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
                 'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_arm_ip}",
-                'operator': 'Frank'
+                'operator': 'admin'
                 }
                 data['logs'] = log_arm_data
                 if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
@@ -726,7 +728,7 @@ def handle_start_processing():
                     'device': 'step馬達',
                     'command': f'往前{param1}(cm)',
                     'status': f"{data['real_position']},{global_step_ip}",
-                    'operator': 'Frank'
+                    'operator': 'admin'
                 }
                 data['logs'] = log_step_data
             elif data['name']=='unet_server':
@@ -736,7 +738,7 @@ def handle_start_processing():
                 'device': 'unet_AN203',
                 'command': f"{data['AN203_ON_OFF_test']}",
                 'status': f"{data['AN203_ON_OFF_test']},{global_unet_ip}",
-                'operator': 'Frank'
+                'operator': 'admin'
                 }
                 data['logs'] = log_unet_data
                 # 將結果發送給客戶端
@@ -757,6 +759,14 @@ def handle_start_processing():
             if active_detection[0] == 'yes':
                 detect_thread.join()
             return_flag = False
+    if end_processing == False:
+       now = datetime.datetime.now()
+       formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+       data={
+             'time': formatted_time,
+           'device': '法規結束'
+           }
+       emit('start_button',data)
 
 
 @socketio.on('page_still_active')
@@ -771,7 +781,15 @@ def handle_pause_processing():
     stop_processing = True
     global end_processing
     end_processing = False
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    data={
+          'time': formatted_time,
+        'device': '暫停執行'
+        }
+    emit('connection_fail',data)
     emit('pause_processing', {'status': 'paused'})
+
 
 @socketio.on('continue_processing')
 def handle_continue_processing():
@@ -779,6 +797,13 @@ def handle_continue_processing():
     stop_processing = False
     global end_processing
     end_processing = False
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    data={
+          'time': formatted_time,
+        'device': '繼續執行'
+        }
+    emit('reconnection',data)
     emit('continue_processing', {'status': 'continued'})
 
 @socketio.on('stop_processing')
@@ -787,6 +812,13 @@ def handle_stop_processing():
     stop_processing = False
     global end_processing
     end_processing = True
+    now = datetime.datetime.now()
+    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    data={
+          'time': formatted_time,
+        'device': '法規結束'
+        }
+    emit('start_button',data)
     emit('stop_processing', {'status': 'stopped'})
 
 
@@ -899,7 +931,7 @@ def dut():
         'device': 'dut機器手臂',
         'command': f'{servo_1_value},{servo_2_value},{servo_3_value},{servo_4_value},{servo_5_value},{servo_6_value}',
         'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-        'operator': 'Frank'
+        'operator': 'admin'
         }
     
     data['logs'] = log_dut_data
@@ -933,7 +965,7 @@ def arm():
         'device': 'arm機器手臂',
         'command': f'{servo_1_value},{servo_2_value},{servo_3_value},{servo_4_value},{servo_5_value},{servo_6_value}',
         'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-        'operator': 'Frank'
+        'operator': 'admin'
         }
     data['logs'] = log_arm_data
     return jsonify(data)
@@ -959,7 +991,7 @@ def step():
         'device': 'step馬達',
         'command': f'往前{in_real_position}(cm)',
         'status': f"{data['real_position']},{data['step_ip']}",
-        'operator': 'Frank'
+        'operator': 'admin'
     }
     data['logs'] = log_step_data
     return jsonify(data)
@@ -1021,7 +1053,7 @@ def button_pressed():
         'device': 'unet_AN203',
         'command': f"{received_data['AN203_ON_OFF_test']}",
         'status': f"{received_data['AN203_ON_OFF_test']},{received_data['unet_ip']}",
-        'operator': 'Frank'
+        'operator': 'admin'
         }
     received_data['logs'] = log_unet_data
     return jsonify(received_data)

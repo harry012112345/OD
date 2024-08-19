@@ -9,7 +9,7 @@
     <meta name="author" content="" />
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png" />
-    <title>Ela - Bootstrap Admin Dashboard Template</title>
+    <title>Ela - 云辰自動化測試系統</title>
 
     <link
       href="/templates/css/lib/chartist/chartist.min.css"
@@ -36,16 +36,65 @@
     <![endif]-->
   </head>
   <style>
-    .highlight-purple {
-      color: purple; /* 紫色字体 */
+    .form-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
     }
 
-    .highlight-red {
-      color: red; /* 红色字体 */
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 60%;
+      flex: 1 1 calc(50% - 50px);
+      min-width: 10px;
     }
 
-    .highlight-green {
-      color: green; /* 綠色字体 */
+    .form-group label {
+      width: 50px;
+      margin: 0;
+    }
+
+    .form-group input {
+      flex: 1;
+      min-width: 0;
+      text-align: right;
+    }
+
+    .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .disabled {
+      pointer-events: none;
+      opacity: 0.5;
     }
   </style>
   <body class="fix-header fix-sidebar">
@@ -111,6 +160,22 @@
             <!-- User profile and search -->
             <ul class="navbar-nav my-lg-0">
               <!-- Search -->
+              <!--           <li class="nav-item hidden-sm-down search-box">
+                <a
+                  class="nav-link hidden-sm-down text-muted"
+                  href="javascript:void(0)"
+                  ><i class="ti-search"></i
+                ></a>
+                <form class="app-search">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search here"
+                  />
+                  <a class="srh-btn"><i class="ti-close"></i></a>
+                </form>
+              </li> -->
+
               <!-- Profile -->
               <li class="nav-item dropdown">
                 <a
@@ -199,159 +264,6 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-label">Features</li>
-              <li>
-                <a class="has-arrow" href="#" aria-expanded="false"
-                  ><i class="fa fa-suitcase"></i
-                  ><span class="hide-menu">Bootstrap UI </span></a
-                >
-                <ul aria-expanded="false" class="collapse">
-                  <li><a href="/templates/ui-alert.html">Alert</a></li>
-                  <li><a href="/templates/ui-button.html">Button</a></li>
-                  <li><a href="/templates/ui-dropdown.html">Dropdown</a></li>
-                  <li>
-                    <a href="/templates/ui-progressbar.html">Progressbar</a>
-                  </li>
-                  <li><a href="/templates/ui-tab.html">Tab</a></li>
-                  <li>
-                    <a href="/templates/ui-typography.html">Typography</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a class="has-arrow" href="#" aria-expanded="false"
-                  ><i class="fa fa-suitcase"></i
-                  ><span class="hide-menu">Components </span></a
-                >
-                <ul aria-expanded="false" class="collapse">
-                  <li><a href="/templates/uc-calender.html">Calender</a></li>
-                  <li><a href="/templates/uc-datamap.html">Datamap</a></li>
-                  <li>
-                    <a href="/templates/uc-nestedable.html">Nestedable</a>
-                  </li>
-                  <li>
-                    <a href="/templates/uc-sweetalert.html">Sweetalert</a>
-                  </li>
-                  <li><a href="/templates/uc-toastr.html">Toastr</a></li>
-                  <li><a href="/templates/uc-weather.html">Weather</a></li>
-                </ul>
-              </li>
-              <li>
-                <a class="has-arrow" href="#" aria-expanded="false"
-                  ><i class="fa fa-wpforms"></i
-                  ><span class="hide-menu">Forms</span></a
-                >
-                <ul aria-expanded="false" class="collapse">
-                  <li><a href="/templates/form-basic.html">Basic Forms</a></li>
-                  <li><a href="/templates/form-layout.html">Form Layout</a></li>
-                  <li>
-                    <a href="/templates/form-validation.html"
-                      >Form Validation</a
-                    >
-                  </li>
-                  <li><a href="/templates/form-editor.html">Editor</a></li>
-                  <li><a href="/templates/form-dropzone.html">Dropzone</a></li>
-                </ul>
-              </li>
-              <li>
-                <a class="has-arrow" href="#" aria-expanded="false"
-                  ><i class="fa fa-table"></i
-                  ><span class="hide-menu">Tables</span></a
-                >
-                <ul aria-expanded="false" class="collapse">
-                  <li>
-                    <a href="/templates/table-bootstrap.html">Basic Tables</a>
-                  </li>
-                  <li>
-                    <a href="/templates/table-datatable.html">Data Tables</a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-label">Layout</li>
-              <li>
-                <a class="has-arrow" href="#" aria-expanded="false"
-                  ><i class="fa fa-columns"></i
-                  ><span class="hide-menu">Layout</span></a
-                >
-                <ul aria-expanded="false" class="collapse">
-                  <li><a href="/templates/layout-blank.html">Blank</a></li>
-                  <li><a href="/templates/layout-boxed.html">Boxed</a></li>
-                  <li>
-                    <a href="/templates/layout-fix-header.html">Fix Header</a>
-                  </li>
-                  <li>
-                    <a href="/templates/layout-fix-sidebar.html">Fix Sidebar</a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-label">EXTRA</li>
-              <li>
-                <a class="has-arrow" href="#" aria-expanded="false"
-                  ><i class="fa fa-book"></i
-                  ><span class="hide-menu">Pages</span></a
-                >
-                <ul aria-expanded="false" class="collapse">
-                  <li>
-                    <a href="#" class="has-arrow"
-                      >Authentication
-                      <span class="label label-rounded label-success"
-                        >6</span
-                      ></a
-                    >
-                    <ul aria-expanded="false" class="collapse">
-                      <li><a href="/templates/page-login.html">Login</a></li>
-                      <li>
-                        <a href="/templates/page-register.html">Register</a>
-                      </li>
-                      <li>
-                        <a href="/templates/page-invoice.html">Invoice</a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li>
-                    <a href="#" class="has-arrow">Error Pages</a>
-                    <ul aria-expanded="false" class="collapse">
-                      <li><a href="/templates/page-error-400.html">400</a></li>
-                      <li><a href="/templates/page-error-403.html">403</a></li>
-                      <li><a href="/templates/page-error-404.html">404</a></li>
-                      <li><a href="/templates/page-error-500.html">500</a></li>
-                      <li><a href="/templates/page-error-503.html">503</a></li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a class="has-arrow" href="#" aria-expanded="false"
-                  ><i class="fa fa-map-marker"></i
-                  ><span class="hide-menu">Maps</span></a
-                >
-                <ul aria-expanded="false" class="collapse">
-                  <li><a href="/templates/map-google.html">Google</a></li>
-                  <li><a href="/templates/map-vector.html">Vector</a></li>
-                </ul>
-              </li>
-              <li>
-                <a class="has-arrow" href="#" aria-expanded="false"
-                  ><i class="fa fa-level-down"></i
-                  ><span class="hide-menu">Multi level dd</span></a
-                >
-                <ul aria-expanded="false" class="collapse">
-                  <li><a href="#">item 1.1</a></li>
-                  <li><a href="#">item 1.2</a></li>
-                  <li>
-                    <a class="has-arrow" href="#" aria-expanded="false"
-                      >Menu 1.3</a
-                    >
-                    <ul aria-expanded="false" class="collapse">
-                      <li><a href="#">item 1.3.1</a></li>
-                      <li><a href="#">item 1.3.2</a></li>
-                      <li><a href="#">item 1.3.3</a></li>
-                      <li><a href="#">item 1.3.4</a></li>
-                    </ul>
-                  </li>
-                  <li><a href="#">item 1.4</a></li>
-                </ul>
-              </li>
             </ul>
           </nav>
           <!-- End Sidebar navigation -->
@@ -360,512 +272,404 @@
       </div>
       <!-- End Left Sidebar  -->
       <!-- Page wrapper  -->
-      <div class="page-wrapper">
-        <!-- Bread crumb -->
-        <div class="row page-titles">
-          <div class="col-md-5 align-self-center">
-            <h3 class="text-primary">儀表板/所有裝置</h3>
+    </div>
+    <div class="page-wrapper">
+      <!-- Bread crumb -->
+      <div class="row page-titles">
+        <div class="col-md-5 align-self-center">
+          <h3 class="text-primary">儀表板/所有裝置</h3>
+        </div>
+        <div class="col-md-7 align-self-center">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a href="javascript:void(0)">APPS</a>
+            </li>
+            <li class="breadcrumb-item active">法規自動化</li>
+          </ol>
+        </div>
+      </div>
+      <!-- End Bread crumb -->
+
+      <!-- Container fluid  -->
+      <div class="container-fluid">
+        <div id="spinner-overlay" class="spinner-overlay" style="display: none">
+          <div class="spinner"></div>
+        </div>
+        <!-- Start Page Content -->
+        <div class="row">
+          <div class="col-md-3">
+            <div class="card p-30">
+              <h2>DUT手臂</h2>
+              <div class="card-body">
+                <form onsubmit="dut_server(event)">
+                  <div class="row">
+                    <label for="servo_1" class="col-sm-3 control-label"
+                      >Servo_1</label
+                    >
+                    <div class="col-sm-9">
+                      <input
+                        type="checkbox"
+                        id="check_servo_1"
+                        name="check_servo_1"
+                      />
+                      <input
+                        type="number"
+                        id="servo_1"
+                        name="servo_1"
+                        min="0"
+                        max="180"
+                        required
+                      /><br />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <label for="servo_2" class="col-sm-3 control-label"
+                      >Servo_2</label
+                    >
+                    <div class="col-sm-9">
+                      <input
+                        type="checkbox"
+                        id="check_servo_2"
+                        name="check_servo_2"
+                      />
+                      <input
+                        type="number"
+                        id="servo_2"
+                        name="servo_2"
+                        min="0"
+                        max="180"
+                        required
+                      /><br />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <label for="servo_3" class="col-sm-3 control-label"
+                      >Servo_3</label
+                    >
+                    <div class="col-sm-9">
+                      <input
+                        type="checkbox"
+                        id="check_servo_3"
+                        name="check_servo_3"
+                      />
+                      <input
+                        type="number"
+                        id="servo_3"
+                        name="servo_3"
+                        min="0"
+                        max="180"
+                        required
+                      /><br />
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <label for="servo_4" class="col-sm-3 control-label"
+                      >Servo_4</label
+                    >
+                    <div class="col-sm-9">
+                      <input
+                        type="checkbox"
+                        id="check_servo_4"
+                        name="check_servo_4"
+                      />
+                      <input
+                        type="number"
+                        id="servo_4"
+                        name="servo_4"
+                        min="0"
+                        max="180"
+                        required
+                      /><br />
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <label for="servo_5" class="col-sm-3 control-label"
+                      >Servo_5</label
+                    >
+                    <div class="col-sm-9">
+                      <input
+                        type="checkbox"
+                        id="check_servo_5"
+                        name="check_servo_5"
+                      />
+                      <input
+                        type="number"
+                        id="servo_5"
+                        name="servo_5"
+                        min="0"
+                        max="180"
+                        required
+                      /><br />
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <label for="servo_6" class="col-sm-3 control-label"
+                      >Servo_6</label
+                    >
+                    <div class="col-sm-9">
+                      <input
+                        type="checkbox"
+                        id="check_servo_6"
+                        name="check_servo_6"
+                      />
+                      <input
+                        type="number"
+                        id="servo_6"
+                        name="servo_6"
+                        min="0"
+                        max="180"
+                        required
+                      /><br />
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
-          <div class="col-md-7 align-self-center">
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item">
-                <a href="javascript:void(0)">APPS</a>
-              </li>
-              <li class="breadcrumb-item active">法規自動化</li>
-            </ol>
+          <div class="col-md-3">
+            <div class="card p-30">
+              <h2>ARM手臂</h2>
+              <div class="card-body">
+                <div class="input-states">
+                  <form onsubmit="arm_server(event)">
+                    <div class="row">
+                      <label for="arm_servo_1" class="col-sm-3 control-label"
+                        >Servo_1</label
+                      >
+                      <div class="col-sm-9">
+                        <input
+                          type="checkbox"
+                          id="check_arm_servo_1"
+                          name="check_arm_servo_1"
+                        />
+                        <input
+                          type="number"
+                          id="arm_servo_1"
+                          name="arm_servo_1"
+                          min="0"
+                          max="180"
+                          required
+                        /><br />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label for="arm_servo_2" class="col-sm-3 control-label"
+                        >Servo_2</label
+                      >
+                      <div class="col-sm-9">
+                        <input
+                          type="checkbox"
+                          id="check_arm_servo_2"
+                          name="check_arm_servo_2"
+                        />
+                        <input
+                          type="number"
+                          id="arm_servo_2"
+                          name="arm_servo_2"
+                          min="0"
+                          max="180"
+                          required
+                        /><br />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label for="arm_servo_3" class="col-sm-3 control-label"
+                        >Servo_3</label
+                      >
+                      <div class="col-sm-9">
+                        <input
+                          type="checkbox"
+                          id="check_arm_servo_3"
+                          name="check_arm_servo_3"
+                        />
+                        <input
+                          type="number"
+                          id="arm_servo_3"
+                          name="arm_servo_3"
+                          min="0"
+                          max="180"
+                          required
+                        /><br />
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <label for="arm_servo_4" class="col-sm-3 control-label"
+                        >Servo_4</label
+                      >
+                      <div class="col-sm-9">
+                        <input
+                          type="checkbox"
+                          id="check_arm_servo_4"
+                          name="check_arm_servo_4"
+                        />
+                        <input
+                          type="number"
+                          id="arm_servo_4"
+                          name="arm_servo_4"
+                          min="0"
+                          max="180"
+                          required
+                        /><br />
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <label for="arm_servo_5" class="col-sm-3 control-label"
+                        >Servo_5</label
+                      >
+                      <div class="col-sm-9">
+                        <input
+                          type="checkbox"
+                          id="check_arm_servo_5"
+                          name="check_arm_servo_5"
+                        />
+                        <input
+                          type="number"
+                          id="arm_servo_5"
+                          name="arm_servo_5"
+                          min="0"
+                          max="180"
+                          required
+                        /><br />
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <label for="arm_servo_6" class="col-sm-3 control-label"
+                        >Servo_6</label
+                      >
+                      <div class="col-sm-9">
+                        <input
+                          type="checkbox"
+                          id="check_arm_servo_6"
+                          name="check_arm_servo_6"
+                        />
+                        <input
+                          type="number"
+                          id="arm_servo_6"
+                          name="arm_servo_6"
+                          min="0"
+                          max="180"
+                          required
+                        /><br />
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-30">
+            <h2>STEP馬達</h2>
+            <div class="input-states">
+              <form onsubmit="sendData(event)">
+                <div class="row">
+                  <label for="real_position" class="col-sm-3 control-label"
+                    >Postion from origin</label
+                  >
+                  <input
+                    type="text"
+                    id="real_position"
+                    name="real_position"
+                    min="0"
+                    max="6"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card p-30">
+              <h2>UNET DONGLE</h2>
+              <div class="input-states">
+                <input
+                  id="ON"
+                  type="radio"
+                  name="check_unet"
+                  value="ON"
+                  required
+                />
+                <label for="ON">ON</label>
+                <input
+                  id="OFF"
+                  type="radio"
+                  name="check_unet"
+                  value="OFF"
+                  required
+                />
+                <label for="OFF">OFF</label>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- End Bread crumb -->
-        <h2>所有狀態</h2>
-        <!-- Container fluid  -->
-
         <div class="container-fluid">
           <!-- Start Page Content -->
           <div class="row">
-            <div class="col-md-3">
-              <div class="card p-30">
-                <h2>DUT手臂</h2>
-                <div class="card-body">
-                  <div class="input-states">
-                    <form class="form-horizontal">
-                      <div class="row">
-                        <label
-                          for="received-servo_1"
-                          class="col-sm-3 control-label"
-                          >Servo_1</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-servo_1"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-servo_2"
-                          class="col-sm-3 control-label"
-                          >Servo_2</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-servo_2"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-servo_3"
-                          class="col-sm-3 control-label"
-                          >Servo_3</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-servo_3"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
+            <div class="card p-30">
+              <h2>溫度與濕度區間</h2>
+              <div class="row">
+                <div class="form-container">
+                  <div class="form-group">
+                    <label for="temperature-max">溫度 - 最大值</label>
+                    <input
+                      type="number"
+                      id="temperature-max"
+                      name="temperature-max"
+                      step="0.1"
+                    />
+                  </div>
 
-                      <div class="row">
-                        <label
-                          for="received-servo_4"
-                          class="col-sm-3 control-label"
-                          >Servo_4</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-servo_4"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
+                  <div class="form-group">
+                    <label for="temperature-min">溫度 - 最小值</label>
+                    <input
+                      type="number"
+                      id="temperature-min"
+                      name="temperature-min"
+                      step="0.1"
+                    />
+                  </div>
 
-                      <div class="row">
-                        <label
-                          for="received-servo_5"
-                          class="col-sm-3 control-label"
-                          >Servo_5</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-servo_5"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
+                  <div class="form-group">
+                    <label for="humidity-max">濕度 - 最大值</label>
+                    <input
+                      type="number"
+                      id="humidity-max"
+                      name="humidity-max"
+                      step="0.1"
+                    />
+                  </div>
 
-                      <div class="row">
-                        <label
-                          for="received-servo_6"
-                          class="col-sm-3 control-label"
-                          >Servo_6</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-servo_6"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label
-                          for="received-temperature"
-                          class="col-sm-3 control-label"
-                          >Temperature</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-temperature"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-humidity"
-                          class="col-sm-3 control-label"
-                          >Humidity</label
-                        >
-                        <div class="col-sm-9">
-                          <div class="input-group">
-                            <input
-                              type="text"
-                              id="received-humidity"
-                              readonly
-                            /><br />
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-detect"
-                          class="col-sm-3 control-label"
-                          >Detection</label
-                        >
-                        <div class="col-sm-9">
-                          <div class="input-group">
-                            <input
-                              type="text"
-                              id="received-detect"
-                              readonly
-                            /><br />
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-set_servo"
-                          class="col-sm-3 control-label"
-                          >Communication</label
-                        >
-                        <div class="col-sm-9">
-                          <div class="input-group">
-                            <input
-                              type="text"
-                              id="received-set_servo"
-                              readonly
-                            /><br />
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-ip_address"
-                          class="col-sm-3 control-label"
-                          >IP address</label
-                        >
-                        <div class="col-sm-9">
-                          <div class="input-group">
-                            <input
-                              type="text"
-                              id="received-ip_address"
-                              readonly
-                            /><br />
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-time"
-                          class="col-sm-3 control-label"
-                          >Update time</label
-                        >
-                        <div class="col-sm-9">
-                          <div class="input-group">
-                            <input
-                              type="text"
-                              id="received-time"
-                              readonly
-                            /><br />
-                          </div>
-                        </div>
-                      </div>
-                    </form>
+                  <div class="form-group">
+                    <label for="humidity-min">濕度 - 最小值</label>
+                    <input
+                      type="number"
+                      id="humidity-min"
+                      name="humidity-min"
+                      step="0.1"
+                    />
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-md-3">
               <div class="card p-30">
-                <h2>ARM手臂</h2>
-                <div class="card-body">
-                  <div class="input-states">
-                    <form class="form-horizontal">
-                      <div class="row">
-                        <label
-                          for="received-arm_servo_1"
-                          class="col-sm-3 control-label"
-                          >Servo_1</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_servo_1"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-arm_servo_2"
-                          class="col-sm-3 control-label"
-                          >Servo_2</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_servo_2"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-arm_servo_3"
-                          class="col-sm-3 control-label"
-                          >Servo_3</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_servo_3"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label
-                          for="received-arm_servo_4"
-                          class="col-sm-3 control-label"
-                          >Servo_4</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_servo_4"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label
-                          for="received-arm_servo_5"
-                          class="col-sm-3 control-label"
-                          >Servo_5</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_servo_5"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label
-                          for="received-arm_servo_6"
-                          class="col-sm-3 control-label"
-                          >Servo_6</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_servo_6"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label
-                          for="received-arm_temperature"
-                          class="col-sm-3 control-label"
-                          >Temperature</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_temperature"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-arm_humidity"
-                          class="col-sm-3 control-label"
-                          >Humidity</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_humidity"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-arm_detect"
-                          class="col-sm-3 control-label"
-                          >Detection</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_detect"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-arm_set_servo"
-                          class="col-sm-3 control-label"
-                          >Communication</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_set_servo"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-arm_ip_address"
-                          class="col-sm-3 control-label"
-                          >IP address</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_ip_address"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <label
-                          for="received-arm_time"
-                          class="col-sm-3 control-label"
-                          >Update time</label
-                        >
-                        <div class="col-sm-9">
-                          <input
-                            type="text"
-                            id="received-arm_time"
-                            readonly
-                          /><br />
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card p-30">
-                <h2>STEP馬達</h2>
-                <div class="input-states">
-                  <form class="form-horizontal">
-                    <div class="row">
-                      <label
-                        for="received-real_position"
-                        class="col-sm-3 control-label"
-                        >Postion from origin</label
-                      >
-                      <div class="col-sm-9">
-                        <input
-                          type="number"
-                          id="received-real_position"
-                          readonly
-                        />
-                      </div>
-                    </div>
-                    <div class="row">
-                      <label
-                        for="received-step_time"
-                        class="col-sm-3 control-label"
-                        >更新時間</label
-                      >
-                      <div class="col-sm-9">
-                        <input
-                          type="text"
-                          id="received-step_time"
-                          readonly
-                        /><br />
-                      </div>
-                    </div>
-                    <div class="row">
-                      <label
-                        for="received-step_ip"
-                        class="col-sm-3 control-label"
-                        >IP 位置:</label
-                      >
-                      <div class="col-sm-9">
-                        <input
-                          type="text"
-                          id="received-step_ip"
-                          readonly
-                        /><br />
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card p-30">
-                <h2>UNET DONGLE</h2>
-                <div class="input-states">
-                  <form class="form-horizontal">
-                    <div class="row">
-                      <label
-                        for="received-AN203_ON_OFF_test"
-                        class="col-sm-3 control-label"
-                        >AN203</label
-                      >
-                      <div class="col-sm-9">
-                        <input
-                          type="text"
-                          id="received-AN203_ON_OFF_test"
-                          readonly
-                        />
-                      </div>
-                    </div>
-                    <div class="row">
-                      <label
-                        for="received-unet_ip"
-                        class="col-sm-3 control-label"
-                        >IP address</label
-                      >
-                      <div class="col-sm-9">
-                        <input
-                          type="text"
-                          id="received-unet_ip"
-                          readonly
-                        /><br />
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <label
-                        for="received-unet_time"
-                        class="col-sm-3 control-label"
-                        >更新時間:</label
-                      >
-                      <div class="col-sm-9">
-                        <input
-                          type="text"
-                          id="received-unet_time"
-                          readonly
-                        /><br />
-                      </div>
-                    </div>
-                  </form>
-                </div>
+                <h2>溫度與濕度區間</h2>
+                <div class="row"></div>
               </div>
             </div>
           </div>
-          <button id="startButton">開始處理</button>
-          <button onclick="stopProcessing()">Stop Processing</button>
           <!-- End PAge Content -->
         </div>
+        <p id="status">Waiting</p>
+        <button id="start-button" onclick="startChecking()">通訊確認</button>
+        <button id="submitButton" onclick="Test_data(event)" disabled>
+          送出
+        </button>
         <!-- End Container fluid  -->
         <!-- footer -->
         <!-- End footer -->
@@ -885,201 +689,181 @@
     <!--stickey kit -->
     <script src="/templates/js/lib/sticky-kit-master/dist/sticky-kit.min.js"></script>
     <script>
-      const socket = io();
+      const checkboxes = document.querySelectorAll("input[type='checkbox']");
+      const numberInputs = document.querySelectorAll("input[type='number']");
+      const textInputs = document.querySelectorAll("input[type='text']");
+      const radioInputs = document.querySelectorAll("input[type='radio']");
+      let start_checking_flag = false;
+      function validateForm() {
+        let allNumberInputsFilled = Array.from(numberInputs).every(
+          (input) => input.value.trim() !== ""
+        );
+        let allTextInputsFilled = Array.from(textInputs).every(
+          (input) => input.value.trim() !== ""
+        );
+        let atLeastOneRadioChecked = Array.from(radioInputs).some(
+          (radio) => radio.checked
+        );
 
-      var logEntries = [];
+        // Check min and max values
+        const temperatureMin = parseFloat(
+          document.getElementById("temperature-min").value
+        );
+        const temperatureMax = parseFloat(
+          document.getElementById("temperature-max").value
+        );
+        const humidityMin = parseFloat(
+          document.getElementById("humidity-min").value
+        );
+        const humidityMax = parseFloat(
+          document.getElementById("humidity-max").value
+        );
 
-      function logGenerate(logs) {
-        var logDiv = document.getElementById("log");
-        var newLogEntry = document.createElement("p");
-        var logText =
-          logs["time"] +
-          "   " +
-          logs["device"] +
-          "   " +
-          logs["command"] +
-          "  " +
-          logs["status"] +
-          "  " +
-          logs["operator"];
-        newLogEntry.textContent = logText;
-        logDiv.appendChild(newLogEntry);
-        logEntries.push(logs);
+        const isTemperatureValid =
+          isNaN(temperatureMin) ||
+          isNaN(temperatureMax) ||
+          temperatureMin <= temperatureMax;
+        const isHumidityValid =
+          isNaN(humidityMin) ||
+          isNaN(humidityMax) ||
+          humidityMin <= humidityMax;
+
+        // Display error if values are invalid
+        if (!isTemperatureValid || !isHumidityValid) {
+          alert("溫度和濕度的最小值不能大於最大值。");
+        }
+
+        submitButton.disabled = !(
+          allNumberInputsFilled &&
+          allTextInputsFilled &&
+          atLeastOneRadioChecked &&
+          isTemperatureValid &&
+          isHumidityValid &&
+          start_checking_flag
+        );
       }
 
-      function startGenerate(logs) {
-        var logDiv = document.getElementById("log");
-        var newLogEntry = document.createElement("p");
-        var logText = logs["time"] + "   " + logs["device"];
-        newLogEntry.textContent = logText;
-        newLogEntry.classList.add("highlight-red");
-        logDiv.appendChild(newLogEntry);
-        logEntries.push(logs);
-      }
+      // Add event listeners to all relevant inputs
+      numberInputs.forEach((input) =>
+        input.addEventListener("input", validateForm)
+      );
+      textInputs.forEach((input) =>
+        input.addEventListener("input", validateForm)
+      );
+      radioInputs.forEach((radio) =>
+        radio.addEventListener("change", validateForm)
+      );
 
-      function connectfailGenerate(logs) {
-        var logDiv = document.getElementById("log");
-        var newLogEntry = document.createElement("p");
-        var logText = logs["time"] + "   " + logs["device"];
-        newLogEntry.textContent = logText;
-        newLogEntry.classList.add("highlight-red");
-        logDiv.appendChild(newLogEntry);
-        logEntries.push(logs);
-      }
+      // Initial validation check
+      validateForm();
 
-      function reconnectGenerate(logs) {
-        var logDiv = document.getElementById("log");
-        var newLogEntry = document.createElement("p");
-        var logText = logs["time"] + "   " + logs["device"];
-        newLogEntry.textContent = logText;
-        newLogEntry.classList.add("highlight-green");
-        logDiv.appendChild(newLogEntry);
-        logEntries.push(logs);
-      }
+      async function Test_data(event) {
+        event.preventDefault();
 
-      function detectGenerate(logs) {
-        var logDiv = document.getElementById("log");
-        var newLogEntry = document.createElement("p");
-        var logText =
-          logs["time"] +
-          "   " +
-          logs["device"] +
-          "   " +
-          logs["command"] +
-          "  " +
-          logs["status"] +
-          "  " +
-          logs["operator"];
-        newLogEntry.textContent = logText;
-        newLogEntry.classList.add("highlight-purple");
-        logDiv.appendChild(newLogEntry);
-        logEntries.push(logs);
-      }
+        var spinnerOverlay = document.getElementById("spinner-overlay");
+        var buttons = document.querySelectorAll("button");
 
-      function downloadLog() {
-        var worksheet = XLSX.utils.json_to_sheet(logEntries);
-        var workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Log");
-
-        XLSX.writeFile(workbook, "log.xlsx");
-      }
-
-      function clearLog() {
-        var logDiv = document.getElementById("log");
-        logDiv.innerHTML = "<p>時間  裝置  指令  狀態  操作者</p>";
-        logEntries = [];
-      }
-
-      function stopProcessing() {
-        // 触发停止处理事件
-        socket.emit("stop_processing");
-      }
-      document.addEventListener("DOMContentLoaded", function () {
-        console.log("Form submitted"); // 检查控制台是否打印此信息
-        var socket = io();
-        socket.on("processing_stopped", function (data) {
-          console.log(data.status);
-          alert(data.status); // 显示停止消息
-        });
-        socket.on("update_detect", (data) => {
-          detectGenerate(data);
-        });
-        socket.on("start_button", (data) => {
-          startGenerate(data);
-        });
-        socket.on("connection_fail", (data) => {
-          connectfailGenerate(data);
-        });
-        socket.on("reconnection", (data) => {
-          reconnectGenerate(data);
-        });
-        socket.on("show_popup", (data) => {
-          alert(`服务器 ${data.server} ${data.status}`);
-        });
-
-        socket.on("update_result", function (data) {
-          var serverType = data.server_type;
-
-          // 根据服务器类型设置相应的输入框的值
-          if (serverType === "arm_server") {
-            document.getElementById("received-arm_servo_1").value =
-              data.servo_dict.servo_1;
-            document.getElementById("received-arm_servo_2").value =
-              data.servo_dict.servo_2;
-            document.getElementById("received-arm_servo_3").value =
-              data.servo_dict.servo_3;
-            document.getElementById("received-arm_servo_4").value =
-              data.servo_dict.servo_4;
-            document.getElementById("received-arm_servo_5").value =
-              data.servo_dict.servo_5;
-            document.getElementById("received-arm_servo_6").value =
-              data.servo_dict.servo_6;
-            document.getElementById("received-arm_temperature").value =
-              data.temperature;
-            document.getElementById("received-arm_humidity").value =
-              data.humidity;
-            document.getElementById("received-arm_ip_address").value =
-              data.ip_address;
-            document.getElementById("received-arm_detect").value = data.detect;
-            document.getElementById("received-arm_set_servo").value =
-              data.set_servo;
-            document.getElementById("received-arm_time").value =
-              data.receivedtime;
-            logGenerate(data.logs);
-          }
-
-          if (serverType === "dut_server") {
-            document.getElementById("received-servo_1").value =
-              data.servo_dict.servo_1;
-            document.getElementById("received-servo_2").value =
-              data.servo_dict.servo_2;
-            document.getElementById("received-servo_3").value =
-              data.servo_dict.servo_3;
-            document.getElementById("received-servo_4").value =
-              data.servo_dict.servo_4;
-            document.getElementById("received-servo_5").value =
-              data.servo_dict.servo_5;
-            document.getElementById("received-servo_6").value =
-              data.servo_dict.servo_6;
-            document.getElementById("received-temperature").value =
-              data.temperature;
-            document.getElementById("received-humidity").value = data.humidity;
-            document.getElementById("received-ip_address").value =
-              data.ip_address;
-            document.getElementById("received-detect").value = data.detect;
-            document.getElementById("received-set_servo").value =
-              data.set_servo;
-            document.getElementById("received-time").value = data.receivedtime;
-            logGenerate(data.logs);
-          }
-
-          if (serverType === "step_server") {
-            document.getElementById("received-real_position").value =
-              data.real_position;
-            document.getElementById("received-step_time").value =
-              data.step_time;
-            document.getElementById("received-step_ip").value = data.step_ip;
-            logGenerate(data.logs);
-          }
-
-          if (serverType === "unet_server") {
-            document.getElementById("received-set_MC026_binding").value =
-              data.set_MC026_binding;
-            document.getElementById("received-AN203_ON_OFF_test").value =
-              data.AN203_ON_OFF_test;
-            document.getElementById("received-unet_time").value =
-              data.unet_time;
-            document.getElementById("received-unet_ip").value = data.unet_ip;
-            logGenerate(data.logs);
-          }
-        });
+        spinnerOverlay.style.display = "flex";
+        buttons.forEach((button) => button.classList.add("disabled"));
+        // 獲取所有表單數據
+        const formData = new FormData();
 
         document
-          .getElementById("startButton")
-          .addEventListener("click", function () {
-            socket.emit("start_processing");
+          .querySelectorAll("input[type='number'], input[type='text']")
+          .forEach((input) => {
+            formData.append(input.name, input.value);
           });
-      });
+        document
+          .querySelectorAll("input[type='checkbox']")
+          .forEach((checkbox) => {
+            formData.append(checkbox.name, checkbox.checked);
+          });
+        document
+          .querySelectorAll("input[type='radio']:checked")
+          .forEach((radio) => {
+            formData.append(radio.name, radio.value);
+          });
+        // 將表單數據轉換為JSON對象
+        const data = Object.fromEntries(formData.entries());
+
+        // 發送AJAX請求到服務器
+        try {
+          const response = await fetch("/test_data", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+          if (response.ok) {
+            setTimeout(function () {
+              spinnerOverlay.style.display = "none";
+              buttons.forEach((button) => button.classList.remove("disabled"));
+            });
+            window.location.href = "/templates/test.html";
+            // 成功後導航到下一頁面
+          } else {
+            console.error("Failed to submit data");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      async function startChecking() {
+        const checkInterval = 5000; // Check every 5 seconds
+        var spinnerOverlay = document.getElementById("spinner-overlay");
+        var buttons = document.querySelectorAll("button");
+        spinnerOverlay.style.display = "flex";
+        buttons.forEach((button) => button.classList.add("disabled"));
+        let intervalId = setInterval(async () => {
+          try {
+            let response = await fetch("/check_connections");
+            let data = await response.json();
+            let statusText = "";
+            let allConnected = true;
+
+            for (let [server, status] of Object.entries(data)) {
+              if (status === "Not connected") {
+                statusText += `${server} is not connected.\n`;
+                allConnected = false;
+              }
+            }
+
+            if (allConnected) {
+              clearInterval(intervalId);
+              start_checking_flag = true;
+              validateForm();
+              setTimeout(function () {
+                spinnerOverlay.style.display = "none";
+                buttons.forEach((button) =>
+                  button.classList.remove("disabled")
+                );
+              });
+              document.getElementById("status").textContent =
+                "All servers are connected.";
+            } else {
+              setTimeout(function () {
+                spinnerOverlay.style.display = "none";
+                buttons.forEach((button) =>
+                  button.classList.remove("disabled")
+                );
+              });
+              document.getElementById("status").textContent =
+                statusText ||
+                "Some servers are not connected. Please check the IPs.";
+            }
+          } catch (error) {
+            setTimeout(function () {
+              spinnerOverlay.style.display = "none";
+              buttons.forEach((button) => button.classList.remove("disabled"));
+            });
+            console.error("Error checking connections:", error);
+            document.getElementById("status").textContent =
+              "Error checking connections.";
+          }
+        }, checkInterval);
+      }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
@@ -1087,8 +871,7 @@
     <script src="/templates/js/lib/datamap/topojson.js"></script>
     <script src="/templates/js/lib/datamap/datamaps.world.min.js"></script>
     <script src="/templates/js/lib/datamap/datamap-init.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+
     <script src="/templates/js/lib/weather/jquery.simpleWeather.min.js"></script>
     <script src="/templates/js/lib/weather/weather-init.js"></script>
     <script src="/templates/js/lib/owl-carousel/owl.carousel.min.js"></script>
