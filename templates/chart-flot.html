@@ -240,6 +240,7 @@
                 >
                 <ul aria-expanded="false" class="collapse">
                   <li><a href="/templates/email-compose.html">設備控制</a></li>
+                  <li><a href="/templates/sb_server.html">SB_Server</a></li>
                 </ul>
               </li>
               <li>
@@ -564,21 +565,58 @@
             </div>
           </div>
           <div class="card p-30">
-            <h2>STEP馬達</h2>
+            <h2>sb馬達</h2>
             <div class="input-states">
               <form onsubmit="sendData(event)">
-                <div class="row">
-                  <label for="real_position" class="col-sm-3 control-label"
-                    >Postion from origin</label
+                <div class="form-group row">
+                  <label for="track" class="col-sm-6 control-label"
+                    >track</label
                   >
-                  <input
-                    type="text"
-                    id="real_position"
-                    name="real_position"
-                    min="0"
-                    max="6"
-                    required
-                  />
+                  <div class="col-sm-6">
+                    <select
+                      id="track"
+                      name="track"
+                      class="form-control"
+                      style="text-align: center"
+                    >
+                      <option value="left">Left</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label for="track_number" class="col-sm-6 control-label"
+                    >track_number</label
+                  >
+                  <div class="col-sm-6">
+                    <input
+                      type="text"
+                      id="track_number"
+                      name="track_number"
+                      min="0"
+                      required
+                      class="form-control"
+                      style="text-align: right"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label for="direction" class="col-sm-6 control-label"
+                    >direction</label
+                  >
+                  <div class="col-sm-6">
+                    <select
+                      id="direction"
+                      name="direction"
+                      class="form-control"
+                      style="text-align: center"
+                    >
+                      <option value="forward">forward</option>
+                      <option value="backforward">backforward</option>
+                    </select>
+                  </div>
                 </div>
               </form>
             </div>
@@ -609,6 +647,7 @@
         </div>
         <div class="container-fluid">
           <!-- Start Page Content -->
+
           <div class="row">
             <div class="card p-30">
               <h2>溫度與濕度區間</h2>

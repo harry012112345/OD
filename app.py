@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, jsonify, send_file, redirect, url_for,flash,session
 from flask_restful import Api, Resource
+from flask_cors import CORS  # 导入CORS
 from flask_socketio import SocketIO, emit
 import pandas as pd
 import json
@@ -14,7 +15,11 @@ import aiohttp
 from threading import Thread
 
 app = Flask(__name__,static_folder='templates',template_folder='templates')
-socketio = SocketIO(app)
+# socketio = SocketIO(app)
+
+CORS(app)  # 启用CORS
+socketio = SocketIO(app, cors_allowed_origins="*")  # 允许所有来源连接
+
 
 current_path = os.getcwd()
 additional_path = "test_excel"
@@ -26,7 +31,7 @@ received_data = []
 
 global_dut_ip=[]
 global_arm_ip=[]
-global_step_ip=[]
+global_sb_ip=[]
 global_unet_ip=[]
 
 temperature_max=0
@@ -38,7 +43,7 @@ execute_excel=[]
 
 log_arm_data=[]
 log_dut_data=[]
-log_step_data=[]
+log_sb_data=[]
 log_unet_data=[]
 
 server_dead_flag=True
@@ -52,7 +57,7 @@ users = {'admin': 'admin'}
 now = datetime.datetime.now()
 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
 local_ip='192.168.15.108'
-server_ips = [f'http://{global_dut_ip}/get_info', f'http://{global_arm_ip}/get_info', f'http://{global_step_ip}/get_info', f'http://{global_step_ip}/get_info']
+server_ips = [f'http://{global_dut_ip}/get_info', f'http://{global_arm_ip}/get_info', f'http://{global_sb_ip}/get_info', f'http://{global_unet_ip}/get_info']
 
 async def check_connection(name, ip):
     try:
@@ -143,17 +148,17 @@ def save_ips_to_file(ip_addresses):
 ip_addresses = load_ips_from_file()
 global_arm_ip = ip_addresses.get('arm_server', 'Not found')
 global_dut_ip = ip_addresses.get('dut_server', 'Not found')
-global_step_ip = ip_addresses.get('step_server', 'Not found')
+global_sb_ip = ip_addresses.get('sb_server', 'Not found')
 global_unet_ip = ip_addresses.get('unet_server', 'Not found')
 
 
 @app.route('/')
 def index():
-    global global_dut_ip, global_arm_ip, global_step_ip, global_unet_ip
+    global global_dut_ip, global_arm_ip, global_sb_ip, global_unet_ip
     ip_addresses = load_ips_from_file()
     global_arm_ip = ip_addresses.get('arm_server', 'Not found')
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
-    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_sb_ip = ip_addresses.get('sb_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
     return render_template(('login.html'))
 
@@ -171,17 +176,17 @@ def login():
 
 @app.route('/check_connections', methods=['GET'])
 async def check_connections():
-    global global_dut_ip, global_arm_ip, global_step_ip, global_unet_ip
+    global global_dut_ip, global_arm_ip, global_sb_ip, global_unet_ip
     ip_addresses = load_ips_from_file()
     global_arm_ip = ip_addresses.get('arm_server', 'Not found')
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
-    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_sb_ip = ip_addresses.get('sb_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
     
     server_ips = {
         'arm_server': f'http://{global_arm_ip}/get_info',
         'dut_server': f'http://{global_dut_ip}/get_info',
-        'step_server': f'http://{global_step_ip}/get_info',
+        'sb_server': f'http://{global_sb_ip}/get_info',
         'unet_server': f'http://{global_unet_ip}/get_info'
     }
 
@@ -193,11 +198,11 @@ def welcome():
     if 'username' not in session:
         return redirect(url_for('login'))
     username=session['username']
-    global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
+    global global_dut_ip,global_arm_ip,global_sb_ip,global_unet_ip
     ip_addresses = load_ips_from_file()
     global_arm_ip = ip_addresses.get('arm_server', 'Not found')
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
-    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_sb_ip = ip_addresses.get('sb_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
     return render_template('welcome.html',formatted_time=formatted_time,username=username,local_ip=local_ip)
 
@@ -213,10 +218,10 @@ def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
     ip_addresses = load_ips_from_file()
-    global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
+    global global_dut_ip,global_arm_ip,global_sb_ip,global_unet_ip
     global_arm_ip = ip_addresses.get('arm_server', 'Not found')
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
-    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_sb_ip = ip_addresses.get('sb_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
     username=session['username']
     return render_template('index.html', received_data=received_data,formatted_time=formatted_time,username=username,local_ip=local_ip)
@@ -232,10 +237,10 @@ def dashboard():
 def test_ip():
     username=session['username']
     ip_addresses = load_ips_from_file()
-    global global_dut_ip,global_arm_ip,global_step_ip,global_unet_ip
+    global global_dut_ip,global_arm_ip,global_sb_ip,global_unet_ip
     global_arm_ip = ip_addresses.get('arm_server', 'Not found')
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
-    global_step_ip = ip_addresses.get('step_server', 'Not found')
+    global_sb_ip = ip_addresses.get('sb_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
     files = [f for f in os.listdir(UPLOAD_FOLDER) if f.endswith(('.xlsx', '.xls'))]
     return render_template('test_ip.html',formatted_time=formatted_time,username=username,local_ip=local_ip,files=files)
@@ -255,14 +260,14 @@ def test_ip():
 #    arm_servo_4 = data['arm_servo_4']
 #    arm_servo_5 = data['arm_servo_5']
 #    arm_servo_6 = data['arm_servo_6']
-#    step_value = data['real_position']
+#    sb_value = data['real_position']
 #    
 #    now = datetime.datetime.now()
 #    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
 #
 #    test_1_url = f'http://{global_dut_ip}/set_servo?servo_1={dut_servo_1}&servo_2={dut_servo_2}&servo_3={dut_servo_3}&servo_4={dut_servo_4}&servo_5={dut_servo_5}&servo_6={dut_servo_6}'
 #    test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
-#    test_3_url = f'http://{global_step_ip}/set_distance?position={step_value}'
+#    test_3_url = f'http://{global_sb_ip}/set_distance?position={sb_value}'
 #
 #    # 同時發送所有請求
 #    responses = await asyncio.gather(
@@ -333,7 +338,9 @@ async def test_data():
     arm_servo_4 = data['arm_servo_4']
     arm_servo_5 = data['arm_servo_5']
     arm_servo_6 = data['arm_servo_6']
-    step_value = data['real_position']
+    sb_track = data['track']
+    sb_track_number=data['track_number']
+    sb_direction=data['direction']
     unet_status = data['check_unet']
     global temperature_max,temperature_min,humidity_max,humidity_min
     temperature_max = float(data['temperature-max'])
@@ -343,7 +350,7 @@ async def test_data():
     new_data = [
         ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, 1, 'no', None],
         ['arm_server', arm_servo_1, arm_servo_2, arm_servo_3, arm_servo_4, arm_servo_5, arm_servo_6, 1, 'no', None],
-        ['step_server', step_value, None, None, None, None, None, 1, 'no', None],
+        ['sb_server', sb_track, sb_track_number, sb_direction, None, None, None, 1, 'no', None],
         ['unet_server', unet_status, None, None, None, None, None, 1, 'no', None]
     ]
     new_df = pd.DataFrame(new_data, columns=[
@@ -359,7 +366,7 @@ async def test_data():
     check_init_data(data)
     test_1_url = f'http://{global_dut_ip}/set_servo?servo_1={dut_servo_1}&servo_2={dut_servo_2}&servo_3={dut_servo_3}&servo_4={dut_servo_4}&servo_5={dut_servo_5}&servo_6={dut_servo_6}'
     test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
-    test_3_url = f'http://{global_step_ip}/set_distance?position={step_value}'
+    test_3_url = f'http://{global_sb_ip}/move?track={sb_track}&track_number={sb_track_number}&direction={sb_direction}'
     test_4_url = f'http://{global_unet_ip}/AN203_{unet_status}'
     # 同時執行所有請求
     responses = await asyncio.gather(
@@ -573,11 +580,13 @@ def handle_start_processing():
                              test = requests.post(f'http://{global_unet_ip}/AN203_OFF')
                           if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
                              break
-            elif row[0] == "step_server":
+            elif row[0] == "sb_server":
              param1 = str(row['parameter_1'])
-             global global_step_ip
-             ip_address=global_step_ip
-             url=f'http://{ip_address}/set_distance?position={param1}'
+             param2 = str(row['parameter_2'])
+             param3 = str(row['parameter_3'])
+             global global_sb_ip
+             ip_address=global_sb_ip
+             url=f'http://{ip_address}/move?track={param1}&track_number={param2}&direction={param3}'
              test = requests.post(url)
              if test.status_code == 200:
                  # 解析 JSON 數據
@@ -585,17 +594,17 @@ def handle_start_processing():
                 now = datetime.datetime.now()
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
                 data['server_type'] = server_type
-                data['step_time'] = formatted_time
-                data['step_ip'] = ip_address
-                global log_step_data
-                log_step_data = {
-                    'time': data['step_time'],
-                    'device': 'step馬達',
-                    'command': f'往前{param1}(cm)',
-                    'status': f"{data['real_position']},{data['step_ip']}",
+                data['sb_time'] = formatted_time
+                data['sb_ip'] = ip_address
+                global log_sb_data
+                log_sb_data = {
+                    'time': data['receivedtime'],
+                    'device': 'sb馬達',
+                    'command': f'track={param1},track_number={param2},direction={param3}',
+                    'status': f"{data['track']},{data['track_number']},{data['direction']},{global_sb_ip}",
                     'operator': 'admin'
                 }
-                data['logs'] = log_step_data   
+                data['logs'] = log_sb_data   
             elif row[0] == "unet_server":
              param1 = str(row['parameter_1'])
              ip_address=global_unet_ip
@@ -630,7 +639,7 @@ def handle_start_processing():
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
                 update_data = {
                     'time': formatted_time,
-                  'device': log_step_data['status'].split(',')[0],
+                  'device': log_sb_data['status'].split(',')[2],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
                 'operator': 'admin'
@@ -654,7 +663,7 @@ def handle_start_processing():
             servers = {
                 'dut': global_dut_ip,
                 'arm': global_arm_ip,
-                'step': global_step_ip,
+                'sb': global_sb_ip,
                 'unet': global_unet_ip
             }
             for server_name, ip in servers.items():
@@ -700,7 +709,7 @@ def handle_start_processing():
                'device': 'dut機器手臂',
                'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
                'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_dut_ip}",
-               'operator': 'admin'
+               'operator': 'admin'  
                }
                data['logs'] = log_dut_data 
             elif data['name']=='arm_server':
@@ -722,15 +731,15 @@ def handle_start_processing():
                              test = requests.post(f'http://{global_unet_ip}/AN203_OFF')
                           if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
                              break
-            elif data['name']=='step_server':
-                log_step_data = {
+            elif data['name']=='sb_server':
+                log_sb_data = {
                     'time': data['receivedtime'],
-                    'device': 'step馬達',
-                    'command': f'往前{param1}(cm)',
-                    'status': f"{data['real_position']},{global_step_ip}",
+                    'device': 'sb馬達',
+                    'command': f'track={param1},track_number={param2},direction={param3}',
+                    'status': f"{data['track']},{data['track_number']},{data['direction']},{global_sb_ip}",
                     'operator': 'admin'
                 }
-                data['logs'] = log_step_data
+                data['logs'] = log_sb_data
             elif data['name']=='unet_server':
                 data['AN203_ON_OFF_test']=f'AN203_{param1}'
                 log_unet_data={
@@ -749,7 +758,7 @@ def handle_start_processing():
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
                 update_data = {
                     'time': formatted_time,
-                  'device': log_step_data['status'].split(',')[0],
+                  'device': log_sb_data['status'].split(',')[2],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
                 'operator': detect_axis
@@ -828,7 +837,7 @@ def receive_ip():
     if request.is_json:
         data = request.get_json()
         ip_addresses = load_ips_from_file()
-
+        print(data)
         name = data.get('name')
         ip_address = data.get('ip_address')
         
@@ -843,10 +852,10 @@ def receive_ip():
                 global_dut_ip = ip_address
                 ip_addresses['dut_server'] = global_dut_ip
 
-            elif name == 'step_server':
-                global global_step_ip
-                global_step_ip = ip_address
-                ip_addresses['step_server'] = global_step_ip
+            elif name == 'sb_server':
+                global global_sb_ip
+                global_sb_ip = ip_address
+                ip_addresses['sb_server'] = global_sb_ip
 
             elif name == 'unet_server':
                 global global_unet_ip
@@ -871,9 +880,39 @@ def server_keep_alive():
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     data['server_type']=name
     data['receivedtime']=formatted_time
+    print(data)
     socketio.emit('server_keep_alive',data)
     response_data = {'message': "server_keep_alive received successfully"}
     return jsonify(response_data)
+
+
+
+@app.route("/execute_api", methods=["GET"])
+def execute_api():
+    global global_sb_ip
+    ip_address=global_sb_ip
+    api_id = request.args.get('api_id')
+    print(api_id)
+    test = requests.get(f'http://{ip_address}/{api_id}')
+    data = test.json()
+    print(data)
+    return jsonify(data)
+
+
+
+
+@app.route('/self_check', methods=["GET"])
+def self_check():
+    global global_sb_ip
+    ip_address=global_sb_ip
+    print(global_sb_ip)
+    test = requests.get(f'http://{ip_address}/self_check_and_turn_on_system')
+    data = test.json()
+    print(data)
+    if test.status_code == 200:
+       data = test.json()
+       print(data)
+    return jsonify(data)
 
 
 
@@ -891,7 +930,7 @@ def detection():
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             update_data = {
                     'time': formatted_time,
-                  'device': log_step_data['status'].split(',')[0],
+                  'device': log_sb_data['status'].split(',')[2],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
                 'operator': detect_axis
@@ -914,7 +953,7 @@ def dut():
     servo_2_value = data['servo_2']
     servo_3_value = data['servo_3']
     servo_4_value = data['servo_4']
-    servo_5_value = data['servo_5'] 
+    servo_5_value = data['servo_5']
     servo_6_value = data['servo_6']
     test = requests.post(f'http://{ip_address}/set_servo?servo_1={servo_1_value}&servo_2={servo_2_value}&servo_3={servo_3_value}&servo_4={servo_4_value}&servo_5={servo_5_value}&servo_6={servo_6_value}')
     if test.status_code == 200:
@@ -971,29 +1010,52 @@ def arm():
     return jsonify(data)
 
 
-@app.route('/api/step', methods=['POST'])
-def step():
+@app.route('/api/sb', methods=['POST'])
+def sb():
     now = datetime.datetime.now()
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     data = request.get_json()
-    global global_step_ip
-    ip_address=global_step_ip
-    in_real_position=data.get('real_position')
-    test = requests.post(f'http://{ip_address}/set_distance?position={in_real_position}')
+    global global_sb_ip
+    ip_address=global_sb_ip
+    track=data.get('track')
+    track_number=data.get('track_number')
+    direction=data.get('direction')
+    test = requests.post(f'http://{ip_address}/move?track={track}&track_number={track_number}&direction={direction}')
     if test.status_code == 200:
             data = test.json()
     else:
         print("Failed to retrieve data:", test.status_code)
-    data['step_time'] = formatted_time
-    data['step_ip'] = ip_address
-    log_step_data = {
-        'time': data['step_time'],
-        'device': 'step馬達',
-        'command': f'往前{in_real_position}(cm)',
-        'status': f"{data['real_position']},{data['step_ip']}",
-        'operator': 'admin'
-    }
-    data['logs'] = log_step_data
+    if not isinstance(data, dict):
+        message=data
+        data={
+            'location':{
+            'track': "",
+            'track_number':"",
+            'direction':"",
+            },
+            'sb_time':"",
+            'sb_ip':"",
+            'logs':{
+                'time': f"{formatted_time}",
+                'device': 'sb馬達',
+                'command': f'{track}側車道,{track_number},方向向{direction}',
+                'status': f"{message},{ip_address}",
+                'operator': 'admin'
+                }
+        }
+    else:
+        data['sb_time'] = formatted_time
+        data['sb_ip'] = ip_address
+        log_sb_data = {
+            'time': data['sb_time'],
+            'device': 'sb馬達',
+            'command': f'{track}側車道,{track_number},方向向{direction}',
+            'status': f"{data['location']['track']},{data['location']['track_number']},{data['location']['direction']},{data['sb_ip']}",
+            'operator': 'admin'
+        }
+        data['logs'] = log_sb_data
+        print(data)
+    print(data)
     return jsonify(data)
 
 

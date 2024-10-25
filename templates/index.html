@@ -179,6 +179,7 @@
                 >
                 <ul aria-expanded="false" class="collapse">
                   <li><a href="/templates/email-compose.html">設備控制</a></li>
+                  <li><a href="/templates/sb_server.html">SB_Server</a></li>
                 </ul>
               </li>
               <li>
@@ -555,45 +556,61 @@
                 <div class="input-states">
                   <form class="form-horizontal">
                     <div class="row">
+                      <label for="received-track" class="col-sm-3 control-label"
+                        >track</label
+                      >
+                      <div class="col-sm-9">
+                        <input type="text" id="received-track" readonly />
+                      </div>
+                    </div>
+
+                    <div class="row">
                       <label
-                        for="received-real_position"
+                        for="received-track_number"
                         class="col-sm-3 control-label"
-                        >Postion from origin</label
+                        >track_number</label
                       >
                       <div class="col-sm-9">
                         <input
                           type="number"
-                          id="received-real_position"
+                          id="received-track_number"
                           readonly
+                          min="0"
                         />
                       </div>
                     </div>
+
                     <div class="row">
                       <label
-                        for="received-step_time"
+                        for="received-direction"
+                        class="col-sm-3 control-label"
+                        >direction</label
+                      >
+                      <div class="col-sm-9">
+                        <input type="text" id="received-direction" readonly />
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <label
+                        for="received-sb_time"
                         class="col-sm-3 control-label"
                         >更新時間</label
                       >
                       <div class="col-sm-9">
                         <input
                           type="text"
-                          id="received-step_time"
+                          id="received-sb_time"
                           readonly
                         /><br />
                       </div>
                     </div>
                     <div class="row">
-                      <label
-                        for="received-step_ip"
-                        class="col-sm-3 control-label"
+                      <label for="received-sb_ip" class="col-sm-3 control-label"
                         >IP 位置:</label
                       >
                       <div class="col-sm-9">
-                        <input
-                          type="text"
-                          id="received-step_ip"
-                          readonly
-                        /><br />
+                        <input type="text" id="received-sb_ip" readonly /><br />
                       </div>
                     </div>
                   </form>
@@ -742,12 +759,16 @@
             document.getElementById("received-time").value = data.receivedtime;
           }
 
-          if (serverType === "step_server") {
-            document.getElementById("received-real_position").value =
-              data.value;
-            document.getElementById("received-step_time").value =
+          if (serverType === "sb_server") {
+            document.getElementById("received-track").value =
+              data.location.track;
+            document.getElementById("received-track_number").value =
+              data.location.track_number;
+            document.getElementById("received-direction").value =
+              data.location.direction;
+            document.getElementById("received-sb_time").value =
               data.receivedtime;
-            document.getElementById("received-step_ip").value = data.ip_address;
+            document.getElementById("received-sb_ip").value = data.ip_address;
           }
 
           if (serverType === "unet_server") {

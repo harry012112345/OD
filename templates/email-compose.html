@@ -187,6 +187,7 @@
                 >
                 <ul aria-expanded="false" class="collapse">
                   <li><a href="/templates/email-compose.html">設備控制</a></li>
+                  <li><a href="/templates/sb_server.html">SB_Server</a></li>
                 </ul>
               </li>
               <li>
@@ -268,115 +269,144 @@
             <div class="col-md-3">
               <div class="card p-30">
                 <h2>DUT手臂</h2>
-                <div class="card-body">
-                      <form onsubmit="dut_server(event)">
+                  <div class="input-states">
+                      <form class="form-horizontal" onsubmit="dut_server(event)">
                       <div class="row">
-                        <label for="servo_1" class="col-sm-3 control-label">Servo_1</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="servo_1" name="servo_1" min="0" max="180" required><br>
+                        <label for="servo_1" class="col-sm-6 col-form-label">Servo_1</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="servo_1" name="servo_1" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
-                        <label for="servo_2" class="col-sm-3 control-label">Servo_2</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="servo_2" name="servo_2" min="0" max="180" required><br>
+                        <label for="servo_2" class="col-sm-6 col-form-label">Servo_2</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="servo_2" name="servo_2" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
-                        <label for="servo_3" class="col-sm-3 control-label">Servo_3</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="servo_3" name="servo_3" min="0" max="180" required><br>
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label for="servo_4" class="col-sm-3 control-label">Servo_4</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="servo_4" name="servo_4" min="0" max="180" required><br>
+                        <label for="servo_3" class="col-sm-6 col-form-label">Servo_3</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="servo_3" name="servo_3" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
                         </div>
                       </div>
 
                       <div class="row">
-                        <label for="servo_5" class="col-sm-3 control-label">Servo_5</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="servo_5" name="servo_5" min="0" max="180" required><br>
+                        <label for="servo_4" class="col-sm-6 col-form-label">Servo_4</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="servo_4" name="servo_4" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
                         </div>
                       </div>
 
                       <div class="row">
-                        <label for="servo_6" class="col-sm-3 control-label">Servo_6</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="servo_6" name="servo_6" min="0" max="180" required><br>
+                        <label for="servo_5" class="col-sm-6 col-form-label">Servo_5</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="servo_5" name="servo_5" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <label for="servo_6" class="col-sm-6 col-form-label">Servo_6</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="servo_6" name="servo_6" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
                         </div>
                       </div>
                       <button type="submit">送出</button>
                     </form>
-                </div>
+                    </div>
               </div>
             </div>
             <div class="col-md-3">
               <div class="card p-30">
                 <h2>ARM手臂</h2>
                 <div class="card-body">
-                      <form onsubmit="arm_server(event)">
-                      <div class="row">
-                        <label for="arm_servo_1" class="col-sm-3 control-label">Servo_1</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="arm_servo_1" name="arm_servo_1" min="0" max="180" required><br>
+                  <div class="input-states">
+                      <form class="form-horizontal" onsubmit="arm_server(event)">
+                        <div class="form-group row">
+                        <label for="arm_servo_1" class="col-sm-6 col-form-label">Servo_1</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="arm_servo_1" name="arm_servo_1" min="0" max="180" required class="form-control"  style="text-align: right;">
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="arm_servo_2" class="col-sm-3 control-label">Servo_2</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="arm_servo_2" name="arm_servo_2" min="0" max="180" required><br>
+                      <div class="form-group row">
+                        <label for="arm_servo_2" class="col-sm-6 col-form-label">Servo_2</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="arm_servo_2" name="arm_servo_2" min="0" max="180" required class="form-control"  style="text-align: right;">
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="arm_servo_3" class="col-sm-3 control-label">Servo_3</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="arm_servo_3" name="arm_servo_3" min="0" max="180" required><br>
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label for="arm_servo_4" class="col-sm-3 control-label">Servo_4</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="arm_servo_4" name="arm_servo_4" min="0" max="180" required><br>
+                      <div class="form-group row">
+                        <label for="arm_servo_3" class="col-sm-6 col-form-label">Servo_3</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="arm_servo_3" name="arm_servo_3" min="0" max="180" required class="form-control"  style="text-align: right;">
                         </div>
                       </div>
 
-                      <div class="row">
-                        <label for="arm_servo_5" class="col-sm-3 control-label">Servo_5</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="arm_servo_5" name="arm_servo_5" min="0" max="180" required><br>
+                      <div class="form-group row">
+                        <label for="arm_servo_4" class="col-sm-6 col-form-label">Servo_4</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="arm_servo_4" name="arm_servo_4" min="0" max="180" required class="form-control"  style="text-align: right;">
                         </div>
                       </div>
 
-                      <div class="row">
-                        <label for="arm_servo_6" class="col-sm-3 control-label">Servo_6</label>
-                        <div class="col-sm-9">
-                          <input type="number" id="arm_servo_6" name="arm_servo_6" min="0" max="180" required><br>
+                      <div class="form-group row">
+                        <label for="arm_servo_5" class="col-sm-6 col-form-label">Servo_5</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="arm_servo_5" name="arm_servo_5" min="0" max="180" required class="form-control"  style="text-align: right;">
+                        </div>
+                      </div>
+
+                      <div class="form-group row">
+                        <label for="arm_servo_6" class="col-sm-6 col-form-label">Servo_6</label>
+                        <div class="col-sm-6">
+                          <input type="number" id="arm_servo_6" name="arm_servo_6" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
                         </div>
                       </div>
                       <button type="submit">送出</button>
                     </form>
+                  </div>
                 </div>
               </div>
             </div>
+            <div class="col-md-3">
               <div class="card p-30">
-                <h2>STEP馬達</h2>
-                <div class="input-states">
+                <h2>SB馬達</h2>
+                  <div class="input-states">
                     <form onsubmit="sendData(event)">
-                    <div class="row">
-                      <label for="real_position" class="col-sm-3 control-label"
-                        >Postion from origin</label
+                      <div class="form-group row">
+                        <label for="track" class="col-sm-6 control-label">track</label>
+                        <div class="col-sm-6">
+                          <select id="track" name="track" class="form-control" style="text-align: center;">
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                          </select>
+                        </div>
+                      </div>
+
+
+                    <div class="form-group row">
+                      <label for="track_number" class="col-sm-6 control-label"
+                        >track_number</label
                       >
-                        <input type="text" id="real_position" name="real_position" min="0" max="6" required/>
+                      <div class="col-sm-6">
+                        <input type="text" id="track_number" name="track_number" min="0"  required class="form-control"  style="text-align: right;"/>
+                      </div>
                     </div>
+
+                    <div class="form-group row">
+                      <label for="direction" class="col-sm-6 control-label">direction</label>
+                      <div class="col-sm-6">
+                        <select id="direction" name="direction" class="form-control" style="text-align: center;">
+                          <option value="forward">forward</option>
+                          <option value="backforward">backforward</option>
+                        </select>
+                      </div>
+                    </div>
+
+
                     <button type="submit">送出</button>
                   </form>
                 </div>
               </div>
+            </div>
             <div class="col-md-3">
               <div class="card p-30">
                 <h2>UNET DONGLE</h2>
@@ -387,53 +417,52 @@
               </div>
             </div>
           </div>
-        
+        </div>
         <div class="container-fluid">
           <!-- Start Page Content -->
           <div class="row">
             <div class="col-md-3">
               <div class="card p-30">
                 <h2>DUT手臂</h2>
-                <div class="card-body">
                   <div class="input-states">
                     <form class="form-horizontal">
                       <div class="row">
                         <label for="received-servo_1" class="col-sm-3 control-label">Servo_1</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-servo_1" readonly><br>
+                          <input type="text" id="received-servo_1" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
                         <label for="received-servo_2" class="col-sm-3 control-label">Servo_2</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-servo_2" readonly><br>
+                          <input type="text" id="received-servo_2" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
                         <label for="received-servo_3" class="col-sm-3 control-label">Servo_3</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-servo_3" readonly><br>
+                          <input type="text" id="received-servo_3" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
 
                       <div class="row">
                         <label for="received-servo_4" class="col-sm-3 control-label">Servo_4</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-servo_4" readonly><br>
+                          <input type="text" id="received-servo_4" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
 
                       <div class="row">
                         <label for="received-servo_5" class="col-sm-3 control-label">Servo_5</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-servo_5" readonly><br>
+                          <input type="text" id="received-servo_5" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
 
                       <div class="row">
                         <label for="received-servo_6" class="col-sm-3 control-label">Servo_6</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-servo_6" readonly><br>
+                          <input type="text" id="received-servo_6" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
 
@@ -442,14 +471,14 @@
                           >Temperature</label
                         >
                         <div class="col-sm-9">
-                          <input type="text" id="received-temperature" readonly><br>
+                          <input type="text" id="received-temperature" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
                         <label for="received-humidity" class="col-sm-3 control-label">Humidity</label>
                         <div class="col-sm-9">
                           <div class="input-group">
-                            <input type="text" id="received-humidity" readonly><br>
+                            <input type="text" id="received-humidity" readonly  style="text-align: right;"><br>
                           </div>
                         </div>
                       </div>
@@ -457,7 +486,7 @@
                         <label for="received-detect" class="col-sm-3 control-label">Detection</label>
                         <div class="col-sm-9">
                           <div class="input-group">
-                            <input type="text" id="received-detect" readonly><br>
+                            <input type="text" id="received-detect" readonly  style="text-align: right;"><br>
                           </div>
                         </div>
                       </div>
@@ -467,7 +496,7 @@
                         >
                         <div class="col-sm-9">
                           <div class="input-group">
-                            <input type="text" id="received-set_servo" readonly><br>
+                            <input type="text" id="received-set_servo" readonly  style="text-align: right;"><br>
                           </div>
                         </div>
                       </div>
@@ -475,7 +504,7 @@
                         <label for="received-ip_address" class="col-sm-3 control-label">IP address</label>
                         <div class="col-sm-9">
                           <div class="input-group">
-                            <input type="text" id="received-ip_address" readonly><br>
+                            <input type="text" id="received-ip_address" readonly  style="text-align: right;"><br>
                           </div>
                         </div>
                       </div>
@@ -485,13 +514,13 @@
                         >
                         <div class="col-sm-9">
                           <div class="input-group">
-                            <input type="text" id="received-time" readonly><br>
+                            <input type="text" id="received-time" readonly  style="text-align: right;"><br>
                           </div>
                         </div>
                       </div>
                     </form>
                   </div>
-                </div>
+
               </div>
             </div>
             <div class="col-md-3">
@@ -503,40 +532,40 @@
                       <div class="row">
                         <label for="received-arm_servo_1" class="col-sm-3 control-label">Servo_1</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_1" readonly><br>
+                          <input type="text" id="received-arm_servo_1" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
                         <label for="received-arm_servo_2" class="col-sm-3 control-label">Servo_2</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_2" readonly><br>
+                          <input type="text" id="received-arm_servo_2" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
                         <label for="received-arm_servo_3" class="col-sm-3 control-label">Servo_3</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_3" readonly><br>
+                          <input type="text" id="received-arm_servo_3" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
 
                       <div class="row">
                         <label for="received-arm_servo_4" class="col-sm-3 control-label">Servo_4</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_4" readonly><br>
+                          <input type="text" id="received-arm_servo_4" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
 
                       <div class="row">
                         <label for="received-arm_servo_5" class="col-sm-3 control-label">Servo_5</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_5" readonly><br>
+                          <input type="text" id="received-arm_servo_5" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
 
                       <div class="row">
                         <label for="received-arm_servo_6" class="col-sm-3 control-label">Servo_6</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_6" readonly><br>
+                          <input type="text" id="received-arm_servo_6" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
 
@@ -545,19 +574,19 @@
                           >Temperature</label
                         >
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_temperature" readonly><br>
+                          <input type="text" id="received-arm_temperature" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
                         <label for="received-arm_humidity" class="col-sm-3 control-label">Humidity</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_humidity" readonly><br>
+                          <input type="text" id="received-arm_humidity" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
                         <label for="received-arm_detect" class="col-sm-3 control-label">Detection</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_detect" readonly><br>
+                          <input type="text" id="received-arm_detect" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
@@ -565,13 +594,13 @@
                           >Communication</label
                         >
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_set_servo" readonly><br>
+                          <input type="text" id="received-arm_set_servo" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
                         <label for="received-arm_ip_address" class="col-sm-3 control-label">IP address</label>
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_ip_address" readonly><br>
+                          <input type="text" id="received-arm_ip_address" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                       <div class="row">
@@ -579,7 +608,7 @@
                           >Update time</label
                         >
                         <div class="col-sm-9">
-                          <input type="text" id="received-arm_time" readonly><br>
+                          <input type="text" id="received-arm_time" readonly  style="text-align: right;"><br>
                         </div>
                       </div>
                     </form>
@@ -589,31 +618,51 @@
             </div>
             <div class="col-md-3">
               <div class="card p-30">
-                <h2>STEP馬達</h2>
+                <h2>SB馬達</h2>
                 <div class="input-states">
                   <form class="form-horizontal">
                     <div class="row">
-                      <label for="received-real_position" class="col-sm-3 control-label"
-                        >Postion from origin</label
+                      <label for="received-track" class="col-sm-3 control-label"
+                        >track</label
                       > 
                       <div class="col-sm-9">
-                        <input type="number" id="received-real_position" readonly/>
+                        <input type="text" id="received-track" readonly/>
                       </div>
                     </div>
+
                     <div class="row">
-                      <label for="received-step_time" class="col-sm-3 control-label"
+                      <label for="received-track" class="col-sm-3 control-label"
+                        >track_number</label
+                      > 
+                      <div class="col-sm-9">
+                        <input type="number" id="received-track_number" readonly/>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <label for="received-direction" class="col-sm-3 control-label"
+                        >direction</label
+                      > 
+                      <div class="col-sm-9">
+                        <input type="text" id="received-direction" readonly/>
+                      </div>
+                    </div>
+
+
+                    <div class="row">
+                      <label for="received-sb_time" class="col-sm-3 control-label"
                         >更新時間</label
                       >
                       <div class="col-sm-9">
-                        <input type="text" id="received-step_time" readonly><br>
+                        <input type="text" id="received-sb_time" readonly><br>
                       </div>
                     </div>
                     <div class="row">
-                      <label for="received-step_ip" class="col-sm-3 control-label"
+                      <label for="received-sb_ip" class="col-sm-3 control-label"
                         >IP 位置:</label
                       >
                       <div class="col-sm-9">
-                        <input type="text" id="received-step_ip" readonly><br>
+                        <input type="text" id="received-sb_ip" readonly><br>
                       </div>
                     </div>
                   </form>
@@ -648,7 +697,6 @@
                 </div>
               </div>
             </div>
-          </div>
 
           <!-- End PAge Content -->
         </div>
@@ -789,9 +837,12 @@
 
         spinnerOverlay.style.display = "flex";
         buttons.forEach((button) => button.classList.add("disabled"));
-            const data = { real_position: parseFloat(document.getElementById('real_position').value) };
+            const data = { track: document.getElementById('track').value,
+                           track_number: parseFloat(document.getElementById('track_number').value),
+                           direction: document.getElementById('direction').value
+             };
 
-            fetch('/api/step', {
+            fetch('/api/sb', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -800,9 +851,11 @@
             })
             .then(response => response.json())
             .then(data => {
-            document.getElementById('received-real_position').value = data.real_position;
-            document.getElementById('received-step_time').value = data.step_time;
-            document.getElementById('received-step_ip').value = data.step_ip;
+            document.getElementById('received-track').value = data.location.track;
+            document.getElementById('received-track_number').value = data.location.track_number;
+            document.getElementById('received-direction').value = data.location.direction;
+            document.getElementById('received-sb_time').value = data.sb_time;
+            document.getElementById('received-sb_ip').value = data.sb_ip;
             logGenerate(data.logs);
             setTimeout(function () {
               spinnerOverlay.style.display = "none";
