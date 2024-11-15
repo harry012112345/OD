@@ -657,20 +657,41 @@
             </div>
             <div class="col-md-3">
               <div class="card p-30">
-                <h2>STEP馬達</h2>
+                <h2>SB馬達</h2>
                 <div class="input-states">
                   <form class="form-horizontal">
                     <div class="row">
                       <label
-                        for="received-real_position"
-                        class="col-sm-3 control-label"
-                        >Postion from origin</label
+                        for="received-target_distance"
+                        class="col-sm-6 control-label"
+                        >target_distance</label
                       >
-                      <div class="col-sm-9">
+                      <div class="col-sm-6">
                         <input
                           type="number"
-                          id="received-real_position"
+                          id="received-target_distance"
                           readonly
+                          min="0"
+                          class="form-control"
+                          style="background-color: #ffffff"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <label
+                        for="received-direction"
+                        class="col-sm-6 control-label"
+                        >direction</label
+                      >
+                      <div class="col-sm-6">
+                        <input
+                          type="text"
+                          id="received-direction"
+                          readonly
+                          min="0"
+                          class="form-control"
+                          style="background-color: #ffffff"
                         />
                       </div>
                     </div>
@@ -1013,11 +1034,13 @@
           logGenerate(data.logs);
         }
 
-        if (serverType === "step_server") {
-          document.getElementById("received-real_position").value =
-            data.real_position;
-          document.getElementById("received-step_time").value = data.step_time;
-          document.getElementById("received-step_ip").value = data.step_ip;
+        if (serverType === "sb_server") {
+          document.getElementById("received-target_distance").value =
+            data.location.target_distance;
+          document.getElementById("received-direction").value =
+            data.location.direction;
+          document.getElementById("received-step_time").value = data.sb_time;
+          document.getElementById("received-step_ip").value = data.sb_ip;
           logGenerate(data.logs);
         }
 

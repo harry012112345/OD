@@ -569,53 +569,19 @@
             <div class="input-states">
               <form onsubmit="sendData(event)">
                 <div class="form-group row">
-                  <label for="track" class="col-sm-6 control-label"
-                    >track</label
-                  >
-                  <div class="col-sm-6">
-                    <select
-                      id="track"
-                      name="track"
-                      class="form-control"
-                      style="text-align: center"
-                    >
-                      <option value="left">Left</option>
-                      <option value="right">Right</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <label for="track_number" class="col-sm-6 control-label"
-                    >track_number</label
+                  <label for="target_distance" class="col-sm-6 control-label"
+                    >target_distance</label
                   >
                   <div class="col-sm-6">
                     <input
-                      type="text"
-                      id="track_number"
-                      name="track_number"
+                      type="number"
+                      id="target_distance"
+                      name="target_distance"
                       min="0"
                       required
                       class="form-control"
                       style="text-align: right"
                     />
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <label for="direction" class="col-sm-6 control-label"
-                    >direction</label
-                  >
-                  <div class="col-sm-6">
-                    <select
-                      id="direction"
-                      name="direction"
-                      class="form-control"
-                      style="text-align: center"
-                    >
-                      <option value="forward">forward</option>
-                      <option value="backforward">backforward</option>
-                    </select>
                   </div>
                 </div>
               </form>
@@ -732,7 +698,12 @@
       const numberInputs = document.querySelectorAll("input[type='number']");
       const textInputs = document.querySelectorAll("input[type='text']");
       const radioInputs = document.querySelectorAll("input[type='radio']");
+
       let start_checking_flag = false;
+
+      const direction = document.getElementById("direction").value;
+      const track = document.getElementById("track").value;
+
       function validateForm() {
         let allNumberInputsFilled = Array.from(numberInputs).every(
           (input) => input.value.trim() !== ""
@@ -822,6 +793,7 @@
           .forEach((radio) => {
             formData.append(radio.name, radio.value);
           });
+
         // 將表單數據轉換為JSON對象
         const data = Object.fromEntries(formData.entries());
 

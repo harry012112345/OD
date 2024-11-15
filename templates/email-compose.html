@@ -371,33 +371,13 @@
                 <h2>SB馬達</h2>
                   <div class="input-states">
                     <form onsubmit="sendData(event)">
-                      <div class="form-group row">
-                        <label for="track" class="col-sm-6 control-label">track</label>
-                        <div class="col-sm-6">
-                          <select id="track" name="track" class="form-control" style="text-align: center;">
-                            <option value="left">Left</option>
-                            <option value="right">Right</option>
-                          </select>
-                        </div>
-                      </div>
-
 
                     <div class="form-group row">
-                      <label for="track_number" class="col-sm-6 control-label"
-                        >track_number</label
+                      <label for="target_distance" class="col-sm-6 control-label"
+                        >target_distance</label
                       >
                       <div class="col-sm-6">
-                        <input type="text" id="track_number" name="track_number" min="0"  required class="form-control"  style="text-align: right;"/>
-                      </div>
-                    </div>
-
-                    <div class="form-group row">
-                      <label for="direction" class="col-sm-6 control-label">direction</label>
-                      <div class="col-sm-6">
-                        <select id="direction" name="direction" class="form-control" style="text-align: center;">
-                          <option value="forward">forward</option>
-                          <option value="backforward">backforward</option>
-                        </select>
+                        <input type="text" id="target_distance" name="target_distance" min="0"  required class="form-control"  style="text-align: right;"/>
                       </div>
                     </div>
 
@@ -426,95 +406,95 @@
                 <h2>DUT手臂</h2>
                   <div class="input-states">
                     <form class="form-horizontal">
-                      <div class="row">
-                        <label for="received-servo_1" class="col-sm-3 control-label">Servo_1</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-servo_1" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-servo_1" class="col-sm-6 control-label">Servo_1</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-servo_1" readonly class="form-control"  style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-servo_2" class="col-sm-3 control-label">Servo_2</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-servo_2" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-servo_2" class="col-sm-6 control-label">Servo_2</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-servo_2" readonly class="form-control"  style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-servo_3" class="col-sm-3 control-label">Servo_3</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-servo_3" readonly  style="text-align: right;"><br>
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label for="received-servo_4" class="col-sm-3 control-label">Servo_4</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-servo_4" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-servo_3" class="col-sm-6 control-label">Servo_3</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-servo_3" readonly class="form-control"  style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
 
-                      <div class="row">
-                        <label for="received-servo_5" class="col-sm-3 control-label">Servo_5</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-servo_5" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-servo_4" class="col-sm-6 control-label">Servo_4</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-servo_4" readonly class="form-control"  style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
 
-                      <div class="row">
-                        <label for="received-servo_6" class="col-sm-3 control-label">Servo_6</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-servo_6" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-servo_5" class="col-sm-6 control-label">Servo_5</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-servo_5" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
 
-                      <div class="row">
-                        <label for="received-temperature" class="col-sm-3 control-label"
+                      <div class="form-group row">
+                        <label for="received-servo_6" class="col-sm-6 control-label">Servo_6</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-servo_6" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
+                        </div>
+                      </div>
+
+                      <div class="form-group row">
+                        <label for="received-temperature" class="col-sm-6 control-label"
                           >Temperature</label
                         >
-                        <div class="col-sm-9">
-                          <input type="text" id="received-temperature" readonly  style="text-align: right;"><br>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-temperature" readonly class="form-control"  style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-humidity" class="col-sm-3 control-label">Humidity</label>
-                        <div class="col-sm-9">
+                      <div class="form-group row">
+                        <label for="received-humidity" class="col-sm-6 control-label">Humidity</label>
+                        <div class="col-sm-6">
                           <div class="input-group">
-                            <input type="text" id="received-humidity" readonly  style="text-align: right;"><br>
+                            <input type="text" id="received-humidity" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                           </div>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-detect" class="col-sm-3 control-label">Detection</label>
-                        <div class="col-sm-9">
+                      <div class="form-group row">
+                        <label for="received-detect" class="col-sm-6 control-label">Detection</label>
+                        <div class="col-sm-6">
                           <div class="input-group">
-                            <input type="text" id="received-detect" readonly  style="text-align: right;"><br>
+                            <input type="text" id="received-detect" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                           </div>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-set_servo" class="col-sm-3 control-label"
+                      <div class="form-group row">
+                        <label for="received-set_servo" class="col-sm-6 control-label"
                           >Communication</label
                         >
-                        <div class="col-sm-9">
+                        <div class="col-sm-6">
                           <div class="input-group">
-                            <input type="text" id="received-set_servo" readonly  style="text-align: right;"><br>
+                            <input type="text" id="received-set_servo" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                           </div>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-ip_address" class="col-sm-3 control-label">IP address</label>
-                        <div class="col-sm-9">
+                      <div class="form-group row">
+                        <label for="received-ip_address" class="col-sm-6 control-label">IP address</label>
+                        <div class="col-sm-6">
                           <div class="input-group">
-                            <input type="text" id="received-ip_address" readonly  style="text-align: right;"><br>
+                            <input type="text" id="received-ip_address" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                           </div>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-time" class="col-sm-3 control-label"
+                      <div class="form-group row">
+                        <label for="received-time" class="col-sm-6 control-label"
                           >Update time</label
                         >
-                        <div class="col-sm-9">
+                        <div class="col-sm-6">
                           <div class="input-group">
-                            <input type="text" id="received-time" readonly  style="text-align: right;"><br>
+                            <input type="text" id="received-time" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                           </div>
                         </div>
                       </div>
@@ -529,86 +509,86 @@
                 <div class="card-body">
                   <div class="input-states">
                     <form class="form-horizontal">
-                      <div class="row">
-                        <label for="received-arm_servo_1" class="col-sm-3 control-label">Servo_1</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_1" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-arm_servo_1" class="col-sm-6 control-label">Servo_1</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_servo_1" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-arm_servo_2" class="col-sm-3 control-label">Servo_2</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_2" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-arm_servo_2" class="col-sm-6 control-label">Servo_2</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_servo_2" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-arm_servo_3" class="col-sm-3 control-label">Servo_3</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_3" readonly  style="text-align: right;"><br>
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <label for="received-arm_servo_4" class="col-sm-3 control-label">Servo_4</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_4" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-arm_servo_3" class="col-sm-6 control-label">Servo_3</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_servo_3" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
 
-                      <div class="row">
-                        <label for="received-arm_servo_5" class="col-sm-3 control-label">Servo_5</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_5" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-arm_servo_4" class="col-sm-6 control-label">Servo_4</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_servo_4" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
 
-                      <div class="row">
-                        <label for="received-arm_servo_6" class="col-sm-3 control-label">Servo_6</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_servo_6" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-arm_servo_5" class="col-sm-6 control-label">Servo_5</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_servo_5" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
 
-                      <div class="row">
-                        <label for="received-arm_temperature" class="col-sm-3 control-label"
+                      <div class="form-group row">
+                        <label for="received-arm_servo_6" class="col-sm-6 control-label">Servo_6</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_servo_6" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
+                        </div>
+                      </div>
+
+                      <div class="form-group row">
+                        <label for="received-arm_temperature" class="col-sm-6 control-label"
                           >Temperature</label
                         >
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_temperature" readonly  style="text-align: right;"><br>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_temperature" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-arm_humidity" class="col-sm-3 control-label">Humidity</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_humidity" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-arm_humidity" class="col-sm-6 control-label">Humidity</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_humidity" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-arm_detect" class="col-sm-3 control-label">Detection</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_detect" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-arm_detect" class="col-sm-6 control-label">Detection</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_detect" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-arm_set_servo" class="col-sm-3 control-label"
+                      <div class="form-group row">
+                        <label for="received-arm_set_servo" class="col-sm-6 control-label"
                           >Communication</label
                         >
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_set_servo" readonly  style="text-align: right;"><br>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_set_servo" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-arm_ip_address" class="col-sm-3 control-label">IP address</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_ip_address" readonly  style="text-align: right;"><br>
+                      <div class="form-group row">
+                        <label for="received-arm_ip_address" class="col-sm-6 control-label">IP address</label>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_ip_address" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
-                      <div class="row">
-                        <label for="received-arm_time" class="col-sm-3 control-label"
+                      <div class="form-group row">
+                        <label for="received-arm_time" class="col-sm-6 control-label"
                           >Update time</label
                         >
-                        <div class="col-sm-9">
-                          <input type="text" id="received-arm_time" readonly  style="text-align: right;"><br>
+                        <div class="col-sm-6">
+                          <input type="text" id="received-arm_time" readonly class="form-control" style="text-align: right; background-color: #ffffff;"><br>
                         </div>
                       </div>
                     </form>
@@ -621,48 +601,59 @@
                 <h2>SB馬達</h2>
                 <div class="input-states">
                   <form class="form-horizontal">
+
                     <div class="row">
-                      <label for="received-track" class="col-sm-3 control-label"
-                        >track</label
-                      > 
-                      <div class="col-sm-9">
-                        <input type="text" id="received-track" readonly/>
+                      <label
+                        for="received-target_distance"
+                        class="col-sm-6 control-label"
+                        >target_distance</label
+                      >
+                      <div class="col-sm-6">
+                        <input
+                          type="number"
+                          id="received-target_distance"
+                          readonly
+                          min="0"
+                          class="form-control"
+                          style="background-color: #ffffff"
+                        />
                       </div>
                     </div>
 
                     <div class="row">
-                      <label for="received-track" class="col-sm-3 control-label"
-                        >track_number</label
-                      > 
-                      <div class="col-sm-9">
-                        <input type="number" id="received-track_number" readonly/>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <label for="received-direction" class="col-sm-3 control-label"
+                      <label
+                        for="received-direction"
+                        class="col-sm-6 control-label"
                         >direction</label
-                      > 
-                      <div class="col-sm-9">
-                        <input type="text" id="received-direction" readonly/>
+                      >
+                      <div class="col-sm-6">
+                        <input
+                          type="text"
+                          id="received-direction"
+                          readonly
+                          min="0"
+                          class="form-control"
+                          style="background-color: #ffffff"
+                        />
                       </div>
                     </div>
 
 
-                    <div class="row">
-                      <label for="received-sb_time" class="col-sm-3 control-label"
+
+                    <div class="form-group row">
+                      <label for="received-sb_time" class="col-sm-6 control-label"
                         >更新時間</label
                       >
-                      <div class="col-sm-9">
-                        <input type="text" id="received-sb_time" readonly><br>
+                      <div class="col-sm-6">
+                        <input type="text" id="received-sb_time" class="form-control" readonly style="background-color: #ffffff;"><br>
                       </div>
                     </div>
-                    <div class="row">
-                      <label for="received-sb_ip" class="col-sm-3 control-label"
+                    <div class="form-group row">
+                      <label for="received-sb_ip" class="col-sm-6 control-label"
                         >IP 位置:</label
                       >
-                      <div class="col-sm-9">
-                        <input type="text" id="received-sb_ip" readonly><br>
+                      <div class="col-sm-6">
+                        <input type="text" id="received-sb_ip" class="form-control" readonly style="background-color: #ffffff;"><br>
                       </div>
                     </div>
                   </form>
@@ -674,23 +665,23 @@
                 <h2>UNET DONGLE</h2>
                 <div class="input-states">
                   <form class="form-horizontal">
-                    <div class="row">
-                      <label for="received-AN203_ON_OFF_test" class="col-sm-3 control-label">AN203</label>
-                      <div class="col-sm-9">
-                        <input type="text" id="received-AN203_ON_OFF_test" readonly>
+                    <div class="form-group row">
+                      <label for="received-AN203_ON_OFF_test" class="col-sm-6 control-label">AN203</label>
+                      <div class="col-sm-6">
+                        <input type="text" id="received-AN203_ON_OFF_test" class="form-control" readonly style="background-color: #ffffff;">
                       </div>
                     </div>
-                    <div class="row">
-                      <label for="received-unet_ip" class="col-sm-3 control-label">IP address</label>
-                      <div class="col-sm-9">
-                        <input type="text" id="received-unet_ip" readonly><br>
+                    <div class="form-group row">
+                      <label for="received-unet_ip" class="col-sm-6 control-label">IP address</label>
+                      <div class="col-sm-6">
+                        <input type="text" id="received-unet_ip" class="form-control" readonly style="background-color: #ffffff;"><br>
                       </div>
                     </div>
 
-                    <div class="row">
-                      <label for="received-unet_time" class="col-sm-3 control-label">更新時間:</label>
-                      <div class="col-sm-9">
-                        <input type="text" id="received-unet_time" readonly><br>
+                    <div class="form-group row">
+                      <label for="received-unet_time" class="col-sm-6 control-label">更新時間:</label>
+                      <div class="col-sm-6">
+                        <input type="text" id="received-unet_time" class="form-control"  readonly style="background-color: #ffffff;"><br>
                       </div>
                     </div>
                   </form>
@@ -837,9 +828,8 @@
 
         spinnerOverlay.style.display = "flex";
         buttons.forEach((button) => button.classList.add("disabled"));
-            const data = { track: document.getElementById('track').value,
-                           track_number: parseFloat(document.getElementById('track_number').value),
-                           direction: document.getElementById('direction').value
+            const data = { 
+               target_distance: parseFloat(document.getElementById('target_distance').value),
              };
 
             fetch('/api/sb', {
@@ -851,8 +841,7 @@
             })
             .then(response => response.json())
             .then(data => {
-            document.getElementById('received-track').value = data.location.track;
-            document.getElementById('received-track_number').value = data.location.track_number;
+            document.getElementById('received-target_distance').value = data.location.target_distance;
             document.getElementById('received-direction').value = data.location.direction;
             document.getElementById('received-sb_time').value = data.sb_time;
             document.getElementById('received-sb_ip').value = data.sb_ip;

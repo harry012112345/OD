@@ -338,9 +338,7 @@ async def test_data():
     arm_servo_4 = data['arm_servo_4']
     arm_servo_5 = data['arm_servo_5']
     arm_servo_6 = data['arm_servo_6']
-    sb_track = data['track']
-    sb_track_number=data['track_number']
-    sb_direction=data['direction']
+    sb_target_distance=data['target_distance']
     unet_status = data['check_unet']
     global temperature_max,temperature_min,humidity_max,humidity_min
     temperature_max = float(data['temperature-max'])
@@ -350,7 +348,7 @@ async def test_data():
     new_data = [
         ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, 1, 'no', None],
         ['arm_server', arm_servo_1, arm_servo_2, arm_servo_3, arm_servo_4, arm_servo_5, arm_servo_6, 1, 'no', None],
-        ['sb_server', sb_track, sb_track_number, sb_direction, None, None, None, 1, 'no', None],
+        ['sb_server', sb_target_distance, None, None, None, None, None, 1, 'no', None],
         ['unet_server', unet_status, None, None, None, None, None, 1, 'no', None]
     ]
     new_df = pd.DataFrame(new_data, columns=[
@@ -366,7 +364,7 @@ async def test_data():
     check_init_data(data)
     test_1_url = f'http://{global_dut_ip}/set_servo?servo_1={dut_servo_1}&servo_2={dut_servo_2}&servo_3={dut_servo_3}&servo_4={dut_servo_4}&servo_5={dut_servo_5}&servo_6={dut_servo_6}'
     test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
-    test_3_url = f'http://{global_sb_ip}/move?track={sb_track}&track_number={sb_track_number}&direction={sb_direction}'
+    test_3_url = f'http://{global_sb_ip}/move?target_distance={sb_target_distance}'
     test_4_url = f'http://{global_unet_ip}/AN203_{unet_status}'
     # 同時執行所有請求
     responses = await asyncio.gather(
@@ -581,16 +579,16 @@ def handle_start_processing():
                           if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
                              break
             elif row[0] == "sb_server":
-             param1 = str(row['parameter_1'])
-             param2 = str(row['parameter_2'])
-             param3 = str(row['parameter_3'])
+             param1 = int(row['parameter_1'])
              global global_sb_ip
              ip_address=global_sb_ip
-             url=f'http://{ip_address}/move?track={param1}&track_number={param2}&direction={param3}'
+             url=f'http://{ip_address}/move?target_distance={param1}'
+             print(url)
              test = requests.post(url)
              if test.status_code == 200:
                  # 解析 JSON 數據
                 data = test.json()
+                print(data)
                 now = datetime.datetime.now()
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
                 data['server_type'] = server_type
@@ -598,10 +596,10 @@ def handle_start_processing():
                 data['sb_ip'] = ip_address
                 global log_sb_data
                 log_sb_data = {
-                    'time': data['receivedtime'],
+                    'time': data['sb_time'],
                     'device': 'sb馬達',
-                    'command': f'track={param1},track_number={param2},direction={param3}',
-                    'status': f"{data['track']},{data['track_number']},{data['direction']},{global_sb_ip}",
+                    'command': f'target_distance={param1}',
+                    'status': f"{data['location']['target_distance']}",
                     'operator': 'admin'
                 }
                 data['logs'] = log_sb_data   
@@ -639,7 +637,7 @@ def handle_start_processing():
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
                 update_data = {
                     'time': formatted_time,
-                  'device': log_sb_data['status'].split(',')[2],
+                  'device': log_sb_data['status'],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
                 'operator': 'admin'
@@ -735,8 +733,8 @@ def handle_start_processing():
                 log_sb_data = {
                     'time': data['receivedtime'],
                     'device': 'sb馬達',
-                    'command': f'track={param1},track_number={param2},direction={param3}',
-                    'status': f"{data['track']},{data['track_number']},{data['direction']},{global_sb_ip}",
+                    'command': f'target_distance={param1}',
+                    'status': f"{data['location']['target_distance']},{global_sb_ip}",
                     'operator': 'admin'
                 }
                 data['logs'] = log_sb_data
@@ -758,7 +756,7 @@ def handle_start_processing():
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
                 update_data = {
                     'time': formatted_time,
-                  'device': log_sb_data['status'].split(',')[2],
+                  'device': log_sb_data['status'],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
                 'operator': detect_axis
@@ -878,9 +876,9 @@ def server_keep_alive():
     name = data.get('name')
     now = datetime.datetime.now()
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    
     data['server_type']=name
     data['receivedtime']=formatted_time
-    print(data)
     socketio.emit('server_keep_alive',data)
     response_data = {'message': "server_keep_alive received successfully"}
     return jsonify(response_data)
@@ -930,7 +928,7 @@ def detection():
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             update_data = {
                     'time': formatted_time,
-                  'device': log_sb_data['status'].split(',')[2],
+                  'device': log_sb_data['status'],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
                 'operator': detect_axis
@@ -1017,10 +1015,8 @@ def sb():
     data = request.get_json()
     global global_sb_ip
     ip_address=global_sb_ip
-    track=data.get('track')
-    track_number=data.get('track_number')
-    direction=data.get('direction')
-    test = requests.post(f'http://{ip_address}/move?track={track}&track_number={track_number}&direction={direction}')
+    target_distance=data.get('target_distance')
+    test = requests.post(f'http://{ip_address}/move?target_distance={target_distance}')
     if test.status_code == 200:
             data = test.json()
     else:
@@ -1030,7 +1026,7 @@ def sb():
         data={
             'location':{
             'track': "",
-            'track_number':"",
+            'target_distance':"",
             'direction':"",
             },
             'sb_time':"",
@@ -1038,7 +1034,7 @@ def sb():
             'logs':{
                 'time': f"{formatted_time}",
                 'device': 'sb馬達',
-                'command': f'{track}側車道,{track_number},方向向{direction}',
+                'command': f'{target_distance}',
                 'status': f"{message},{ip_address}",
                 'operator': 'admin'
                 }
@@ -1049,12 +1045,11 @@ def sb():
         log_sb_data = {
             'time': data['sb_time'],
             'device': 'sb馬達',
-            'command': f'{track}側車道,{track_number},方向向{direction}',
-            'status': f"{data['location']['track']},{data['location']['track_number']},{data['location']['direction']},{data['sb_ip']}",
+            'command': f'{target_distance}',
+            'status': f"{data['location']['target_distance']},{data['location']['direction']},{data['sb_ip']}",
             'operator': 'admin'
         }
         data['logs'] = log_sb_data
-        print(data)
     print(data)
     return jsonify(data)
 
