@@ -1,5 +1,5 @@
-arm_server: 192.168.15.116
+arm_server: 192.168.15.114
 unet_server: 192.168.15.115
-dut_server: 192.168.15.114
+dut_server: 192.168.15.112
 step_server: 192.168.15.102
-sb_server: 192.168.15.109
+sb_server: 192.168.15.107
