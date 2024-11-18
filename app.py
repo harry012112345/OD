@@ -104,7 +104,7 @@ def check_init_data(input_data):
         if input_data.get(check_key) == 'true':
             result[arm_servo_key] = input_data[arm_servo_key]
 
-    excel_file = os.path.join(UPLOAD_FOLDER, 'IEC13680.xlsx')
+    excel_file = os.path.join(UPLOAD_FOLDER, 'test.xlsx')
     # 讀取 Excel 數據到 DataFrame
     df = pd.read_excel(excel_file)
 
@@ -325,7 +325,7 @@ async def test_data():
     data = request.json
     print(data)
     global execute_excel
-    execute_excel =  'IEC13680.xlsx'
+    execute_excel =  'test.xlsx'
     dut_servo_1 = data['servo_1']
     dut_servo_2 = data['servo_2']
     dut_servo_3 = data['servo_3']
@@ -355,7 +355,7 @@ async def test_data():
         'server_name', 'parameter_1', 'parameter_2', 'parameter_3', 'parameter_4',
         'parameter_5', 'parameter_6', 'delay_time', 'active_detection','axis'
     ])
-    excel_file = os.path.join(UPLOAD_FOLDER, 'IEC13680.xlsx')
+    excel_file = os.path.join(UPLOAD_FOLDER, 'test.xlsx')
     # 讀取 Excel 數據到 DataFrame
     df = pd.read_excel(excel_file)
     df.iloc[:4] = new_df
@@ -484,7 +484,7 @@ def handle_start_processing():
         'device': '開始處理'
         }
     emit('start_button',data)
-    excel_file = os.path.join(UPLOAD_FOLDER,'IEC13680.xlsx')
+    excel_file = os.path.join(UPLOAD_FOLDER,'test.xlsx')
     df = pd.read_excel(excel_file)
     global return_flag
     global detect_confirm_flag
@@ -1118,4 +1118,4 @@ def button_pressed():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port=13333)

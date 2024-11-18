@@ -1,9 +1,9 @@
 aiohttp==3.9.5
-Flask==3.1.0
-Flask_Cors==5.0.0
-Flask_RESTful==0.3.10
-Flask_SocketIO==5.3.6
+Flask
+Flask_Cors
+Flask_RESTful
+Flask_SocketIO
 pandas==2.2.3
 Requests==2.32.3
-Flask[async]==2.2.2
+Flask[async]
 openpyxl==3.1.5
