@@ -122,10 +122,7 @@ def check_init_data(input_data):
                 df.loc[index, new_values.keys()] = new_values.values()
     df.to_excel(excel_file, index=False)
 
-def detection_thread(detect_time):
-    global detect_flag
-    time.sleep(detect_time)
-    detect_flag = False
+
 
 def load_ips_from_file():
     ip_addresses = {}
@@ -503,13 +500,10 @@ def handle_start_processing():
         detect_confirm_flag=False
         delay_time=row['delay_time']
         server_type = row['server_name']
-        active_detection = row['active_detection'].split(',')
-        if active_detection[0] == 'yes':
+        active_detection = row['active_detection']
+        if active_detection == 'yes':
            detect_axis = row['axis']
            detect_flag = True
-           detect_time = int(active_detection[1])
-           detect_thread = Thread(target=detection_thread, args=(detect_time,))
-           detect_thread.start()
         else:
            detect_flag = False
         try:
@@ -644,8 +638,8 @@ def handle_start_processing():
               }
                 emit('update_detect',update_data)
             time.sleep(delay_time)
-            if active_detection[0] == 'yes':
-                detect_thread.join()
+            if active_detection == 'yes':
+                detect_flag=True
         except requests.RequestException as e:
             connection_break_flag=True
             print(f"请求失败: {e}")
@@ -688,11 +682,8 @@ def handle_start_processing():
                 'device': 'connection restore'
                 }
             emit('reconnection',data)
-            if active_detection[0] == 'yes':
+            if active_detection == 'yes':
                detect_flag = True
-               detect_time = int(active_detection[1])
-               detect_thread = Thread(target=detection_thread, args=(detect_time,))
-               detect_thread.start()
             else:
                detect_flag = False
             test = requests.post(url)
@@ -764,7 +755,7 @@ def handle_start_processing():
                 emit('update_detect',update_data)
             time.sleep(delay_time)
             if active_detection[0] == 'yes':
-                detect_thread.join()
+                detect_flag=True
             return_flag = False
     if end_processing == False:
        now = datetime.datetime.now()
@@ -881,6 +872,7 @@ def server_keep_alive():
     data['receivedtime']=formatted_time
     socketio.emit('server_keep_alive',data)
     response_data = {'message': "server_keep_alive received successfully"}
+    print(data)
     return jsonify(response_data)
 
 
@@ -1118,4 +1110,4 @@ def button_pressed():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=13333)
+    app.run(host='0.0.0.0')

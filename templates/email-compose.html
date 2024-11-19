@@ -878,6 +878,77 @@
               buttons.forEach((button) => button.classList.remove("disabled"));
             }); 
         }
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+        var socket = io();
+
+        socket.on("server_keep_alive", function (data) {
+          var serverType = data.server_type;
+
+          if (serverType === "arm_server") {
+            document.getElementById("received-arm_servo_1").value =
+              data.value.servo_dict.servo_1;
+            document.getElementById("received-arm_servo_2").value =
+              data.value.servo_dict.servo_2;
+            document.getElementById("received-arm_servo_3").value =
+              data.value.servo_dict.servo_3;
+            document.getElementById("received-arm_servo_4").value =
+              data.value.servo_dict.servo_4;
+            document.getElementById("received-arm_servo_5").value =
+              data.value.servo_dict.servo_5;
+            document.getElementById("received-arm_servo_6").value =
+              data.value.servo_dict.servo_6;
+            document.getElementById("received-arm_temperature").value =
+              data.value.temperature;
+            document.getElementById("received-arm_humidity").value =
+              data.value.humidity;
+            document.getElementById("received-arm_ip_address").value =
+              data.value.ip_address;
+            document.getElementById("received-arm_time").value =
+              data.receivedtime;
+          }
+
+          if (serverType === "dut_server") {
+            document.getElementById("received-servo_1").value =
+              data.value.servo_dict.servo_1;
+            document.getElementById("received-servo_2").value =
+              data.value.servo_dict.servo_2;
+            document.getElementById("received-servo_3").value =
+              data.value.servo_dict.servo_3;
+            document.getElementById("received-servo_4").value =
+              data.value.servo_dict.servo_4;
+            document.getElementById("received-servo_5").value =
+              data.value.servo_dict.servo_5;
+            document.getElementById("received-servo_6").value =
+              data.value.servo_dict.servo_6;
+            document.getElementById("received-temperature").value =
+              data.value.temperature;
+            document.getElementById("received-humidity").value =
+              data.value.humidity;
+            document.getElementById("received-ip_address").value =
+              data.value.ip_address;
+            document.getElementById("received-time").value = data.receivedtime;
+          }
+          if (serverType === "sb_server") {
+            document.getElementById("received-target_distance").value =
+              data.location.target_distance;
+            document.getElementById("received-direction").value =
+              data.location.direction;
+            document.getElementById("received-sb_time").value =
+              data.receivedtime;
+            document.getElementById("received-sb_ip").value = data.ip_address;
+          }
+
+          if (serverType === "unet_server") {
+            document.getElementById("received-AN203_ON_OFF_test").value =
+              data.value;
+            document.getElementById("received-unet_time").value =
+              data.receivedtime;
+            document.getElementById("received-unet_ip").value = data.ip_address;
+          }
+        });
+      });
       
       
 
