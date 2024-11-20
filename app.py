@@ -47,7 +47,7 @@ log_sb_data=[]
 log_unet_data=[]
 
 server_dead_flag=True
-detect_flag=True
+detect_flag=False
 return_flag=False
 detect_confirm_flag=False
 stop_processing = False
@@ -179,7 +179,11 @@ async def check_connections():
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
     global_sb_ip = ip_addresses.get('sb_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
-    
+
+
+    test=request.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
+
+
     server_ips = {
         'arm_server': f'http://{global_arm_ip}/get_info',
         'dut_server': f'http://{global_dut_ip}/get_info',
@@ -500,12 +504,12 @@ def handle_start_processing():
         detect_confirm_flag=False
         delay_time=row['delay_time']
         server_type = row['server_name']
-        active_detection = row['active_detection']
-        if active_detection == 'yes':
-           detect_axis = row['axis']
-           detect_flag = True
-        else:
-           detect_flag = False
+        # active_detection = row['active_detection']
+        # if active_detection == 'yes':
+        #    detect_axis = row['axis']
+        #    detect_flag = True
+        # else:
+        #    detect_flag = False
         try:
             if row[0] == "dut_server":
              param1 = str(row['parameter_1'])
@@ -516,6 +520,7 @@ def handle_start_processing():
              param6 = str(row['parameter_6'])
              global global_dut_ip
              ip_address=global_dut_ip
+             detect_axis = row['axis']
              url=f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}'
              test = requests.post(url)
              if test.status_code == 200:
@@ -622,6 +627,39 @@ def handle_start_processing():
                 'operator': 'admin'
                 }
                 data['logs'] = log_unet_data
+            elif row[0] == "iec63180_movement_set":
+                ip_address=global_arm_ip
+                url=f'http://{ip_address}/iec63180_movement_set'
+                detect_flag=True
+                test = requests.get(url)
+                detect_flag=False
+                if test.status_code == 200:
+                   data = test.json()
+                   now = datetime.datetime.now()
+                   formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+                   data['receivedtime'] = formatted_time
+                   data['server_type'] = server_type
+                   log_arm_data={
+                   'time': f"{data['receivedtime']}",
+                   'device': 'arm機器手臂',
+                   'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
+                   'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
+                   'operator': 'admin'
+                   }
+                   data['logs'] = log_arm_data
+                   if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
+                       while True:
+                          arm_response = requests.get(f'http://{global_arm_ip}/get_info')
+                          arm_data = arm_response.json()
+                          print(arm_data)
+                          if temperature_min>arm_data['temperature']:
+                             test = requests.post(f'http://{global_unet_ip}/AN203_ON')
+                          elif arm_data['temperature']>temperature_max:
+                             test = requests.post(f'http://{global_unet_ip}/AN203_OFF')
+                          if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
+                             break
+                   
+
             # 模擬一些處理時間
             # 將結果發送給客戶端
             emit('update_result',data)
@@ -634,12 +672,12 @@ def handle_start_processing():
                   'device': log_sb_data['status'],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                'operator': 'admin'
+                'operator': detect_axis
               }
                 emit('update_detect',update_data)
             time.sleep(delay_time)
-            if active_detection == 'yes':
-                detect_flag=True
+            # if active_detection == 'yes':
+            #     detect_flag=True
         except requests.RequestException as e:
             connection_break_flag=True
             print(f"请求失败: {e}")
@@ -682,10 +720,10 @@ def handle_start_processing():
                 'device': 'connection restore'
                 }
             emit('reconnection',data)
-            if active_detection == 'yes':
-               detect_flag = True
-            else:
-               detect_flag = False
+            # if active_detection == 'yes':
+            #    detect_flag = True
+            # else:
+            #    detect_flag = False
             test = requests.post(url)
             data = test.json()
             now = datetime.datetime.now()
@@ -754,8 +792,8 @@ def handle_start_processing():
               }
                 emit('update_detect',update_data)
             time.sleep(delay_time)
-            if active_detection[0] == 'yes':
-                detect_flag=True
+            # if active_detection[0] == 'yes':
+            #     detect_flag=True
             return_flag = False
     if end_processing == False:
        now = datetime.datetime.now()
