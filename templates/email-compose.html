@@ -957,7 +957,7 @@
       function logGenerate(logs) {
         var logDiv = document.getElementById("log");
         var newLogEntry = document.createElement("p");
-        var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['operator']  ;
+        var logText = logs['time'] + '   '+ logs['device'] +'   '+logs['command'] +'  '+logs['status'] + '  ' + logs['detect_axis']  ;
         newLogEntry.textContent = logText;
         logDiv.appendChild(newLogEntry);
         logEntries.push(logs);

@@ -34,6 +34,8 @@ global_arm_ip=[]
 global_sb_ip=[]
 global_unet_ip=[]
 
+global_dut_delay=0
+
 temperature_max=0
 temperature_min=0
 humidity_max=0
@@ -181,7 +183,7 @@ async def check_connections():
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
 
 
-    test=request.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
+    # test=request.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
 
 
     server_ips = {
@@ -339,6 +341,7 @@ async def test_data():
     arm_servo_4 = data['arm_servo_4']
     arm_servo_5 = data['arm_servo_5']
     arm_servo_6 = data['arm_servo_6']
+    dut_delay = ['dut_delay_time']
     sb_target_distance=data['target_distance']
     unet_status = data['check_unet']
     global temperature_max,temperature_min,humidity_max,humidity_min
@@ -346,8 +349,12 @@ async def test_data():
     temperature_min = float(data['temperature-min'])
     humidity_max = float(data['humidity-max'])
     humidity_min = float(data['humidity-min'])
+
+    global global_dut_delay
+    global_dut_delay=dut_delay
+
     new_data = [
-        ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, 1, 'no', None],
+        ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, dut_delay, 'no', None],
         ['arm_server', arm_servo_1, arm_servo_2, arm_servo_3, arm_servo_4, arm_servo_5, arm_servo_6, 1, 'no', None],
         ['sb_server', sb_target_distance, None, None, None, None, None, 1, 'no', None],
         ['unet_server', unet_status, None, None, None, None, None, 1, 'no', None]
@@ -512,6 +519,7 @@ def handle_start_processing():
         #    detect_flag = False
         try:
             if row[0] == "dut_server":
+             delay_time=global_dut_delay
              param1 = str(row['parameter_1'])
              param2 = str(row['parameter_2'])
              param3 = str(row['parameter_3'])
@@ -536,7 +544,7 @@ def handle_start_processing():
                 'device': 'dut機器手臂',
                 'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
                 'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-                'operator': 'admin'
+                'detect_axis': ''
                 }
                 data['logs'] = log_dut_data   
             elif row[0] == "arm_server":
@@ -563,7 +571,7 @@ def handle_start_processing():
                 'device': 'arm機器手臂',
                 'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
                 'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-                'operator': 'admin'
+                'detect_axis': ''
                 }
                 data['logs'] = log_arm_data
                 if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
@@ -587,7 +595,6 @@ def handle_start_processing():
              if test.status_code == 200:
                  # 解析 JSON 數據
                 data = test.json()
-                print(data)
                 now = datetime.datetime.now()
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
                 data['server_type'] = server_type
@@ -599,7 +606,7 @@ def handle_start_processing():
                     'device': 'sb馬達',
                     'command': f'target_distance={param1}',
                     'status': f"{data['location']['target_distance']}",
-                    'operator': 'admin'
+                    'detect_axis': ''
                 }
                 data['logs'] = log_sb_data   
             elif row[0] == "unet_server":
@@ -624,7 +631,7 @@ def handle_start_processing():
                 'device': 'unet_AN203',
                 'command': f"{data['AN203_ON_OFF_test']}",
                 'status': f"{data['AN203_ON_OFF_test']},{data['unet_ip']}",
-                'operator': 'admin'
+                'detect_axis': ''
                 }
                 data['logs'] = log_unet_data
             elif row[0] == "iec63180_movement_set":
@@ -643,8 +650,8 @@ def handle_start_processing():
                    'time': f"{data['receivedtime']}",
                    'device': 'arm機器手臂',
                    'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
-                   'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-                   'operator': 'admin'
+                   'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['ip_address']}",
+                   'detect_axis': ''
                    }
                    data['logs'] = log_arm_data
                    if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
@@ -672,10 +679,11 @@ def handle_start_processing():
                   'device': log_sb_data['status'],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                'operator': detect_axis
+                'detect_axis': detect_axis
               }
                 emit('update_detect',update_data)
-            time.sleep(delay_time)
+            if delay_time==1 or delay_time==8:
+                time.sleep(delay_time)
             # if active_detection == 'yes':
             #     detect_flag=True
         except requests.RequestException as e:
@@ -736,7 +744,7 @@ def handle_start_processing():
                'device': 'dut機器手臂',
                'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
                'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_dut_ip}",
-               'operator': 'admin'  
+               'detect_axis': ''  
                }
                data['logs'] = log_dut_data 
             elif data['name']=='arm_server':
@@ -745,7 +753,7 @@ def handle_start_processing():
                 'device': 'arm機器手臂',
                 'command': f'{param1},{param2},{param3},{param4},{param5},{param6}',
                 'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{global_arm_ip}",
-                'operator': 'admin'
+                'detect_axis': ''
                 }
                 data['logs'] = log_arm_data
                 if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
@@ -764,7 +772,7 @@ def handle_start_processing():
                     'device': 'sb馬達',
                     'command': f'target_distance={param1}',
                     'status': f"{data['location']['target_distance']},{global_sb_ip}",
-                    'operator': 'admin'
+                    'detect_axis': ''
                 }
                 data['logs'] = log_sb_data
             elif data['name']=='unet_server':
@@ -774,7 +782,7 @@ def handle_start_processing():
                 'device': 'unet_AN203',
                 'command': f"{data['AN203_ON_OFF_test']}",
                 'status': f"{data['AN203_ON_OFF_test']},{global_unet_ip}",
-                'operator': 'admin'
+                'detect_axis': ''
                 }
                 data['logs'] = log_unet_data
                 # 將結果發送給客戶端
@@ -788,7 +796,7 @@ def handle_start_processing():
                   'device': log_sb_data['status'],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                'operator': detect_axis
+                'detect_axis': detect_axis
               }
                 emit('update_detect',update_data)
             time.sleep(delay_time)
@@ -802,7 +810,7 @@ def handle_start_processing():
              'time': formatted_time,
            'device': '法規結束'
            }
-       emit('start_button',data)
+       emit('end_button',data)
 
 
 @socketio.on('page_still_active')
@@ -910,7 +918,6 @@ def server_keep_alive():
     data['receivedtime']=formatted_time
     socketio.emit('server_keep_alive',data)
     response_data = {'message': "server_keep_alive received successfully"}
-    print(data)
     return jsonify(response_data)
 
 
@@ -961,7 +968,7 @@ def detection():
                   'device': log_sb_data['status'],
                   'status': log_arm_data['status'],
                  'command': log_dut_data['command'],
-                'operator': detect_axis
+                'detect_axis': detect_axis
               }
             print(update_data)
             socketio.emit('update_detect',update_data)
@@ -998,7 +1005,7 @@ def dut():
         'device': 'dut機器手臂',
         'command': f'{servo_1_value},{servo_2_value},{servo_3_value},{servo_4_value},{servo_5_value},{servo_6_value}',
         'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-        'operator': 'admin'
+        'detect_axis': ''
         }
     
     data['logs'] = log_dut_data
@@ -1032,7 +1039,7 @@ def arm():
         'device': 'arm機器手臂',
         'command': f'{servo_1_value},{servo_2_value},{servo_3_value},{servo_4_value},{servo_5_value},{servo_6_value}',
         'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
-        'operator': 'admin'
+        'detect_axis': ''
         }
     data['logs'] = log_arm_data
     return jsonify(data)
@@ -1066,7 +1073,7 @@ def sb():
                 'device': 'sb馬達',
                 'command': f'{target_distance}',
                 'status': f"{message},{ip_address}",
-                'operator': 'admin'
+                'detect_axis': ''
                 }
         }
     else:
@@ -1077,7 +1084,7 @@ def sb():
             'device': 'sb馬達',
             'command': f'{target_distance}',
             'status': f"{data['location']['target_distance']},{data['location']['direction']},{data['sb_ip']}",
-            'operator': 'admin'
+            'detect_axis': ''
         }
         data['logs'] = log_sb_data
     print(data)
@@ -1140,7 +1147,7 @@ def button_pressed():
         'device': 'unet_AN203',
         'command': f"{received_data['AN203_ON_OFF_test']}",
         'status': f"{received_data['AN203_ON_OFF_test']},{received_data['unet_ip']}",
-        'operator': 'admin'
+        'detect_axis': ''
         }
     received_data['logs'] = log_unet_data
     return jsonify(received_data)
