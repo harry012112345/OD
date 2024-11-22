@@ -31,6 +31,10 @@
     display: none; /* Hide the dropdown menu initially */
 }
 
+.start-btn {
+      background-color: blue;
+    }
+
 .close {
     position: absolute;
     top: 10px;
@@ -270,7 +274,7 @@
               <div class="card p-30">
                 <h2>DUT手臂</h2>
                   <div class="input-states">
-                      <form class="form-horizontal" onsubmit="dut_server(event)">
+                      <form class="form-horizontal " onsubmit="dut_server(event)">
                       <div class="row">
                         <label for="servo_1" class="col-sm-6 col-form-label">Servo_1</label>
                         <div class="col-sm-6">
@@ -310,7 +314,7 @@
                           <input type="number" id="servo_6" name="servo_6" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
                         </div>
                       </div>
-                      <button type="submit">送出</button>
+                      <button class="start-btn" type="submit">送出</button>
                     </form>
                     </div>
               </div>
@@ -360,7 +364,7 @@
                           <input type="number" id="arm_servo_6" name="arm_servo_6" min="0" max="180" required class="form-control"  style="text-align: right;"><br>
                         </div>
                       </div>
-                      <button type="submit">送出</button>
+                      <button class="start-btn" type="submit">送出</button>
                     </form>
                   </div>
                 </div>
@@ -382,7 +386,7 @@
                     </div>
 
 
-                    <button type="submit">送出</button>
+                    <button class="start-btn" type="submit">送出</button>
                   </form>
                 </div>
               </div>

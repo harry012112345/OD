@@ -34,7 +34,7 @@ global_arm_ip=[]
 global_sb_ip=[]
 global_unet_ip=[]
 
-global_dut_delay=0
+global_dut_delay=1
 
 temperature_max=0
 temperature_min=0
@@ -183,9 +183,6 @@ async def check_connections():
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
 
 
-    # test=request.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
-
-
     server_ips = {
         'arm_server': f'http://{global_arm_ip}/get_info',
         'dut_server': f'http://{global_dut_ip}/get_info',
@@ -326,7 +323,6 @@ def test_ip():
 @app.route('/test_data', methods=["POST"])
 async def test_data():
     data = request.json
-    print(data)
     global execute_excel
     execute_excel =  'test.xlsx'
     dut_servo_1 = data['servo_1']
@@ -349,9 +345,12 @@ async def test_data():
     temperature_min = float(data['temperature-min'])
     humidity_max = float(data['humidity-max'])
     humidity_min = float(data['humidity-min'])
-
+    
     global global_dut_delay
     global_dut_delay=dut_delay
+
+    print(data)
+    print(dut_delay)
 
     new_data = [
         ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, dut_delay, 'no', None],
@@ -369,12 +368,15 @@ async def test_data():
     df.iloc[:4] = new_df
     df.to_excel(excel_file, index=False)
 
-    check_init_data(data)
+    # check_init_data(data)
     test_1_url = f'http://{global_dut_ip}/set_servo?servo_1={dut_servo_1}&servo_2={dut_servo_2}&servo_3={dut_servo_3}&servo_4={dut_servo_4}&servo_5={dut_servo_5}&servo_6={dut_servo_6}'
     test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
     test_3_url = f'http://{global_sb_ip}/move?target_distance={sb_target_distance}'
     test_4_url = f'http://{global_unet_ip}/AN203_{unet_status}'
     # 同時執行所有請求
+
+    test=request.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
+
     responses = await asyncio.gather(
         send_request(test_1_url),
         send_request(test_2_url),
@@ -509,8 +511,10 @@ def handle_start_processing():
             break
         return_flag=False
         detect_confirm_flag=False
-        delay_time=row['delay_time']
         server_type = row['server_name']
+        delay_time=row['delay_time']
+        if  server_type=="dut_server":            
+           delay_time=global_dut_delay
         # active_detection = row['active_detection']
         # if active_detection == 'yes':
         #    detect_axis = row['axis']
@@ -519,7 +523,6 @@ def handle_start_processing():
         #    detect_flag = False
         try:
             if row[0] == "dut_server":
-             delay_time=global_dut_delay
              param1 = str(row['parameter_1'])
              param2 = str(row['parameter_2'])
              param3 = str(row['parameter_3'])
@@ -682,7 +685,7 @@ def handle_start_processing():
                 'detect_axis': detect_axis
               }
                 emit('update_detect',update_data)
-            if delay_time==1 or delay_time==8:
+            if delay_time==1 or delay_time==6:
                 time.sleep(delay_time)
             # if active_detection == 'yes':
             #     detect_flag=True
@@ -785,6 +788,37 @@ def handle_start_processing():
                 'detect_axis': ''
                 }
                 data['logs'] = log_unet_data
+            elif row[0] == "iec63180_movement_set":
+                ip_address=global_arm_ip
+                url=f'http://{ip_address}/iec63180_movement_set'
+                detect_flag=True
+                test = requests.get(url)
+                detect_flag=False
+                if test.status_code == 200:
+                   data = test.json()
+                   now = datetime.datetime.now()
+                   formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+                   data['receivedtime'] = formatted_time
+                   data['server_type'] = server_type
+                   log_arm_data={
+                   'time': f"{data['receivedtime']}",
+                   'device': 'arm機器手臂',
+                   'command': f"{param1},{param2},{param3},{param4},{param5},{param6}",
+                   'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['ip_address']}",
+                   'detect_axis': ''
+                   }
+                   data['logs'] = log_arm_data
+                   if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
+                       while True:
+                          arm_response = requests.get(f'http://{global_arm_ip}/get_info')
+                          arm_data = arm_response.json()
+                          print(arm_data)
+                          if temperature_min>arm_data['temperature']:
+                             test = requests.post(f'http://{global_unet_ip}/AN203_ON')
+                          elif arm_data['temperature']>temperature_max:
+                             test = requests.post(f'http://{global_unet_ip}/AN203_OFF')
+                          if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
+                             break
                 # 將結果發送給客戶端
             emit('update_result',data)
             return_flag=True
@@ -913,7 +947,6 @@ def server_keep_alive():
     name = data.get('name')
     now = datetime.datetime.now()
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-    
     data['server_type']=name
     data['receivedtime']=formatted_time
     socketio.emit('server_keep_alive',data)

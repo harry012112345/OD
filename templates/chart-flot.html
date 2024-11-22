@@ -79,6 +79,24 @@
       }
     }
 
+    .start-btn {
+      background-color: blue;
+    }
+
+    .default-color {
+      background-color: gray;
+      cursor: not-allowed;
+    }
+    .changed-color {
+      background-color: blue;
+    }
+    .enabled {
+      cursor: pointer;
+    }
+    .disabled {
+      cursor: not-allowed;
+    }
+
     .spinner-overlay {
       position: fixed;
       top: 0;
@@ -301,18 +319,18 @@
           <div class="col-md-3">
             <div class="card p-30">
               <h2>DUT手臂</h2>
-              <div class="card-body">
-                <form onsubmit="dut_server(event)">
+              <div class="input-states">
+                <form class="form-horizontal" onsubmit="dut_server(event)">
                   <div class="row">
-                    <label for="servo_1" class="col-sm-3 control-label"
+                    <label for="servo_1" class="col-sm-6 control-label"
                       >Servo_1</label
                     >
-                    <div class="col-sm-9">
-                      <input
+                    <div class="col-sm-6">
+                      <!-- <input
                         type="checkbox"
                         id="check_servo_1"
                         name="check_servo_1"
-                      />
+                      /> -->
                       <input
                         type="number"
                         value="0"
@@ -320,20 +338,22 @@
                         name="servo_1"
                         min="0"
                         max="180"
+                        class="form-control"
+                        style="text-align: right"
                         required
                       /><br />
                     </div>
                   </div>
                   <div class="row">
-                    <label for="servo_2" class="col-sm-3 control-label"
+                    <label for="servo_2" class="col-sm-6 control-label"
                       >Servo_2</label
                     >
-                    <div class="col-sm-9">
-                      <input
+                    <div class="col-sm-6">
+                      <!-- <input
                         type="checkbox"
                         id="check_servo_2"
                         name="check_servo_2"
-                      />
+                      /> -->
                       <input
                         type="number"
                         value="0"
@@ -341,20 +361,22 @@
                         name="servo_2"
                         min="0"
                         max="180"
+                        class="form-control"
+                        style="text-align: right"
                         required
                       /><br />
                     </div>
                   </div>
                   <div class="row">
-                    <label for="servo_3" class="col-sm-3 control-label"
+                    <label for="servo_3" class="col-sm-6 control-label"
                       >Servo_3</label
                     >
-                    <div class="col-sm-9">
-                      <input
+                    <div class="col-sm-6">
+                      <!-- <input
                         type="checkbox"
                         id="check_servo_3"
                         name="check_servo_3"
-                      />
+                      /> -->
                       <input
                         type="number"
                         value="90"
@@ -362,21 +384,24 @@
                         name="servo_3"
                         min="0"
                         max="180"
+                        class="form-control"
+                        style="text-align: right"
                         required
                       /><br />
                     </div>
                   </div>
 
                   <div class="row">
-                    <label for="servo_4" class="col-sm-3 control-label"
+                    <label for="servo_4" class="col-sm-6 control-label"
                       >Servo_4</label
                     >
-                    <div class="col-sm-9">
-                      <input
+                    <div class="col-sm-6">
+                      <!-- <input
                         type="checkbox"
                         id="check_servo_4"
                         name="check_servo_4"
-                      />
+                        style="text-align: left"
+                      /> -->
                       <input
                         type="number"
                         value="90"
@@ -384,21 +409,24 @@
                         name="servo_4"
                         min="0"
                         max="180"
+                        class="form-control"
+                        style="text-align: right"
                         required
-                      /><br />
+                      />
+                      <br />
                     </div>
                   </div>
 
                   <div class="row">
-                    <label for="servo_5" class="col-sm-3 control-label"
+                    <label for="servo_5" class="col-sm-6 control-label"
                       >Servo_5</label
                     >
-                    <div class="col-sm-9">
-                      <input
+                    <div class="col-sm-6">
+                      <!-- <input
                         type="checkbox"
                         id="check_servo_5"
                         name="check_servo_5"
-                      />
+                      /> -->
                       <input
                         type="number"
                         value="90"
@@ -406,21 +434,23 @@
                         name="servo_5"
                         min="0"
                         max="180"
+                        class="form-control"
+                        style="text-align: right"
                         required
                       /><br />
                     </div>
                   </div>
 
                   <div class="row">
-                    <label for="servo_6" class="col-sm-3 control-label"
+                    <label for="servo_6" class="col-sm-6 control-label"
                       >Servo_6</label
                     >
-                    <div class="col-sm-9">
-                      <input
+                    <div class="col-sm-6">
+                      <!-- <input
                         type="checkbox"
                         id="check_servo_6"
                         name="check_servo_6"
-                      />
+                      /> -->
                       <input
                         type="number"
                         value="0"
@@ -428,16 +458,18 @@
                         name="servo_6"
                         min="0"
                         max="180"
+                        class="form-control"
+                        style="text-align: right"
                         required
                       /><br />
                     </div>
                   </div>
 
                   <div class="row">
-                    <label for="dut_delay_time" class="col-sm-3 control-label"
-                      >dut_delay_time</label
+                    <label for="dut_delay_time" class="col-sm-6 control-label"
+                      >delay_time</label
                     >
-                    <div class="col-sm-9">
+                    <div class="col-sm-6">
                       <input
                         type="number"
                         value="1"
@@ -445,6 +477,8 @@
                         name="dut_delay_time"
                         min="0"
                         max="180"
+                        class="form-control"
+                        style="text-align: right"
                         required
                       /><br />
                     </div>
@@ -460,15 +494,15 @@
                 <div class="input-states">
                   <form onsubmit="arm_server(event)">
                     <div class="row">
-                      <label for="arm_servo_1" class="col-sm-3 control-label"
+                      <label for="arm_servo_1" class="col-sm-6 control-label"
                         >Servo_1</label
                       >
-                      <div class="col-sm-9">
-                        <input
+                      <div class="col-sm-6">
+                        <!-- <input
                           type="checkbox"
                           id="check_arm_servo_1"
                           name="check_arm_servo_1"
-                        />
+                        /> -->
                         <input
                           type="number"
                           value="90"
@@ -476,20 +510,22 @@
                           name="arm_servo_1"
                           min="0"
                           max="180"
+                          class="form-control"
+                          style="text-align: right"
                           required
                         /><br />
                       </div>
                     </div>
                     <div class="row">
-                      <label for="arm_servo_2" class="col-sm-3 control-label"
+                      <label for="arm_servo_2" class="col-sm-6 control-label"
                         >Servo_2</label
                       >
-                      <div class="col-sm-9">
-                        <input
+                      <div class="col-sm-6">
+                        <!-- <input
                           type="checkbox"
                           id="check_arm_servo_2"
                           name="check_arm_servo_2"
-                        />
+                        /> -->
                         <input
                           type="number"
                           value="0"
@@ -497,20 +533,22 @@
                           name="arm_servo_2"
                           min="0"
                           max="180"
+                          class="form-control"
+                          style="text-align: right"
                           required
                         /><br />
                       </div>
                     </div>
                     <div class="row">
-                      <label for="arm_servo_3" class="col-sm-3 control-label"
+                      <label for="arm_servo_3" class="col-sm-6 control-label"
                         >Servo_3</label
                       >
-                      <div class="col-sm-9">
-                        <input
+                      <div class="col-sm-6">
+                        <!-- <input
                           type="checkbox"
                           id="check_arm_servo_3"
                           name="check_arm_servo_3"
-                        />
+                        /> -->
                         <input
                           type="number"
                           value="90"
@@ -518,43 +556,47 @@
                           name="arm_servo_3"
                           min="0"
                           max="180"
+                          class="form-control"
+                          style="text-align: right"
                           required
                         /><br />
                       </div>
                     </div>
 
                     <div class="row">
-                      <label for="arm_servo_4" class="col-sm-3 control-label"
+                      <label for="arm_servo_4" class="col-sm-6 control-label"
                         >Servo_4</label
                       >
-                      <div class="col-sm-9">
-                        <input
+                      <div class="col-sm-6">
+                        <!-- <input
                           type="checkbox"
                           id="check_arm_servo_4"
                           name="check_arm_servo_4"
-                        />
+                        /> -->
                         <input
                           type="number"
-                          value="0"
+                          value="180"
                           id="arm_servo_4"
                           name="arm_servo_4"
                           min="0"
                           max="180"
+                          class="form-control"
+                          style="text-align: right"
                           required
                         /><br />
                       </div>
                     </div>
 
                     <div class="row">
-                      <label for="arm_servo_5" class="col-sm-3 control-label"
+                      <label for="arm_servo_5" class="col-sm-6 control-label"
                         >Servo_5</label
                       >
-                      <div class="col-sm-9">
-                        <input
+                      <div class="col-sm-6">
+                        <!-- <input
                           type="checkbox"
                           id="check_arm_servo_5"
                           name="check_arm_servo_5"
-                        />
+                        /> -->
                         <input
                           type="number"
                           value="90"
@@ -562,21 +604,23 @@
                           name="arm_servo_5"
                           min="0"
                           max="180"
+                          class="form-control"
+                          style="text-align: right"
                           required
                         /><br />
                       </div>
                     </div>
 
                     <div class="row">
-                      <label for="arm_servo_6" class="col-sm-3 control-label"
+                      <label for="arm_servo_6" class="col-sm-6 control-label"
                         >Servo_6</label
                       >
-                      <div class="col-sm-9">
-                        <input
+                      <div class="col-sm-6">
+                        <!-- <input
                           type="checkbox"
                           id="check_arm_servo_6"
                           name="check_arm_servo_6"
-                        />
+                        /> -->
                         <input
                           type="number"
                           value="90"
@@ -584,6 +628,8 @@
                           name="arm_servo_6"
                           min="0"
                           max="180"
+                          class="form-control"
+                          style="text-align: right"
                           required
                         /><br />
                       </div>
@@ -593,28 +639,30 @@
               </div>
             </div>
           </div>
-          <div class="card p-30">
-            <h2>sb馬達</h2>
-            <div class="input-states">
-              <form onsubmit="sendData(event)">
-                <div class="form-group row">
-                  <label for="target_distance" class="col-sm-6 control-label"
-                    >target_distance</label
-                  >
-                  <div class="col-sm-6">
-                    <input
-                      type="number"
-                      value="50"
-                      id="target_distance"
-                      name="target_distance"
-                      min="0"
-                      required
-                      class="form-control"
-                      style="text-align: right"
-                    />
+          <div class="col-md-3">
+            <div class="card p-30">
+              <h2>sb馬達</h2>
+              <div class="input-states">
+                <form onsubmit="sendData(event)">
+                  <div class="form-group row">
+                    <label for="target_distance" class="col-sm-6 control-label"
+                      >target_distance</label
+                    >
+                    <div class="col-sm-6">
+                      <input
+                        type="number"
+                        value="50"
+                        id="target_distance"
+                        name="target_distance"
+                        min="0"
+                        required
+                        class="form-control"
+                        style="text-align: right"
+                      />
+                    </div>
                   </div>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
           <div class="col-md-3">
@@ -695,18 +743,23 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-3">
-              <div class="card p-30">
-                <h2>溫度與濕度區間</h2>
-                <div class="row"></div>
-              </div>
-            </div>
           </div>
           <!-- End PAge Content -->
         </div>
         <p id="status">Waiting</p>
-        <button id="start-button" onclick="startChecking()">通訊確認</button>
-        <button id="submitButton" onclick="Test_data(event)" disabled>
+        <button
+          id="start-button"
+          class="start-btn enabled"
+          onclick="startChecking()"
+        >
+          通訊確認
+        </button>
+        <button
+          id="submitButton"
+          class="default-color disabled"
+          onclick="Test_data(event)"
+          disabled
+        >
           送出
         </button>
         <!-- End Container fluid  -->
@@ -734,6 +787,9 @@
       const radioInputs = document.querySelectorAll("input[type='radio']");
 
       let start_checking_flag = false;
+
+      const startBtn = document.getElementById("start-btn");
+      const submitBtn = document.getElementById("submitButton");
 
       const direction = document.getElementById("direction").value;
       const track = document.getElementById("track").value;
@@ -879,6 +935,10 @@
               clearInterval(intervalId);
               start_checking_flag = true;
               validateForm();
+              submitBtn.classList.remove("disabled");
+              submitBtn.classList.add("enabled");
+              submitBtn.classList.remove("default-color");
+              submitBtn.classList.add("changed-color");
               setTimeout(function () {
                 spinnerOverlay.style.display = "none";
                 buttons.forEach((button) =>

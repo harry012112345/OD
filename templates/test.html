@@ -912,7 +912,7 @@
       });
 
       document.addEventListener("DOMContentLoaded", function () {
-        const socket = io("http://192.168.0.100:5000");
+        const socket = io("http://192.168.0.100:13333");
 
         setInterval(() => {
           socket.emit("page_still_active");
