@@ -79,6 +79,14 @@
       }
     }
 
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
     .start-btn {
       background-color: blue;
     }
@@ -749,14 +757,14 @@
         <p id="status">Waiting</p>
         <button
           id="start-button"
-          class="start-btn enabled"
+          class="btn start-btn enabled"
           onclick="startChecking()"
         >
           通訊確認
         </button>
         <button
           id="submitButton"
-          class="default-color disabled"
+          class="btn default-color disabled"
           onclick="Test_data(event)"
           disabled
         >
@@ -935,8 +943,6 @@
               clearInterval(intervalId);
               start_checking_flag = true;
               validateForm();
-              submitBtn.classList.remove("disabled");
-              submitBtn.classList.add("enabled");
               submitBtn.classList.remove("default-color");
               submitBtn.classList.add("changed-color");
               setTimeout(function () {

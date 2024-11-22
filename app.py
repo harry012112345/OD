@@ -182,7 +182,7 @@ async def check_connections():
     global_sb_ip = ip_addresses.get('sb_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
 
-
+    test=requests.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
     server_ips = {
         'arm_server': f'http://{global_arm_ip}/get_info',
         'dut_server': f'http://{global_dut_ip}/get_info',
@@ -323,6 +323,7 @@ def test_ip():
 @app.route('/test_data', methods=["POST"])
 async def test_data():
     data = request.json
+    print(data)
     global execute_excel
     execute_excel =  'test.xlsx'
     dut_servo_1 = data['servo_1']
@@ -337,7 +338,7 @@ async def test_data():
     arm_servo_4 = data['arm_servo_4']
     arm_servo_5 = data['arm_servo_5']
     arm_servo_6 = data['arm_servo_6']
-    dut_delay = ['dut_delay_time']
+    dut_delay = data['dut_delay_time']
     sb_target_distance=data['target_distance']
     unet_status = data['check_unet']
     global temperature_max,temperature_min,humidity_max,humidity_min
@@ -345,12 +346,11 @@ async def test_data():
     temperature_min = float(data['temperature-min'])
     humidity_max = float(data['humidity-max'])
     humidity_min = float(data['humidity-min'])
-    
     global global_dut_delay
     global_dut_delay=dut_delay
 
-    print(data)
     print(dut_delay)
+    print(global_dut_delay)
 
     new_data = [
         ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, dut_delay, 'no', None],
@@ -373,10 +373,9 @@ async def test_data():
     test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
     test_3_url = f'http://{global_sb_ip}/move?target_distance={sb_target_distance}'
     test_4_url = f'http://{global_unet_ip}/AN203_{unet_status}'
+
     # 同時執行所有請求
-
-    test=request.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
-
+    test=requests.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
     responses = await asyncio.gather(
         send_request(test_1_url),
         send_request(test_2_url),
