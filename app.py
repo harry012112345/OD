@@ -23,8 +23,9 @@ socketio = SocketIO(app, cors_allowed_origins="*")  # 允许所有来源连接
 
 current_path = os.getcwd()
 additional_path = "test_excel"
+output = "output"
 UPLOAD_FOLDER = os.path.join(current_path, additional_path)
-
+DOWNLOAD_FOLDER = os.path.join(current_path, output)
 
 # 用於儲存上傳的數據
 received_data = []
@@ -34,7 +35,7 @@ global_arm_ip=[]
 global_sb_ip=[]
 global_unet_ip=[]
 
-global_dut_delay=1
+global_dut_delay=0
 
 temperature_max=0
 temperature_min=0
@@ -60,6 +61,29 @@ now = datetime.datetime.now()
 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
 local_ip='192.168.15.108'
 server_ips = [f'http://{global_dut_ip}/get_info', f'http://{global_arm_ip}/get_info', f'http://{global_sb_ip}/get_info', f'http://{global_unet_ip}/get_info']
+
+
+
+
+def save_excel_to_folder(excel_data, file_name):
+    """
+    参数:
+    - file_path (str): 主文件夹路径。
+    - excel_data (pd.DataFrame): 要保存的数据。
+    - file_name (str): Excel 文件名，默认是 'data.xlsx'。
+    """
+
+    if not os.path.exists(DOWNLOAD_FOLDER):
+        os.makedirs(DOWNLOAD_FOLDER)
+
+    # 保存 Excel 文件到目标文件夹
+    excel_full_path = os.path.join(DOWNLOAD_FOLDER, file_name)
+    excel_data.to_excel(excel_full_path, index=False)
+    print(f"Excel 文件已保存到 {excel_full_path}")
+
+
+
+
 
 async def check_connection(name, ip):
     try:
@@ -106,7 +130,7 @@ def check_init_data(input_data):
         if input_data.get(check_key) == 'true':
             result[arm_servo_key] = input_data[arm_servo_key]
 
-    excel_file = os.path.join(UPLOAD_FOLDER, 'test.xlsx')
+    excel_file = os.path.join(UPLOAD_FOLDER, 'IEC13680.xlsx')
     # 讀取 Excel 數據到 DataFrame
     df = pd.read_excel(excel_file)
 
@@ -181,16 +205,14 @@ async def check_connections():
     global_dut_ip = ip_addresses.get('dut_server', 'Not found')
     global_sb_ip = ip_addresses.get('sb_server', 'Not found')
     global_unet_ip = ip_addresses.get('unet_server', 'Not found')
-
-    test=requests.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
     server_ips = {
         'arm_server': f'http://{global_arm_ip}/get_info',
         'dut_server': f'http://{global_dut_ip}/get_info',
         'sb_server': f'http://{global_sb_ip}/get_info',
         'unet_server': f'http://{global_unet_ip}/get_info'
     }
-
     results = await check_all_connections(server_ips)
+    test=requests.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
     return jsonify(results)
 
 @app.route('/welcome')
@@ -325,7 +347,7 @@ async def test_data():
     data = request.json
     print(data)
     global execute_excel
-    execute_excel =  'test.xlsx'
+    execute_excel =  'IEC13680.xlsx'
     dut_servo_1 = data['servo_1']
     dut_servo_2 = data['servo_2']
     dut_servo_3 = data['servo_3']
@@ -347,10 +369,7 @@ async def test_data():
     humidity_max = float(data['humidity-max'])
     humidity_min = float(data['humidity-min'])
     global global_dut_delay
-    global_dut_delay=dut_delay
-
-    print(dut_delay)
-    print(global_dut_delay)
+    global_dut_delay=int(dut_delay)
 
     new_data = [
         ['dut_server', dut_servo_1, dut_servo_2, dut_servo_3, dut_servo_4, dut_servo_5, dut_servo_6, dut_delay, 'no', None],
@@ -362,7 +381,7 @@ async def test_data():
         'server_name', 'parameter_1', 'parameter_2', 'parameter_3', 'parameter_4',
         'parameter_5', 'parameter_6', 'delay_time', 'active_detection','axis'
     ])
-    excel_file = os.path.join(UPLOAD_FOLDER, 'test.xlsx')
+    excel_file = os.path.join(UPLOAD_FOLDER, 'IEC13680.xlsx')
     # 讀取 Excel 數據到 DataFrame
     df = pd.read_excel(excel_file)
     df.iloc[:4] = new_df
@@ -375,7 +394,6 @@ async def test_data():
     test_4_url = f'http://{global_unet_ip}/AN203_{unet_status}'
 
     # 同時執行所有請求
-    test=requests.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
     responses = await asyncio.gather(
         send_request(test_1_url),
         send_request(test_2_url),
@@ -487,23 +505,33 @@ def handle_start_processing():
     stop_processing = False
     global end_processing
     end_processing = False
+    df_download = pd.DataFrame({
+    "time": [""],
+    "device": [""],
+    "commands": [""],
+    "status": [""],
+    "detect_axis": [""]
+    })
+
     formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
     data={
           'time': formatted_time,
         'device': '開始處理'
         }
     emit('start_button',data)
-    excel_file = os.path.join(UPLOAD_FOLDER,'test.xlsx')
+    excel_file = os.path.join(UPLOAD_FOLDER,'IEC13680.xlsx')
     df = pd.read_excel(excel_file)
     global return_flag
     global detect_confirm_flag
     global detect_flag
     global server_dead_flag
     global detect_axis
+    global global_dut_delay
     for index, row in df.iterrows():
-        if server_dead_flag==True:
-           break
-        server_dead_flag=True
+        # print(server_dead_flag)
+        # if server_dead_flag==True:
+        #    break
+        # server_dead_flag=True
         while stop_processing ==True:
             continue
         if end_processing==True:
@@ -512,8 +540,6 @@ def handle_start_processing():
         detect_confirm_flag=False
         server_type = row['server_name']
         delay_time=row['delay_time']
-        if  server_type=="dut_server":            
-           delay_time=global_dut_delay
         # active_detection = row['active_detection']
         # if active_detection == 'yes':
         #    detect_axis = row['axis']
@@ -522,6 +548,7 @@ def handle_start_processing():
         #    detect_flag = False
         try:
             if row[0] == "dut_server":
+             delay_time=global_dut_delay
              param1 = str(row['parameter_1'])
              param2 = str(row['parameter_2'])
              param3 = str(row['parameter_3'])
@@ -532,7 +559,7 @@ def handle_start_processing():
              ip_address=global_dut_ip
              detect_axis = row['axis']
              url=f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}'
-             test = requests.post(url)
+             test = requests.post(url,timeout=15)
              if test.status_code == 200:
                  # 解析 JSON 數據
                 data = test.json()
@@ -548,7 +575,10 @@ def handle_start_processing():
                 'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['detect']},{data['ip_address']}",
                 'detect_axis': ''
                 }
-                data['logs'] = log_dut_data   
+                data['logs'] = log_dut_data
+                download_data=[log_dut_data]   
+                df_new = pd.DataFrame(download_data)
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
             elif row[0] == "arm_server":
              param1 = str(row['parameter_1'])
              param2 = str(row['parameter_2'])
@@ -559,7 +589,7 @@ def handle_start_processing():
              global global_arm_ip
              ip_address=global_arm_ip
              url=f'http://{ip_address}/set_servo?servo_1={param1}&servo_2={param2}&servo_3={param3}&servo_4={param4}&servo_5={param5}&servo_6={param6}'
-             test = requests.post(url)
+             test = requests.post(url,timeout=15)
              if test.status_code == 200:
                  # 解析 JSON 數據
                 data = test.json()
@@ -576,6 +606,9 @@ def handle_start_processing():
                 'detect_axis': ''
                 }
                 data['logs'] = log_arm_data
+                download_data=[log_arm_data]   
+                df_new = pd.DataFrame(download_data)
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
                 if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
                     while True:
                           arm_response = requests.get(f'http://{global_arm_ip}/get_info')
@@ -593,12 +626,13 @@ def handle_start_processing():
              ip_address=global_sb_ip
              url=f'http://{ip_address}/move?target_distance={param1}'
              print(url)
-             test = requests.post(url)
+             test = requests.post(url,timeout=15)
              if test.status_code == 200:
                  # 解析 JSON 數據
                 data = test.json()
                 now = datetime.datetime.now()
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
+
                 data['server_type'] = server_type
                 data['sb_time'] = formatted_time
                 data['sb_ip'] = ip_address
@@ -611,11 +645,14 @@ def handle_start_processing():
                     'detect_axis': ''
                 }
                 data['logs'] = log_sb_data   
+                download_data=[log_sb_data]   
+                df_new = pd.DataFrame(download_data)
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
             elif row[0] == "unet_server":
              param1 = str(row['parameter_1'])
              ip_address=global_unet_ip
              url=f'http://{ip_address}/AN203_{param1}'
-             test = requests.post(url)
+             test = requests.post(url,timeout=15)
              if test.status_code == 200:
                  # 解析 JSON 數據
                 data = {
@@ -636,11 +673,13 @@ def handle_start_processing():
                 'detect_axis': ''
                 }
                 data['logs'] = log_unet_data
+                df_new = pd.DataFrame([log_unet_data])
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
             elif row[0] == "iec63180_movement_set":
                 ip_address=global_arm_ip
                 url=f'http://{ip_address}/iec63180_movement_set'
                 detect_flag=True
-                test = requests.get(url)
+                test = requests.get(url,timeout=15)
                 detect_flag=False
                 if test.status_code == 200:
                    data = test.json()
@@ -668,7 +707,7 @@ def handle_start_processing():
                           if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
                              break
                    
-
+            
             # 模擬一些處理時間
             # 將結果發送給客戶端
             emit('update_result',data)
@@ -684,7 +723,7 @@ def handle_start_processing():
                 'detect_axis': detect_axis
               }
                 emit('update_detect',update_data)
-            if delay_time==1 or delay_time==6:
+            if delay_time>=1:
                 time.sleep(delay_time)
             # if active_detection == 'yes':
             #     detect_flag=True
@@ -734,13 +773,17 @@ def handle_start_processing():
             #    detect_flag = True
             # else:
             #    detect_flag = False
-            test = requests.post(url)
+            print(row[0])
+            if row[0] == "iec63180_movement_set":
+               test = requests.get(url,timeout=15)
+            else:
+               test = requests.post(url,timeout=15)
             data = test.json()
             now = datetime.datetime.now()
             formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
             data['receivedtime'] = formatted_time
             data['server_type'] = server_type
-            if data['name']=='dut_server':
+            if row[0]=='dut_server':
                log_dut_data={
                'time': f"{data['receivedtime']}",
                'device': 'dut機器手臂',
@@ -749,7 +792,10 @@ def handle_start_processing():
                'detect_axis': ''  
                }
                data['logs'] = log_dut_data 
-            elif data['name']=='arm_server':
+               download_data=[log_dut_data]   
+               df_new = pd.DataFrame(download_data)
+               df_download = pd.concat([df_download, df_new], ignore_index=True)
+            elif row[0]=='arm_server':
                 log_arm_data={
                 'time': f"{data['receivedtime']}",
                 'device': 'arm機器手臂',
@@ -758,6 +804,9 @@ def handle_start_processing():
                 'detect_axis': ''
                 }
                 data['logs'] = log_arm_data
+                download_data=[log_arm_data]   
+                df_new = pd.DataFrame(download_data)
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
                 if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
                     while True:
                           arm_response = requests.get(f'http://{global_arm_ip}/get_info')
@@ -768,7 +817,7 @@ def handle_start_processing():
                              test = requests.post(f'http://{global_unet_ip}/AN203_OFF')
                           if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
                              break
-            elif data['name']=='sb_server':
+            elif row[0]=='sb_server':
                 log_sb_data = {
                     'time': data['receivedtime'],
                     'device': 'sb馬達',
@@ -777,7 +826,10 @@ def handle_start_processing():
                     'detect_axis': ''
                 }
                 data['logs'] = log_sb_data
-            elif data['name']=='unet_server':
+                download_data=[log_sb_data]   
+                df_new = pd.DataFrame(download_data)
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
+            elif row[0]=='unet_server':
                 data['AN203_ON_OFF_test']=f'AN203_{param1}'
                 log_unet_data={
                 'time': f"{data['receivedtime']}",
@@ -787,11 +839,13 @@ def handle_start_processing():
                 'detect_axis': ''
                 }
                 data['logs'] = log_unet_data
+                df_new = pd.DataFrame(data['logs'])
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
             elif row[0] == "iec63180_movement_set":
                 ip_address=global_arm_ip
                 url=f'http://{ip_address}/iec63180_movement_set'
                 detect_flag=True
-                test = requests.get(url)
+                test = requests.get(url,timeout=15)
                 detect_flag=False
                 if test.status_code == 200:
                    data = test.json()
@@ -832,10 +886,12 @@ def handle_start_processing():
                 'detect_axis': detect_axis
               }
                 emit('update_detect',update_data)
-            time.sleep(delay_time)
+            if delay_time>=1:
+              time.sleep(delay_time)
             # if active_detection[0] == 'yes':
             #     detect_flag=True
             return_flag = False
+            
     if end_processing == False:
        now = datetime.datetime.now()
        formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -843,7 +899,11 @@ def handle_start_processing():
              'time': formatted_time,
            'device': '法規結束'
            }
+       emit('reconnection',data)
        emit('end_button',data)
+       download_time=now.strftime('%Y-%m-%d_%H_%M_%S')
+       download_excel=(f"IEC13680_{download_time}.xlsx")
+       save_excel_to_folder(df,download_excel)
 
 
 @socketio.on('page_still_active')
@@ -896,6 +956,7 @@ def handle_stop_processing():
         'device': '法規結束'
         }
     emit('start_button',data)
+    print("強制結束")
     emit('stop_processing', {'status': 'stopped'})
 
 
@@ -1187,4 +1248,4 @@ def button_pressed():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=13333)
+    app.run(host='0.0.0.0')

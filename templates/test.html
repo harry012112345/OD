@@ -36,6 +36,12 @@
     <![endif]-->
   </head>
   <style>
+
+#log {
+  height: 300px; /* 自定义高度 */
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
     .btn {
       padding: 10px 20px;
       font-size: 16px;
@@ -628,6 +634,7 @@
           logs["detect_axis"];
         newLogEntry.textContent = logText;
         logDiv.appendChild(newLogEntry);
+        logDiv.scrollTop = logDiv.scrollHeight;
         logEntries.push(logs);
       }
 
@@ -638,6 +645,7 @@
         newLogEntry.textContent = logText;
         newLogEntry.classList.add("highlight-red");
         logDiv.appendChild(newLogEntry);
+        logDiv.scrollTop = logDiv.scrollHeight;
         logEntries.push(logs);
       }
 
@@ -648,6 +656,7 @@
         newLogEntry.textContent = logText;
         newLogEntry.classList.add("highlight-red");
         logDiv.appendChild(newLogEntry);
+        logDiv.scrollTop = logDiv.scrollHeight;
         logEntries.push(logs);
       }
 
@@ -658,6 +667,7 @@
         newLogEntry.textContent = logText;
         newLogEntry.classList.add("highlight-red");
         logDiv.appendChild(newLogEntry);
+        logDiv.scrollTop = logDiv.scrollHeight;
         logEntries.push(logs);
       }
 
@@ -668,6 +678,7 @@
         newLogEntry.textContent = logText;
         newLogEntry.classList.add("highlight-green");
         logDiv.appendChild(newLogEntry);
+        logDiv.scrollTop = logDiv.scrollHeight;
         logEntries.push(logs);
       }
 
@@ -687,6 +698,7 @@
         newLogEntry.textContent = logText;
         newLogEntry.classList.add("highlight-purple");
         logDiv.appendChild(newLogEntry);
+        logDiv.scrollTop = logDiv.scrollHeight;
         logEntries.push(logs);
       }
 
@@ -694,7 +706,6 @@
         var worksheet = XLSX.utils.json_to_sheet(logEntries);
         var workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Log");
-
         XLSX.writeFile(workbook, "log.xlsx");
       }
 
@@ -916,7 +927,7 @@
 
         setInterval(() => {
           socket.emit("page_still_active");
-        }, 10);
+        }, 100);
       });
     </script>
   </body>

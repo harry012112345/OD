@@ -920,14 +920,14 @@
       }
 
       async function startChecking() {
-        const checkInterval = 5000; // Check every 5 seconds
+        const checkInterval = 10000; // Check every 5 seconds
         var spinnerOverlay = document.getElementById("spinner-overlay");
         var buttons = document.querySelectorAll("button");
         spinnerOverlay.style.display = "flex";
         buttons.forEach((button) => button.classList.add("disabled"));
+        let response = await fetch("/check_connections");
         let intervalId = setInterval(async () => {
           try {
-            let response = await fetch("/check_connections");
             let data = await response.json();
             let statusText = "";
             let allConnected = true;
