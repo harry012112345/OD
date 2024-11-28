@@ -103,7 +103,7 @@ async def check_all_connections(server_ips):
 
 async def send_request(url):
     async with aiohttp.ClientSession() as session:
-        async with session.post(url) as response:
+        async with session.get(url) as response:
             if response.status == 200:
                 try:
                     return await response.json()
@@ -212,7 +212,7 @@ async def check_connections():
         'unet_server': f'http://{global_unet_ip}/get_info'
     }
     results = await check_all_connections(server_ips)
-    test=requests.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
+    # test=requests.get(f'http://{global_sb_ip}/self_check_and_turn_on_system')
     return jsonify(results)
 
 @app.route('/welcome')
@@ -388,18 +388,17 @@ async def test_data():
     df.to_excel(excel_file, index=False)
 
     # check_init_data(data)
-    test_1_url = f'http://{global_dut_ip}/set_servo?servo_1={dut_servo_1}&servo_2={dut_servo_2}&servo_3={dut_servo_3}&servo_4={dut_servo_4}&servo_5={dut_servo_5}&servo_6={dut_servo_6}'
-    test_2_url = f'http://{global_arm_ip}/set_servo?servo_1={arm_servo_1}&servo_2={arm_servo_2}&servo_3={arm_servo_3}&servo_4={arm_servo_4}&servo_5={arm_servo_5}&servo_6={arm_servo_6}'
-    test_3_url = f'http://{global_sb_ip}/move?target_distance={sb_target_distance}'
+    test_1_url = f'http://{global_dut_ip}/iec63180_initialization_dut'
+    test_2_url = f'http://{global_arm_ip}/iec63180_initialization_arm'
+    test_3_url = f'http://{global_sb_ip}/iec63180_initialization_sb'
     test_4_url = f'http://{global_unet_ip}/AN203_{unet_status}'
-
     # 同時執行所有請求
     responses = await asyncio.gather(
         send_request(test_1_url),
         send_request(test_2_url),
         send_request(test_3_url),
-        send_request(test_4_url)
     )
+    test = requests.post(test_4_url)
   
 #    now = datetime.datetime.now()
 #    formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -707,7 +706,7 @@ def handle_start_processing():
                           if humidity_min<arm_data['humidity']<humidity_max and temperature_min<arm_data['temperature']<temperature_max:
                              break
                    
-            
+     
             # 模擬一些處理時間
             # 將結果發送給客戶端
             emit('update_result',data)
@@ -722,6 +721,9 @@ def handle_start_processing():
                  'command': log_dut_data['command'],
                 'detect_axis': detect_axis
               }
+                download_data=[data]   
+                df_new = pd.DataFrame(download_data)
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
                 emit('update_detect',update_data)
             if delay_time>=1:
                 time.sleep(delay_time)
@@ -769,6 +771,9 @@ def handle_start_processing():
                 'device': 'connection restore'
                 }
             emit('reconnection',data)
+            download_data=[data]   
+            df_new = pd.DataFrame(download_data)
+            df_download = pd.concat([df_download, df_new], ignore_index=True)
             # if active_detection == 'yes':
             #    detect_flag = True
             # else:
@@ -860,6 +865,7 @@ def handle_start_processing():
                    'status': f"{data['servo_dict']['servo_1']},{data['servo_dict']['servo_2']},{data['servo_dict']['servo_3']},{data['servo_dict']['servo_4']},{data['servo_dict']['servo_5']},{data['servo_dict']['servo_6']},{data['temperature']},{data['humidity']},{data['ip_address']}",
                    'detect_axis': ''
                    }
+
                    data['logs'] = log_arm_data
                    if data['humidity']>humidity_max or data['humidity']<humidity_min or data['temperature']>temperature_max or data['temperature']<temperature_min:
                        while True:
@@ -886,6 +892,9 @@ def handle_start_processing():
                 'detect_axis': detect_axis
               }
                 emit('update_detect',update_data)
+                download_data=[update_data]   
+                df_new = pd.DataFrame(download_data)
+                df_download = pd.concat([df_download, df_new], ignore_index=True)
             if delay_time>=1:
               time.sleep(delay_time)
             # if active_detection[0] == 'yes':
@@ -903,7 +912,7 @@ def handle_start_processing():
        emit('end_button',data)
        download_time=now.strftime('%Y-%m-%d_%H_%M_%S')
        download_excel=(f"IEC13680_{download_time}.xlsx")
-       save_excel_to_folder(df,download_excel)
+       save_excel_to_folder(df_download,download_excel)
 
 
 @socketio.on('page_still_active')
