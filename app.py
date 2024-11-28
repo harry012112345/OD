@@ -721,7 +721,7 @@ def handle_start_processing():
                  'command': log_dut_data['command'],
                 'detect_axis': detect_axis
               }
-                download_data=[data]   
+                download_data=[update_data]   
                 df_new = pd.DataFrame(download_data)
                 df_download = pd.concat([df_download, df_new], ignore_index=True)
                 emit('update_detect',update_data)
